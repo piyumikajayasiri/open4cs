@@ -1,69 +1,142 @@
-import Image from "next/image";
+import GemstoneForm from "../../components/gemstone/GemstoneForm";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main>
+      {/* Beginner introduction */}
+      <section className="border-b border-[var(--border)] bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="inline-flex rounded-full bg-[var(--primary-soft)] px-4 py-2 text-sm font-semibold text-[var(--primary-dark)]">
+              Simple • Educational • Step by Step
+            </span>
+
+            <h1 className="mt-6 text-4xl font-bold tracking-tight text-[var(--foreground)] sm:text-5xl">
+              Understand Your Gemstone
+              <span className="block text-[var(--primary)]">
+                Through the 4Cs
+              </span>
+            </h1>
+
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[var(--muted)]">
+              You do not need to be a gemstone expert. We&apos;ll guide
+              you through a simple evaluation of your gemstone&apos;s
+              Color, Clarity, Cut, and Carat Weight.
+            </p>
+
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <a
+                href="#evaluation"
+                className="inline-flex w-full items-center justify-center rounded-xl bg-[var(--primary)] px-6 py-3 font-semibold text-white transition hover:bg-[var(--primary-dark)] sm:w-auto"
+              >
+                Start Gemstone Evaluation
+              </a>
+
+              <a
+                href="/learn"
+                className="inline-flex w-full items-center justify-center rounded-xl border border-[var(--border)] bg-white px-6 py-3 font-semibold transition hover:bg-[var(--surface-soft)] sm:w-auto"
+              >
+                Learn About the 4Cs
+              </a>
+            </div>
+
+            <p className="mt-4 text-sm text-[var(--muted)]">
+              No gemmological experience required.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Simple 4C explanation */}
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-6 text-center">
+          <h2 className="text-2xl font-bold">
+            What are the 4Cs?
+          </h2>
+
+          <p className="mt-2 text-[var(--muted)]">
+            Four important characteristics used to understand a gemstone.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <C4Card
+            letter="C"
+            title="Color"
+            description="Understand the gemstone's hue, tone, saturation, and color distribution."
+          />
+
+          <C4Card
+            letter="C"
+            title="Clarity"
+            description="Look at how visible inclusions or internal features are in the gemstone."
+          />
+
+          <C4Card
+            letter="C"
+            title="Cut"
+            description="Consider the gemstone's proportions, symmetry, polish, and visible cut effects."
+          />
+
+          <C4Card
+            letter="C"
+            title="Carat Weight"
+            description="Consider the gemstone's weight together with its dimensions and size."
+          />
         </div>
-      </main>
+      </section>
+
+      {/* Existing working evaluation system */}
+      <section
+        id="evaluation"
+        className="scroll-mt-24 border-t border-[var(--border)] bg-white"
+      >
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <p className="text-sm font-semibold uppercase tracking-wider text-[var(--primary)]">
+              Guided Evaluation
+            </p>
+
+            <h2 className="mt-2 text-3xl font-bold">
+              Evaluate Your Gemstone
+            </h2>
+
+            <p className="mt-3 max-w-2xl text-[var(--muted)]">
+              Answer the questions using the information you know.
+              If you are unsure about a gemstone term, we&apos;ll make
+              it easier to understand as you move through the process.
+            </p>
+          </div>
+
+          <GemstoneForm />
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function C4Card({
+  letter,
+  title,
+  description,
+}: {
+  letter: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-white p-6 shadow-sm">
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--primary-soft)] text-lg font-bold text-[var(--primary-dark)]">
+        {letter}
+      </div>
+
+      <h3 className="mt-4 text-lg font-bold">
+        {title}
+      </h3>
+
+      <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+        {description}
+      </p>
     </div>
   );
 }
