@@ -458,136 +458,186 @@ export default function GemstoneForm() {
       </section>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <EvaluationProgress currentStep={currentStep} />
-
-        <h2>Gemstone Information</h2>
-
-      {error && (
-        <div
-          role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 p-5"
-        >
-          <p className="font-bold text-red-800">
-            We couldn&apos;t complete the evaluation
-          </p>
-
-          <p className="mt-2 text-sm leading-6 text-red-700">
-            {error}
-          </p>
-
-          <p className="mt-2 text-sm text-red-700">
-            Please check your information and try again.
-          </p>
+        {/* Step Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+              {currentStep === 1 && "Select Your Gemstone"}
+              {currentStep === 2 && "Basic Gemstone Information"}
+              {currentStep === 3 && "Color Evaluation"}
+              {currentStep === 4 && "Clarity Evaluation"}
+              {currentStep === 5 && "Cut Evaluation"}
+              {currentStep === 6 && "Carat Weight Band"}
+              {currentStep === 7 && "Supporting Factors & Reliability"}
+              {currentStep === 8 && "Review & Generate Evaluation"}
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Step {currentStep} of 8 · Choose the CAGS-supported variety closest to your stone
+            </p>
+          </div>
+          <span className="text-xs font-medium text-slate-400">
+            Draft auto-saves
+          </span>
         </div>
-      )}
 
-      {currentStep === 1 && (
-        <BasicInformation
-          variety={variety}
-          caratWeight={caratWeight}
-          onVarietyChange={setVariety}
-          onCaratWeightChange={setCaratWeight}
+        {/* 8-Step Progress Stepper Bar */}
+        <EvaluationProgress
+          currentStep={currentStep}
+          onStepClick={(s) => setCurrentStep(s)}
         />
-      )}
 
-      {currentStep === 2 && (
-        <ColorSection
-          hue={hue}
-          tone={tone}
-          saturation={saturation}
-          distribution={distribution}
-          zoning={zoning}
-          onHueChange={setHue}
-          onToneChange={setTone}
-          onSaturationChange={setSaturation}
-          onDistributionChange={setDistribution}
-          onZoningChange={setZoning}
-        />
-      )}
+        {error && (
+          <div
+            role="alert"
+            className="rounded-2xl border border-red-200 bg-red-50 p-4 text-xs text-red-700"
+          >
+            <p className="font-bold">We couldn&apos;t complete the evaluation</p>
+            <p className="mt-1">{error}</p>
+          </div>
+        )}
 
-      {currentStep === 3 && (
-        <ClaritySection
-          nakedEye={nakedEye}
-          loupe10x={loupe10x}
-          inclusionType={inclusionType}
-          inclusionLocation={inclusionLocation}
-          severity={severity}
-          onNakedEyeChange={setNakedEye}
-          onLoupe10xChange={setLoupe10x}
-          onInclusionTypeChange={setInclusionType}
-          onInclusionLocationChange={setInclusionLocation}
-          onSeverityChange={setSeverity}
-        />
-      )}
+        {/* Step Content */}
+        {currentStep === 1 && (
+          <BasicInformation
+            stepMode="gemstone"
+            variety={variety || "Ceylon Blue Sapphire"}
+            caratWeight={caratWeight}
+            onVarietyChange={setVariety}
+            onCaratWeightChange={setCaratWeight}
+          />
+        )}
 
-      {currentStep === 4 && (
-        <CutSection
-          length={length}
-          width={width}
-          depth={depth}
-          symmetry={symmetry}
-          polish={polish}
-          windowing={windowing}
-          extinction={extinction}
-          bulging={bulging}
-          onLengthChange={setLength}
-          onWidthChange={setWidth}
-          onDepthChange={setDepth}
-          onSymmetryChange={setSymmetry}
-          onPolishChange={setPolish}
-          onWindowingChange={setWindowing}
-          onExtinctionChange={setExtinction}
-          onBulgingChange={setBulging}
-        />
-      )}
+        {currentStep === 2 && (
+          <BasicInformation
+            stepMode="basic"
+            variety={variety || "Ceylon Blue Sapphire"}
+            caratWeight={caratWeight}
+            onVarietyChange={setVariety}
+            onCaratWeightChange={setCaratWeight}
+          />
+        )}
 
-      {currentStep === 5 && (
-        <AdditionalInformationSection
-          treatmentStatus={treatmentStatus}
-          treatmentType={treatmentType}
-          originValue={originValue}
-          originReliability={originReliability}
-          informationReliability={informationReliability}
-          onTreatmentStatusChange={setTreatmentStatus}
-          onTreatmentTypeChange={setTreatmentType}
-          onOriginValueChange={setOriginValue}
-          onOriginReliabilityChange={setOriginReliability}
-          onInformationReliabilityChange={(field, value) =>
-            setInformationReliability((previous) => ({
-              ...previous,
-              [field]: value,
-            }))
-          }
-        />
-      )}
+        {currentStep === 3 && (
+          <ColorSection
+            hue={hue}
+            tone={tone}
+            saturation={saturation}
+            distribution={distribution}
+            zoning={zoning}
+            onHueChange={setHue}
+            onToneChange={setTone}
+            onSaturationChange={setSaturation}
+            onDistributionChange={setDistribution}
+            onZoningChange={setZoning}
+          />
+        )}
 
-      <div className="flex flex-col-reverse gap-3 border-t border-[var(--border)] pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          {currentStep > 1 && (
+        {currentStep === 4 && (
+          <ClaritySection
+            nakedEye={nakedEye}
+            loupe10x={loupe10x}
+            inclusionType={inclusionType}
+            inclusionLocation={inclusionLocation}
+            severity={severity}
+            onNakedEyeChange={setNakedEye}
+            onLoupe10xChange={setLoupe10x}
+            onInclusionTypeChange={setInclusionType}
+            onInclusionLocationChange={setInclusionLocation}
+            onSeverityChange={setSeverity}
+          />
+        )}
+
+        {currentStep === 5 && (
+          <CutSection
+            length={length}
+            width={width}
+            depth={depth}
+            symmetry={symmetry}
+            polish={polish}
+            windowing={windowing}
+            extinction={extinction}
+            bulging={bulging}
+            onLengthChange={setLength}
+            onWidthChange={setWidth}
+            onDepthChange={setDepth}
+            onSymmetryChange={setSymmetry}
+            onPolishChange={setPolish}
+            onWindowingChange={setWindowing}
+            onExtinctionChange={setExtinction}
+            onBulgingChange={setBulging}
+          />
+        )}
+
+        {currentStep === 6 && (
+          <section className="rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 shadow-xs space-y-4">
+            <h2 className="text-xl font-bold text-slate-900">Carat Weight Evaluation</h2>
+            <p className="text-xs text-slate-500">
+              Evaluating weight of {caratWeight || "1.5"} ct for {variety || "Ceylon Blue Sapphire"}.
+            </p>
+            <div className="rounded-xl bg-slate-50 p-4 border border-slate-200/60 text-xs text-slate-600">
+              <p className="font-bold text-slate-800">Carat Size Band: 1.00 - 1.99 ct</p>
+              <p className="mt-1">Standard market liquidity tier with high demand across B2B channels.</p>
+            </div>
+          </section>
+        )}
+
+        {(currentStep === 7 || currentStep === 8) && (
+          <AdditionalInformationSection
+            treatmentStatus={treatmentStatus}
+            treatmentType={treatmentType}
+            originValue={originValue}
+            originReliability={originReliability}
+            informationReliability={informationReliability}
+            onTreatmentStatusChange={setTreatmentStatus}
+            onTreatmentTypeChange={setTreatmentType}
+            onOriginValueChange={setOriginValue}
+            onOriginReliabilityChange={setOriginReliability}
+            onInformationReliabilityChange={(field, value) =>
+              setInformationReliability((previous) => ({
+                ...previous,
+                [field]: value,
+              }))
+            }
+          />
+        )}
+
+        {/* Navigation Actions Footer Bar */}
+        <div className="flex items-center justify-between border-t border-slate-200 pt-6">
+          <button
+            type="button"
+            onClick={() => {
+              if (currentStep > 1) {
+                setCurrentStep((step) => step - 1);
+              } else {
+                if (window.confirm("Cancel gemstone evaluation?")) {
+                  window.location.href = "/dashboard";
+                }
+              }
+            }}
+            className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
+          >
+            {currentStep > 1 ? "← Back" : "Cancel"}
+          </button>
+
+          {currentStep < 8 ? (
             <button
               type="button"
-              onClick={() =>
-                setCurrentStep((step) => Math.max(1, step - 1))
-              }
-              className="w-full rounded-xl border border-[var(--border)] bg-white px-6 py-3 font-semibold hover:bg-[var(--surface-soft)] sm:w-auto"
+              onClick={() => setCurrentStep((step) => Math.min(8, step + 1))}
+              className="bg-[#070D1E] hover:bg-[#152347] text-white text-xs font-semibold px-6 py-2.5 rounded-xl shadow-md transition flex items-center gap-2"
             >
-              ← Back
+              <span>Continue</span>
+              <span>→</span>
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={loading || !currentUser}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-7 py-3 rounded-xl shadow-md transition disabled:opacity-50"
+            >
+              {loading ? "Evaluating..." : "Generate Evaluation Report"}
             </button>
           )}
         </div>
-
-        {currentStep < 5 && (
-          <button
-            type="button"
-            onClick={() =>
-              setCurrentStep((step) => Math.min(5, step + 1))
-            }
-            className="w-full rounded-xl bg-[var(--primary)] px-7 py-3 font-semibold text-white hover:bg-[var(--primary-dark)] sm:w-auto"
-          >
-            Continue →
-          </button>
-        )}
-      </div>
 
       {currentStep === 5 && (
         <div className="space-y-4 pt-4">

@@ -42,3 +42,8 @@ next-env.d.ts
 
 # local database data
 .mongo-data/
+
+# scratch directory
+scratch/
+AGENTS.md
+CLAUDE.md

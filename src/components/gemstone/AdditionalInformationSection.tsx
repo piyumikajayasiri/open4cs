@@ -1,3 +1,11 @@
+import { useEffect, useState } from "react";
+
+interface RegistryOption {
+  _id: string;
+  name: string;
+  description?: string;
+}
+
 type AdditionalInformationSectionProps = {
   treatmentStatus: string;
   treatmentType: string;
@@ -30,6 +38,44 @@ export default function AdditionalInformationSection({
   onOriginReliabilityChange,
   onInformationReliabilityChange,
 }: AdditionalInformationSectionProps) {
+  const [treatmentOptions, setTreatmentOptions] = useState<RegistryOption[]>([]);
+  const [originOptions, setOriginOptions] = useState<RegistryOption[]>([]);
+  const [optionsLoading, setOptionsLoading] = useState(true);
+  const [optionsError, setOptionsError] = useState("");
+
+  useEffect(() => {
+    async function loadOptions() {
+      try {
+        setOptionsLoading(true);
+        setOptionsError("");
+
+        const response = await fetch("/api/gemstone-options");
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.error || "Unable to load gemstone options."
+          );
+        }
+
+        setTreatmentOptions(data.treatments ?? []);
+        setOriginOptions(data.origins ?? []);
+      } catch (error) {
+        console.error("Failed to load gemstone options:", error);
+
+        setOptionsError(
+          error instanceof Error
+            ? error.message
+            : "Unable to load gemstone options."
+        );
+      } finally {
+        setOptionsLoading(false);
+      }
+    }
+
+    loadOptions();
+  }, []);
+
   return (
     <section className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-7">
       <div className="mb-7">
@@ -60,6 +106,12 @@ export default function AdditionalInformationSection({
         </p>
       </div>
 
+      {optionsError && (
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {optionsError} Please refresh the page and try again.
+        </div>
+      )}
+
       <div className="space-y-8">
         {/* Treatment Status */}
         <div>
@@ -80,13 +132,19 @@ export default function AdditionalInformationSection({
             id="treatment-status"
             value={treatmentStatus}
             onChange={(e) => onTreatmentStatusChange(e.target.value)}
-            className="mt-3 w-full rounded-xl border border-[var(--border)] bg-white px-4 py-3 outline-none transition focus:border-[var(--primary)]"
+            disabled={optionsLoading}
+            className="mt-3 w-full rounded-xl border border-[var(--border)] bg-white px-4 py-3 outline-none transition focus:border-[var(--primary)] disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <option value="">Select treatment status</option>
-            <option value="Untreated">Untreated</option>
-            <option value="Heated">Heated</option>
-            <option value="Treated">Treated</option>
-            <option value="Unknown">Unknown</option>
+            <option value="">
+              {optionsLoading
+                ? "Loading treatment options..."
+                : "Select treatment information"}
+            </option>
+            {treatmentOptions.map((option) => (
+              <option key={option._id} value={option.name}>
+                {option.name}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -129,14 +187,19 @@ export default function AdditionalInformationSection({
             id="origin-value"
             value={originValue}
             onChange={(e) => onOriginValueChange(e.target.value)}
-            className="mt-3 w-full rounded-xl border border-[var(--border)] bg-white px-4 py-3 outline-none transition focus:border-[var(--primary)]"
+            disabled={optionsLoading}
+            className="mt-3 w-full rounded-xl border border-[var(--border)] bg-white px-4 py-3 outline-none transition focus:border-[var(--primary)] disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <option value="">Select origin</option>
-            <option value="Sri Lanka">Sri Lanka</option>
-            <option value="Myanmar">Myanmar</option>
-            <option value="Madagascar">Madagascar</option>
-            <option value="Other">Other</option>
-            <option value="Unknown">Unknown</option>
+            <option value="">
+              {optionsLoading
+                ? "Loading origin options..."
+                : "Select reported origin"}
+            </option>
+            {originOptions.map((option) => (
+              <option key={option._id} value={option.name}>
+                {option.name}
+              </option>
+            ))}
           </select>
         </div>
 

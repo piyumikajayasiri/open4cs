@@ -1,46 +1,90 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-const CATEGORY_DESCRIPTIONS = [
+const USER_CATEGORIES = [
   {
-    value: "Student",
-    label: "Student / Learner",
-    description: "Learning gemstone evaluation basics and exploring standard valuation concepts.",
+    id: "Student",
+    label: "Student",
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 14l9-5-9-5-9 5 9 5z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+      </svg>
+    ),
   },
   {
-    value: "Trader",
-    label: "Trader / Gem Dealer",
-    description: "Buying, selling, or trading gemstones with standard commercial market benchmarks.",
+    id: "Trader",
+    label: "Trader",
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h4m-4 0V11m0 0h4m-4 0H9m4 0V7m0 0h4m-4 0H9" />
+      </svg>
+    ),
   },
   {
-    value: "Gemologist",
-    label: "Gemologist / Evaluator",
-    description: "Conducting technical 4C assessments, laboratory testing, and origin analysis.",
+    id: "Gemologist",
+    label: "Gemologist",
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L5.595 15.12a2 2 0 00-1.8 1.48L3 20h18l-1.572-4.572zM12 11a4 4 0 100-8 4 4 0 000 8z" />
+      </svg>
+    ),
   },
   {
-    value: "Professional",
-    label: "Industry Professional",
-    description: "Jewelers, appraisers, and business executives needing structured pricing tools.",
+    id: "Professional",
+    label: "Professional",
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+    ),
   },
 ];
 
 export default function RegisterPage() {
+  const router = useRouter();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [category, setCategory] = useState("Student");
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Dynamic Password Strength Calculator
+  function getPasswordStrength(pass: string) {
+    if (!pass) return { score: 0, label: "None", color: "text-slate-400" };
+    let score = 0;
+    if (pass.length >= 8) score++;
+    if (pass.length >= 12) score++;
+    if (/[0-9]/.test(pass)) score++;
+    if (/[^A-Za-z0-9]/.test(pass)) score++;
+
+    if (score <= 1) return { score: 1, label: "Weak", color: "text-red-500" };
+    if (score === 2) return { score: 2, label: "Fair", color: "text-amber-500" };
+    if (score === 3) return { score: 3, label: "Good", color: "text-emerald-500" };
+    return { score: 4, label: "Strong", color: "text-emerald-600 font-semibold" };
+  }
+
+  const strength = getPasswordStrength(password);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setMessage("");
     setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -64,167 +108,217 @@ export default function RegisterPage() {
         return;
       }
 
-      setMessage("Registration successful. You can now log in.");
-
-      setName("");
-      setEmail("");
-      setPassword("");
-      setCategory("Student");
+      setMessage("Registration successful! Redirecting to login...");
+      setTimeout(() => {
+        router.push("/login");
+      }, 1500);
     } catch {
-      setError("Registration failed.");
+      setError("Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <main className="min-h-[calc(100vh-80px)]">
-      <div className="mx-auto grid max-w-6xl gap-10 px-5 py-12 sm:px-8 lg:grid-cols-2 lg:items-start lg:py-20">
-        <section className="lg:sticky lg:top-28">
-          <span className="inline-flex rounded-full bg-[var(--primary-soft)] px-3 py-1 text-sm font-semibold text-[var(--primary-dark)]">
-            Create Your Account
-          </span>
+    <main className="min-h-[calc(100vh-80px)] bg-[#F8FAFC] py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+      <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl p-8 sm:p-10 border border-slate-100">
+        
+        {/* Header & Logo */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-9 h-9 rounded-xl bg-[#0B132B] flex items-center justify-center text-sky-400 shadow-md">
+            <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path d="M12 2L2 9l10 13L22 9L12 2zm0 3.2L18.6 9 12 18.2 5.4 9 12 5.2z" />
+            </svg>
+          </div>
+          <div>
+            <span className="font-bold text-slate-900 text-lg leading-none block">
+              Open 4Cs
+            </span>
+            <span className="text-[10px] font-extrabold tracking-widest text-slate-400 uppercase block mt-0.5">
+              GEMSTONE EVALUATION
+            </span>
+          </div>
+        </div>
 
-          <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-5xl">
-            Start evaluating gemstones with confidence
+        {/* Title */}
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+            Create your account
           </h1>
-
-          <p className="mt-4 text-base leading-7 text-[var(--muted)] sm:text-lg">
-            Join Open 4Cs to save your evaluations, track valuation history, and access standardized market pricing reference tools.
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Statements and guidance adapt to your category.
           </p>
+        </div>
 
-          <div className="mt-8 space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--muted)]">
-              Which category describes you best?
-            </h2>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {CATEGORY_DESCRIPTIONS.map((cat) => (
-                <div
-                  key={cat.value}
-                  className={`rounded-xl border p-4 transition ${
-                    category === cat.value
-                      ? "border-[var(--primary)] bg-[var(--primary-soft)]/40"
-                      : "border-[var(--border)] bg-white"
-                  }`}
-                >
-                  <p className="font-semibold text-sm">{cat.label}</p>
-                  <p className="mt-1 text-xs text-[var(--muted)] leading-5">
-                    {cat.description}
-                  </p>
-                </div>
-              ))}
-            </div>
+        {/* Status Messages */}
+        {error && (
+          <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+            {error}
           </div>
-        </section>
+        )}
 
-        <section className="rounded-2xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-8">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold">Register</h2>
-            <p className="mt-1 text-sm text-[var(--muted)]">
-              Fill in your details below to create your free account.
-            </p>
+        {message && (
+          <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-700 font-medium">
+            {message}
+          </div>
+        )}
+
+        {/* Register Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          
+          {/* Full Name */}
+          <div>
+            <label
+              htmlFor="name"
+              className="block text-xs font-semibold text-slate-700 mb-1.5"
+            >
+              Full Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Amaya Fernando"
+              required
+              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 placeholder:text-slate-400"
+            />
           </div>
 
-          {message && (
-            <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-              <p className="font-semibold">{message}</p>
-              <p className="mt-1 text-emerald-700">
-                <Link href="/login" className="underline hover:text-emerald-900">
-                  Click here to log in to your new account.
-                </Link>
-              </p>
-            </div>
-          )}
+          {/* Email */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-xs font-semibold text-slate-700 mb-1.5"
+            >
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="amaya@uni.lk"
+              required
+              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 placeholder:text-slate-400"
+            />
+          </div>
 
-          {error && (
-            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Password & Confirm Password Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium">
-                Full Name
-              </label>
-              <input
-                id="name"
-                type="text"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="Jane Doe"
-                required
-                className="mt-1.5 w-full rounded-xl border border-[var(--border)] px-4 py-2.5 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium">
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="you@example.com"
-                required
-                className="mt-1.5 w-full rounded-xl border border-[var(--border)] px-4 py-2.5 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium">
+              <label
+                htmlFor="password"
+                className="block text-xs font-semibold text-slate-700 mb-1.5"
+              >
                 Password
               </label>
               <input
                 id="password"
                 type="password"
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="At least 8 characters"
-                minLength={8}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="samplepassword"
                 required
-                className="mt-1.5 w-full rounded-xl border border-[var(--border)] px-4 py-2.5 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                minLength={8}
+                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 placeholder:text-slate-400"
               />
             </div>
 
             <div>
-              <label htmlFor="category" className="block text-sm font-medium">
-                User Category
-              </label>
-              <select
-                id="category"
-                value={category}
-                onChange={(event) => setCategory(event.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-[var(--border)] bg-white px-4 py-2.5 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+              <label
+                htmlFor="confirmPassword"
+                className="block text-xs font-semibold text-slate-700 mb-1.5"
               >
-                <option value="Student">Student / Learner</option>
-                <option value="Trader">Trader / Gem Dealer</option>
-                <option value="Gemologist">Gemologist / Evaluator</option>
-                <option value="Professional">Industry Professional</option>
-              </select>
+                Confirm Password
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="samplepassword"
+                required
+                minLength={8}
+                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 placeholder:text-slate-400"
+              />
+            </div>
+          </div>
+
+          {/* Password Strength Indicator */}
+          <div className="space-y-1 pt-1">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-slate-700">Password strength</span>
+              <span className={strength.color}>{strength.label}</span>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-xl bg-[var(--primary)] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[var(--primary-dark)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2 disabled:opacity-50 transition"
-            >
-              {loading ? "Creating Account..." : "Create Account"}
-            </button>
-          </form>
+            <div className="grid grid-cols-4 gap-1.5">
+              {[1, 2, 3, 4].map((seg) => (
+                <div
+                  key={seg}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    seg <= strength.score ? "bg-emerald-600" : "bg-slate-200"
+                  }`}
+                />
+              ))}
+            </div>
 
-          <div className="mt-6 border-t border-[var(--border)] pt-6 text-center text-sm text-[var(--muted)]">
-            Already have an account?{" "}
-            <Link
-              href="/login"
-              className="font-semibold text-[var(--primary)] hover:text-[var(--primary-dark)] underline"
-            >
-              Log in instead
-            </Link>
+            <p className="text-[11px] text-emerald-600 font-medium flex items-center gap-1 pt-0.5">
+              <span>✓</span>
+              <span>12+ characters with a number and symbol</span>
+            </p>
           </div>
-        </section>
+
+          {/* User Category Selection */}
+          <div className="pt-2">
+            <label className="block text-xs font-semibold text-slate-700 mb-2">
+              User Category
+            </label>
+            <div className="grid grid-cols-4 gap-2">
+              {USER_CATEGORIES.map((cat) => {
+                const isSelected = category === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setCategory(cat.id)}
+                    className={`flex flex-col items-center justify-center p-3 rounded-2xl transition duration-150 text-center ${
+                      isSelected
+                        ? "border-2 border-[#0B132B] bg-slate-50/80 shadow-xs text-slate-900 font-bold"
+                        : "border border-slate-200 hover:border-slate-300 hover:bg-slate-50/50 text-slate-500 font-medium"
+                    }`}
+                  >
+                    <div className={`mb-1.5 ${isSelected ? "text-[#0B132B]" : "text-slate-400"}`}>
+                      {cat.icon}
+                    </div>
+                    <span className="text-xs">{cat.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[#0B132B] hover:bg-[#1C2A4D] text-white font-semibold py-3 rounded-xl shadow-md text-sm transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+          >
+            {loading ? "Creating Account..." : "Create Account"}
+          </button>
+        </form>
+
+        {/* Already have an account link */}
+        <div className="text-center text-xs sm:text-sm text-slate-500 mt-6">
+          Already have an account?{" "}
+          <Link
+            href="/login"
+            className="font-semibold text-blue-600 hover:underline"
+          >
+            Login
+          </Link>
+        </div>
+
       </div>
     </main>
   );

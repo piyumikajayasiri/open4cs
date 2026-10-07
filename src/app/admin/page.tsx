@@ -34,6 +34,46 @@ interface RuleVersionRecord {
   updatedAt: string;
 }
 
+interface GemstoneVarietyItem {
+  _id: string;
+  name: string;
+  description: string;
+  isActive?: boolean;
+  engineSupported?: boolean;
+}
+
+interface HistoricalPriceRecord {
+  _id: string;
+  referenceGemstoneId: string;
+  variety: string;
+  caratWeight: number;
+  price: number;
+  currency: string;
+  recordedAt: string;
+  source: "REFERENCE_CREATED" | "REFERENCE_UPDATED";
+  note?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface RecommendationRuleRecord {
+  _id: string;
+  key: string;
+  category:
+    | "COLOR"
+    | "CLARITY"
+    | "CUT"
+    | "MEASUREMENT"
+    | "VERIFICATION";
+  name: string;
+  description: string;
+  message: string;
+  isActive: boolean;
+  engineSupported: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 type ReferenceGemstone = {
   _id: string;
   variety: string;
@@ -71,6 +111,22 @@ type ReferenceGemstone = {
   };
   referencePrice: number;
   currency?: string;
+};
+
+const recommendationCategoryOrder = [
+  "COLOR",
+  "CLARITY",
+  "CUT",
+  "MEASUREMENT",
+  "VERIFICATION",
+] as const;
+
+const recommendationCategoryLabels: Record<string, string> = {
+  COLOR: "Color Recommendations",
+  CLARITY: "Clarity Recommendations",
+  CUT: "Cut Recommendations",
+  MEASUREMENT: "Measurement Recommendations",
+  VERIFICATION: "Verification Recommendations",
 };
 
 function createEmptyReferenceForm() {
@@ -137,6 +193,114 @@ export default function AdminPage() {
   const [ruleVersionsLoading, setRuleVersionsLoading] = useState(true);
   const [ruleVersionsError, setRuleVersionsError] = useState("");
 
+  const [gemstoneVarieties, setGemstoneVarieties] = useState<GemstoneVarietyItem[]>([]);
+  const [treatmentOptions, setTreatmentOptions] = useState<GemstoneVarietyItem[]>([]);
+  const [originOptions, setOriginOptions] = useState<GemstoneVarietyItem[]>([]);
+  const [editingVarietyId, setEditingVarietyId] = useState<string | null>(null);
+  const [varietyDescription, setVarietyDescription] = useState("");
+  const [savingVarietyId, setSavingVarietyId] = useState<string | null>(null);
+  const [varietyMessage, setVarietyMessage] = useState("");
+  const [varietyError, setVarietyError] = useState("");
+
+  const [editingTreatmentId, setEditingTreatmentId] = useState<string | null>(null);
+  const [treatmentDescription, setTreatmentDescription] = useState("");
+  const [savingTreatmentId, setSavingTreatmentId] = useState<string | null>(null);
+  const [treatmentMessage, setTreatmentMessage] = useState("");
+  const [treatmentError, setTreatmentError] = useState("");
+
+  const [editingOriginId, setEditingOriginId] = useState<string | null>(null);
+  const [originDescription, setOriginDescription] = useState("");
+  const [savingOriginId, setSavingOriginId] = useState<string | null>(null);
+  const [originMessage, setOriginMessage] = useState("");
+  const [originError, setOriginError] = useState("");
+
+  const [historicalPrices, setHistoricalPrices] = useState<HistoricalPriceRecord[]>([]);
+  const [historicalPricesLoading, setHistoricalPricesLoading] = useState(true);
+  const [historicalPricesError, setHistoricalPricesError] = useState("");
+
+  const [recommendationRules, setRecommendationRules] = useState<
+    RecommendationRuleRecord[]
+  >([]);
+  const [recommendationRulesLoading, setRecommendationRulesLoading] =
+    useState(true);
+  const [recommendationRulesError, setRecommendationRulesError] =
+    useState("");
+
+  const [editingRecommendationRuleId, setEditingRecommendationRuleId] =
+    useState<string | null>(null);
+  const [
+    recommendationRuleDescription,
+    setRecommendationRuleDescription,
+  ] = useState("");
+  const [
+    savingRecommendationRuleId,
+    setSavingRecommendationRuleId,
+  ] = useState<string | null>(null);
+  const [
+    recommendationRuleManagementMessage,
+    setRecommendationRuleManagementMessage,
+  ] = useState("");
+  const [
+    recommendationRuleManagementError,
+    setRecommendationRuleManagementError,
+  ] = useState("");
+
+  async function loadRecommendationRules() {
+    try {
+      setRecommendationRulesLoading(true);
+      setRecommendationRulesError("");
+
+      const response = await fetch("/api/admin/recommendation-rules");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Unable to load recommendation rules."
+        );
+      }
+
+      setRecommendationRules(data.recommendationRules ?? []);
+    } catch (error) {
+      console.error("Failed to load recommendation rules:", error);
+
+      setRecommendationRulesError(
+        error instanceof Error
+          ? error.message
+          : "Unable to load recommendation rules."
+      );
+    } finally {
+      setRecommendationRulesLoading(false);
+    }
+  }
+
+  async function loadHistoricalPrices() {
+    try {
+      setHistoricalPricesLoading(true);
+      setHistoricalPricesError("");
+
+      const response = await fetch("/api/admin/historical-pricing");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Unable to load historical pricing."
+        );
+      }
+
+      setHistoricalPrices(data.historicalPrices ?? []);
+    } catch (error) {
+      console.error("Failed to load historical pricing:", error);
+
+      setHistoricalPricesError(
+        error instanceof Error
+          ? error.message
+          : "Unable to load historical pricing."
+      );
+    } finally {
+      setHistoricalPricesLoading(false);
+    }
+  }
+
   async function loadRuleVersions() {
     try {
       setRuleVersionsLoading(true);
@@ -183,6 +347,27 @@ export default function AdminPage() {
 
         setAdminUser(data.user);
         loadRuleVersions();
+        loadHistoricalPrices();
+        loadRecommendationRules();
+
+        const varietyResponse = await fetch("/api/admin/gemstone-varieties");
+        const varietyData = await varietyResponse.json();
+        if (varietyResponse.ok) {
+          setGemstoneVarieties(varietyData.gemstoneVarieties ?? []);
+        }
+
+        const [tRes, oRes] = await Promise.all([
+          fetch("/api/admin/treatment-options"),
+          fetch("/api/admin/origin-options"),
+        ]);
+        if (tRes.ok) {
+          const tData = await tRes.json();
+          setTreatmentOptions(tData.treatmentOptions ?? []);
+        }
+        if (oRes.ok) {
+          const oData = await oRes.json();
+          setOriginOptions(oData.originOptions ?? []);
+        }
 
         const referenceResponse = await fetch("/api/reference-gemstones");
         const referenceData = await referenceResponse.json();
@@ -204,6 +389,232 @@ export default function AdminPage() {
 
     checkAdminAccess();
   }, []);
+
+  function handleEditVariety(variety: GemstoneVarietyItem) {
+    setEditingVarietyId(variety._id);
+    setVarietyDescription(variety.description || "");
+    setVarietyError("");
+    setVarietyMessage("");
+  }
+
+  function handleCancelVarietyEdit() {
+    setEditingVarietyId(null);
+    setVarietyDescription("");
+    setVarietyError("");
+    setVarietyMessage("");
+  }
+
+  async function handleSaveVariety(id: string) {
+    try {
+      setSavingVarietyId(id);
+      setVarietyError("");
+      setVarietyMessage("");
+
+      const response = await fetch(`/api/admin/gemstone-varieties/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          description: varietyDescription,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update gemstone variety.");
+      }
+
+      setGemstoneVarieties((current) =>
+        current.map((item) =>
+          item._id === id
+            ? { ...item, description: data.gemstoneVariety.description }
+            : item
+        )
+      );
+
+      setEditingVarietyId(null);
+      setVarietyDescription("");
+      setVarietyMessage("Gemstone variety description updated successfully.");
+    } catch (err) {
+      setVarietyError(
+        err instanceof Error ? err.message : "Failed to update variety."
+      );
+    } finally {
+      setSavingVarietyId(null);
+    }
+  }
+
+  function handleEditTreatment(option: GemstoneVarietyItem) {
+    setEditingTreatmentId(option._id);
+    setTreatmentDescription(option.description || "");
+    setTreatmentError("");
+    setTreatmentMessage("");
+  }
+
+  function handleCancelTreatmentEdit() {
+    setEditingTreatmentId(null);
+    setTreatmentDescription("");
+    setTreatmentError("");
+    setTreatmentMessage("");
+  }
+
+  async function handleSaveTreatment(id: string) {
+    try {
+      setSavingTreatmentId(id);
+      setTreatmentError("");
+      setTreatmentMessage("");
+
+      const response = await fetch(`/api/admin/treatment-options/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          description: treatmentDescription,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update treatment option.");
+      }
+
+      setTreatmentOptions((current) =>
+        current.map((item) =>
+          item._id === id
+            ? { ...item, description: data.treatmentOption.description }
+            : item
+        )
+      );
+
+      setEditingTreatmentId(null);
+      setTreatmentDescription("");
+      setTreatmentMessage("Treatment option description updated successfully.");
+    } catch (err) {
+      setTreatmentError(
+        err instanceof Error ? err.message : "Failed to update treatment option."
+      );
+    } finally {
+      setSavingTreatmentId(null);
+    }
+  }
+
+  function handleEditOrigin(option: GemstoneVarietyItem) {
+    setEditingOriginId(option._id);
+    setOriginDescription(option.description || "");
+    setOriginError("");
+    setOriginMessage("");
+  }
+
+  function handleCancelOriginEdit() {
+    setEditingOriginId(null);
+    setOriginDescription("");
+    setOriginError("");
+    setOriginMessage("");
+  }
+
+  async function handleSaveOrigin(id: string) {
+    try {
+      setSavingOriginId(id);
+      setOriginError("");
+      setOriginMessage("");
+
+      const response = await fetch(`/api/admin/origin-options/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          description: originDescription,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update origin option.");
+      }
+
+      setOriginOptions((current) =>
+        current.map((item) =>
+          item._id === id
+            ? { ...item, description: data.originOption.description }
+            : item
+        )
+      );
+
+      setEditingOriginId(null);
+      setOriginDescription("");
+      setOriginMessage("Origin option description updated successfully.");
+    } catch (err) {
+      setOriginError(
+        err instanceof Error ? err.message : "Failed to update origin option."
+      );
+    } finally {
+      setSavingOriginId(null);
+    }
+  }
+
+  function handleEditRecommendationRule(rule: RecommendationRuleRecord) {
+    setEditingRecommendationRuleId(rule._id);
+    setRecommendationRuleDescription(rule.description ?? "");
+    setRecommendationRuleManagementError("");
+    setRecommendationRuleManagementMessage("");
+  }
+
+  function handleCancelRecommendationRuleEdit() {
+    setEditingRecommendationRuleId(null);
+    setRecommendationRuleDescription("");
+    setRecommendationRuleManagementError("");
+    setRecommendationRuleManagementMessage("");
+  }
+
+  async function handleSaveRecommendationRule(id: string) {
+    try {
+      setSavingRecommendationRuleId(id);
+      setRecommendationRuleManagementError("");
+      setRecommendationRuleManagementMessage("");
+
+      const response = await fetch(`/api/admin/recommendation-rules/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          description: recommendationRuleDescription,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Failed to update recommendation rule description."
+        );
+      }
+
+      setRecommendationRules((prev) =>
+        prev.map((r) => (r._id === id ? data.recommendationRule : r))
+      );
+      setRecommendationRuleManagementMessage(
+        "Recommendation rule description updated successfully."
+      );
+      setEditingRecommendationRuleId(null);
+      setRecommendationRuleDescription("");
+    } catch (err) {
+      console.error("Failed to save recommendation rule description:", err);
+      setRecommendationRuleManagementError(
+        err instanceof Error
+          ? err.message
+          : "Failed to update recommendation rule description."
+      );
+    } finally {
+      setSavingRecommendationRuleId(null);
+    }
+  }
 
   function handleEditReference(reference: ReferenceGemstone) {
     setEditingReferenceId(reference._id);
@@ -525,6 +936,7 @@ export default function AdminPage() {
         setReferenceGemstones(
           Array.isArray(updatedReferences) ? updatedReferences : []
         );
+        loadHistoricalPrices();
       }
 
       setNewReference(createEmptyReferenceForm());
@@ -776,6 +1188,335 @@ export default function AdminPage() {
           ))}
       </section>
 
+      {/* Supported Gemstone Varieties Section */}
+      <section className="rounded-2xl border border-[var(--border)] bg-white p-6 shadow-xs sm:p-8 space-y-6">
+        <div>
+          <h2 className="text-xl font-bold text-[var(--foreground)]">
+            Supported Gemstone Varieties
+          </h2>
+
+          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+            The valuation engine currently supports rules and scoring parameters for three corundum varieties. CAGS admins can edit educational descriptions below.
+          </p>
+        </div>
+
+        {varietyError && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {varietyError}
+          </div>
+        )}
+
+        {varietyMessage && (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+            {varietyMessage}
+          </div>
+        )}
+
+        <div className="grid gap-6 md:grid-cols-3">
+          {gemstoneVarieties.map((variety) => (
+            <div
+              key={variety._id}
+              className="rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)]/40 p-5 flex flex-col justify-between space-y-4"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-lg text-[var(--foreground)]">
+                    {variety.name}
+                  </h3>
+
+                  <div className="flex items-center gap-1.5">
+                    <span className="rounded-full bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800">
+                      Engine Supported
+                    </span>
+                  </div>
+                </div>
+
+                {editingVarietyId === variety._id ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-[var(--muted)] mb-1">
+                        Educational Description (max 500 chars)
+                      </label>
+                      <textarea
+                        rows={4}
+                        maxLength={500}
+                        value={varietyDescription}
+                        onChange={(e) => setVarietyDescription(e.target.value)}
+                        className="w-full rounded-xl border border-[var(--border)] bg-white p-3 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                        placeholder="Enter educational description..."
+                      />
+                      <div className="mt-1 text-right text-xs text-[var(--muted)]">
+                        {varietyDescription.length}/500
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCancelVarietyEdit}
+                        disabled={savingVarietyId === variety._id}
+                        className="rounded-xl border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--foreground)] hover:bg-[var(--surface-soft)] transition disabled:opacity-60"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSaveVariety(variety._id)}
+                        disabled={savingVarietyId === variety._id}
+                        className="rounded-xl bg-[var(--primary)] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[var(--primary-dark)] transition disabled:opacity-60"
+                      >
+                        {savingVarietyId === variety._id ? "Saving..." : "Save Description"}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-sm leading-6 text-[var(--muted)] min-h-[60px]">
+                      {variety.description || "No educational description added yet."}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {editingVarietyId !== variety._id && (
+                <div className="pt-2 border-t border-[var(--border)] flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => handleEditVariety(variety)}
+                    className="rounded-lg border border-[var(--primary)] px-3 py-1 text-xs font-semibold text-[var(--primary)] hover:bg-[var(--primary-soft)] transition"
+                  >
+                    Edit Description
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Treatment Information Section */}
+      <section className="rounded-2xl border border-[var(--border)] bg-white p-6 shadow-xs sm:p-8 space-y-6">
+        <div>
+          <h2 className="text-xl font-bold text-[var(--foreground)]">
+            Treatment Information
+          </h2>
+
+          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+            These are the treatment categories supported by the current evaluation rules. You can update their educational descriptions below.
+          </p>
+
+          <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+            Pricing adjustments and supported treatment categories cannot be changed from this screen.
+          </p>
+        </div>
+
+        {treatmentError && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {treatmentError}
+          </div>
+        )}
+
+        {treatmentMessage && (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+            {treatmentMessage}
+          </div>
+        )}
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {treatmentOptions.map((option) => (
+            <div
+              key={option._id}
+              className="rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)]/40 p-5 flex flex-col justify-between space-y-4"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-lg text-[var(--foreground)]">
+                    {option.name}
+                  </h3>
+
+                  <div className="flex items-center gap-1.5">
+                    <span className="rounded-full bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800">
+                      Engine Supported
+                    </span>
+                  </div>
+                </div>
+
+                {editingTreatmentId === option._id ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-[var(--muted)] mb-1">
+                        Educational Description (max 500 chars)
+                      </label>
+                      <p className="text-[11px] text-[var(--muted)] mb-1.5 leading-4">
+                        This text helps users understand what this treatment category means. It does not verify whether a gemstone actually received this treatment.
+                      </p>
+                      <textarea
+                        rows={4}
+                        maxLength={500}
+                        value={treatmentDescription}
+                        onChange={(e) => setTreatmentDescription(e.target.value)}
+                        className="w-full rounded-xl border border-[var(--border)] bg-white p-3 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                        placeholder="Enter educational description..."
+                      />
+                      <div className="mt-1 text-right text-xs text-[var(--muted)]">
+                        {treatmentDescription.length}/500
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCancelTreatmentEdit}
+                        disabled={savingTreatmentId === option._id}
+                        className="rounded-xl border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--foreground)] hover:bg-[var(--surface-soft)] transition disabled:opacity-60"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSaveTreatment(option._id)}
+                        disabled={savingTreatmentId === option._id}
+                        className="rounded-xl bg-[var(--primary)] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[var(--primary-dark)] transition disabled:opacity-60"
+                      >
+                        {savingTreatmentId === option._id ? "Saving..." : "Save Description"}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-sm leading-6 text-[var(--muted)] min-h-[60px]">
+                      {option.description || "No educational description added yet."}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {editingTreatmentId !== option._id && (
+                <div className="pt-2 border-t border-[var(--border)] flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => handleEditTreatment(option)}
+                    className="rounded-lg border border-[var(--primary)] px-3 py-1 text-xs font-semibold text-[var(--primary)] hover:bg-[var(--primary-soft)] transition"
+                  >
+                    Edit Description
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Gemstone Origin Information Section */}
+      <section className="rounded-2xl border border-[var(--border)] bg-white p-6 shadow-xs sm:p-8 space-y-6">
+        <div>
+          <h2 className="text-xl font-bold text-[var(--foreground)]">
+            Gemstone Origin Information
+          </h2>
+
+          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+            These are the geographic origin choices supported by the current evaluation rules. You can update their educational descriptions below.
+          </p>
+
+          <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+            An origin entered in the system is reported information. It does not authenticate or scientifically determine a gemstone&apos;s origin.
+          </p>
+        </div>
+
+        {originError && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {originError}
+          </div>
+        )}
+
+        {originMessage && (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+            {originMessage}
+          </div>
+        )}
+
+        <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-5">
+          {originOptions.map((option) => (
+            <div
+              key={option._id}
+              className="rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)]/40 p-5 flex flex-col justify-between space-y-4"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-lg text-[var(--foreground)]">
+                    {option.name}
+                  </h3>
+
+                  <div className="flex items-center gap-1.5">
+                    <span className="rounded-full bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800">
+                      Engine Supported
+                    </span>
+                  </div>
+                </div>
+
+                {editingOriginId === option._id ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-[var(--muted)] mb-1">
+                        Educational Description (max 500 chars)
+                      </label>
+                      <textarea
+                        rows={4}
+                        maxLength={500}
+                        value={originDescription}
+                        onChange={(e) => setOriginDescription(e.target.value)}
+                        className="w-full rounded-xl border border-[var(--border)] bg-white p-3 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                        placeholder="Enter educational description..."
+                      />
+                      <div className="mt-1 text-right text-xs text-[var(--muted)]">
+                        {originDescription.length}/500
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCancelOriginEdit}
+                        disabled={savingOriginId === option._id}
+                        className="rounded-xl border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--foreground)] hover:bg-[var(--surface-soft)] transition disabled:opacity-60"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSaveOrigin(option._id)}
+                        disabled={savingOriginId === option._id}
+                        className="rounded-xl bg-[var(--primary)] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[var(--primary-dark)] transition disabled:opacity-60"
+                      >
+                        {savingOriginId === option._id ? "Saving..." : "Save Description"}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-sm leading-6 text-[var(--muted)] min-h-[60px]">
+                      {option.description || "No educational description added yet."}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {editingOriginId !== option._id && (
+                <div className="pt-2 border-t border-[var(--border)] flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => handleEditOrigin(option)}
+                    className="rounded-lg border border-[var(--primary)] px-3 py-1 text-xs font-semibold text-[var(--primary)] hover:bg-[var(--primary-soft)] transition"
+                  >
+                    Edit Description
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Add / Edit Reference Form */}
       <section id="reference-form" className="rounded-2xl border border-[var(--border)] bg-white p-6 shadow-xs sm:p-8 space-y-6">
         <div>
@@ -816,9 +1557,19 @@ export default function AdminPage() {
                 }
                 className="mt-1.5 w-full rounded-xl border border-[var(--border)] bg-white px-3.5 py-2.5 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
               >
-                <option value="Blue Sapphire">Blue Sapphire</option>
-                <option value="Padparadscha">Padparadscha</option>
-                <option value="Ruby">Ruby</option>
+                {gemstoneVarieties.length === 0 ? (
+                  <>
+                    <option value="Blue Sapphire">Blue Sapphire</option>
+                    <option value="Padparadscha">Padparadscha</option>
+                    <option value="Ruby">Ruby</option>
+                  </>
+                ) : (
+                  gemstoneVarieties.map((variety) => (
+                    <option key={variety._id} value={variety.name}>
+                      {variety.name}
+                    </option>
+                  ))
+                )}
               </select>
             </div>
 
@@ -1307,10 +2058,20 @@ export default function AdminPage() {
                   className="mt-1 w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm"
                 >
                   <option value="">Select</option>
-                  <option value="Untreated">Untreated</option>
-                  <option value="Heated">Heated</option>
-                  <option value="Treated">Treated</option>
-                  <option value="Unknown">Unknown</option>
+                  {treatmentOptions.length === 0 ? (
+                    <>
+                      <option value="Untreated">Untreated</option>
+                      <option value="Heated">Heated</option>
+                      <option value="Treated">Treated</option>
+                      <option value="Unknown">Unknown</option>
+                    </>
+                  ) : (
+                    treatmentOptions.map((option) => (
+                      <option key={option._id} value={option.name}>
+                        {option.name}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
             </fieldset>
@@ -1336,11 +2097,21 @@ export default function AdminPage() {
                     className="mt-1 w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm"
                   >
                     <option value="">Select</option>
-                    <option value="Sri Lanka">Sri Lanka</option>
-                    <option value="Myanmar">Myanmar</option>
-                    <option value="Madagascar">Madagascar</option>
-                    <option value="Other">Other</option>
-                    <option value="Unknown">Unknown</option>
+                    {originOptions.length === 0 ? (
+                      <>
+                        <option value="Sri Lanka">Sri Lanka</option>
+                        <option value="Myanmar">Myanmar</option>
+                        <option value="Madagascar">Madagascar</option>
+                        <option value="Other">Other</option>
+                        <option value="Unknown">Unknown</option>
+                      </>
+                    ) : (
+                      originOptions.map((option) => (
+                        <option key={option._id} value={option.name}>
+                          {option.name}
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
 
@@ -1477,6 +2248,319 @@ export default function AdminPage() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* Historical Pricing Section */}
+      <section className="rounded-2xl border border-[var(--border)] bg-white p-6 shadow-xs sm:p-8 space-y-6">
+        <div>
+          <h2 className="text-xl font-bold text-[var(--foreground)]">
+            Historical Pricing
+          </h2>
+
+          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+            Review the recorded pricing history of reference gemstones used by the evaluation system.
+          </p>
+
+          <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
+            These records are kept as an audit history. They cannot be edited or deleted from this dashboard.
+          </p>
+        </div>
+
+        <div className="rounded-xl bg-[var(--surface-soft)] p-4 border border-[var(--border)]">
+          <p className="text-sm font-semibold text-[var(--foreground)]">
+            How is this used?
+          </p>
+
+          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+            Historical records show how reference prices changed over time. New gemstone evaluations use the current reference price, not an older historical price.
+          </p>
+        </div>
+
+        {historicalPricesLoading && (
+          <p className="text-sm text-[var(--muted)]">
+            Loading pricing history...
+          </p>
+        )}
+
+        {historicalPricesError && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {historicalPricesError}
+          </div>
+        )}
+
+        {!historicalPricesLoading &&
+          !historicalPricesError &&
+          historicalPrices.length === 0 && (
+            <p className="text-sm text-[var(--muted)]">
+              No historical pricing records are available yet.
+            </p>
+          )}
+
+        {!historicalPricesLoading &&
+          !historicalPricesError &&
+          historicalPrices.length > 0 && (
+            <div className="grid gap-4 lg:grid-cols-2">
+              {historicalPrices.map((record) => (
+                <article
+                  key={record._id}
+                  className="rounded-xl border border-[var(--border)] bg-[var(--surface-soft)]/40 p-5 space-y-4"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-semibold text-[var(--foreground)] text-base">
+                        {record.variety}
+                      </h3>
+
+                      <p className="mt-1 text-sm text-[var(--muted)]">
+                        {record.caratWeight} ct
+                      </p>
+                    </div>
+
+                    <span className="rounded-full bg-[var(--primary-soft)] px-3 py-1 text-xs font-semibold text-[var(--primary-dark)]">
+                      {record.source === "REFERENCE_CREATED"
+                        ? "Initial Price"
+                        : "Price Updated"}
+                    </span>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-medium text-[var(--muted)]">
+                      Recorded Price
+                    </p>
+
+                    <p className="mt-1 text-lg font-bold text-[var(--foreground)]">
+                      {record.currency} {record.price.toLocaleString()}
+                    </p>
+                  </div>
+
+                  <div className="text-xs text-[var(--muted)] pt-2 border-t border-[var(--border)] space-y-1">
+                    <p>
+                      <span className="font-medium text-[var(--foreground)]">Recorded:</span>{" "}
+                      {new Date(record.recordedAt).toLocaleString()}
+                    </p>
+
+                    {record.note && (
+                      <p className="text-[var(--muted)] leading-5">
+                        {record.note}
+                      </p>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+      </section>
+
+      {/* Recommendation Rules Section */}
+      <section className="rounded-2xl border border-[var(--border)] bg-white p-6 shadow-xs sm:p-8 space-y-6">
+        <div>
+          <h2 className="text-xl font-bold text-[var(--foreground)]">
+            Recommendation Rules
+          </h2>
+
+          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+            These rules determine when educational recommendations may appear
+            after a gemstone evaluation.
+          </p>
+        </div>
+
+        <div className="rounded-xl bg-[var(--surface-soft)] p-4 border border-[var(--border)]">
+          <p className="text-sm font-semibold text-[var(--foreground)]">
+            How do these rules work?
+          </p>
+
+          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+            The evaluation engine controls each rule&apos;s trigger and recommendation
+            message. CAGS administrators can update the educational description
+            shown in this dashboard, but cannot change evaluation behavior here.
+          </p>
+        </div>
+
+        {recommendationRuleManagementMessage && (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-800">
+            {recommendationRuleManagementMessage}
+          </div>
+        )}
+
+        {recommendationRuleManagementError && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {recommendationRuleManagementError}
+          </div>
+        )}
+
+        {recommendationRulesLoading && (
+          <p className="text-sm text-[var(--muted)]">
+            Loading recommendation rules...
+          </p>
+        )}
+
+        {recommendationRulesError && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {recommendationRulesError}
+          </div>
+        )}
+
+        {!recommendationRulesLoading &&
+          !recommendationRulesError &&
+          recommendationRules.length === 0 && (
+            <p className="text-sm text-[var(--muted)]">
+              No recommendation rules are available.
+            </p>
+          )}
+
+        {!recommendationRulesLoading &&
+          !recommendationRulesError &&
+          recommendationRules.length > 0 && (
+            <div className="space-y-8">
+              {recommendationCategoryOrder.map((category) => {
+                const categoryRules = recommendationRules.filter(
+                  (r) => r.category === category
+                );
+                if (categoryRules.length === 0) return null;
+
+                return (
+                  <div key={category} className="space-y-4">
+                    <h3 className="text-lg font-semibold text-[var(--foreground)] border-b border-[var(--border)] pb-2">
+                      {recommendationCategoryLabels[category] ??
+                        `${category} Recommendations`}
+                    </h3>
+
+                    <div className="grid gap-4 lg:grid-cols-2">
+                      {categoryRules.map((rule) => (
+                        <article
+                          key={rule._id}
+                          className="rounded-xl border border-[var(--border)] bg-white p-4 space-y-3"
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <h4 className="font-semibold text-[var(--foreground)]">
+                                {rule.name}
+                              </h4>
+
+                              <p className="mt-1 text-xs text-[var(--muted)]">
+                                {rule.category}
+                              </p>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-2">
+                              {rule.isActive && (
+                                <span className="rounded-full bg-[var(--primary-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--primary-dark)]">
+                                  Active
+                                </span>
+                              )}
+
+                              {rule.engineSupported && (
+                                <span className="rounded-full bg-[var(--surface-soft)] px-2.5 py-1 text-xs font-medium text-[var(--foreground)] border border-[var(--border)]">
+                                  Engine Supported
+                                </span>
+                              )}
+
+                              {editingRecommendationRuleId !== rule._id && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleEditRecommendationRule(rule)
+                                  }
+                                  className="rounded-lg border border-[var(--primary)] px-3 py-1 text-xs font-semibold text-[var(--primary)] hover:bg-[var(--primary-soft)] transition"
+                                >
+                                  Edit Description
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {editingRecommendationRuleId === rule._id ? (
+                            <div className="mt-4">
+                              <label className="text-sm font-semibold text-[var(--foreground)]">
+                                Educational Description
+                              </label>
+
+                              <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+                                Explain when this recommendation applies in language
+                                that is easy for administrators to understand. This
+                                does not change the evaluation trigger.
+                              </p>
+
+                              <textarea
+                                value={recommendationRuleDescription}
+                                onChange={(event) =>
+                                  setRecommendationRuleDescription(
+                                    event.target.value
+                                  )
+                                }
+                                maxLength={500}
+                                rows={4}
+                                className="mt-3 w-full rounded-xl border border-[var(--border)] p-3 text-sm focus:border-[var(--primary)] focus:outline-hidden"
+                              />
+
+                              <div className="mt-2 flex items-center justify-between">
+                                <div className="flex gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleSaveRecommendationRule(rule._id)
+                                    }
+                                    disabled={
+                                      savingRecommendationRuleId === rule._id
+                                    }
+                                    className="rounded-lg bg-[var(--primary)] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[var(--primary-dark)] transition disabled:opacity-60"
+                                  >
+                                    {savingRecommendationRuleId === rule._id
+                                      ? "Saving..."
+                                      : "Save Description"}
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={handleCancelRecommendationRuleEdit}
+                                    disabled={
+                                      savingRecommendationRuleId === rule._id
+                                    }
+                                    className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--foreground)] hover:bg-[var(--surface-soft)] transition disabled:opacity-60"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+
+                                <p className="text-xs text-[var(--muted)]">
+                                  {recommendationRuleDescription.length}/500
+                                </p>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="mt-4">
+                              <p className="text-xs font-semibold text-[var(--muted)]">
+                                When it applies
+                              </p>
+
+                              <p className="mt-1 text-sm leading-6 text-[var(--foreground)]">
+                                {rule.description}
+                              </p>
+                            </div>
+                          )}
+
+                          <div className="mt-4 rounded-lg bg-[var(--surface-soft)] p-3 space-y-1">
+                            <p className="text-xs font-semibold text-[var(--muted)]">
+                              Engine Recommendation
+                            </p>
+
+                            <p className="text-[11px] leading-4 text-[var(--muted)]">
+                              This wording is controlled by the current evaluation
+                              engine and cannot be edited here.
+                            </p>
+
+                            <p className="mt-2 text-sm leading-6 text-[var(--foreground)] pt-1">
+                              {rule.message}
+                            </p>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
       </section>
 
       {referenceToDelete && (

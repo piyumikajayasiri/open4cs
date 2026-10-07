@@ -16,8 +16,8 @@ export default function Header() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
-  const router = useRouter();
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     async function checkAuth() {
@@ -38,6 +38,10 @@ export default function Header() {
 
     checkAuth();
   }, [pathname]);
+
+  if (pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin") || pathname?.startsWith("/evaluate") || pathname?.startsWith("/catalogue")) {
+    return null;
+  }
 
   async function handleLogout() {
     try {
@@ -92,6 +96,19 @@ export default function Header() {
           >
             Learn
           </Link>
+
+          {user && (
+            <Link
+              href="/dashboard"
+              className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
+                pathname === "/dashboard"
+                  ? "bg-[var(--primary-soft)] text-[var(--primary-dark)]"
+                  : "hover:bg-[var(--surface-soft)] text-[var(--foreground)]"
+              }`}
+            >
+              My Evaluations
+            </Link>
+          )}
 
           {user?.role === "CAGS_ADMIN" && (
             <Link
@@ -180,6 +197,16 @@ export default function Header() {
             >
               Learn
             </Link>
+
+            {user && (
+              <Link
+                href="/dashboard"
+                onClick={() => setMenuOpen(false)}
+                className="block rounded-xl px-4 py-3 font-semibold hover:bg-[var(--surface-soft)]"
+              >
+                My Evaluations & History
+              </Link>
+            )}
 
             {user?.role === "CAGS_ADMIN" && (
               <Link

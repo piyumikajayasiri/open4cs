@@ -1,65 +1,62 @@
-import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
-import { connectDB } from "@/lib/mongodb";
+import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
 
-const VALID_CATEGORIES = [
-  "STUDENT",
-  "TRADER",
-  "GEMOLOGIST",
-  "PROFESSIONAL",
-] as const;
+const ALLOWED_CATEGORIES = [
+  "Student",
+  "Trader",
+  "Gemologist",
+  "Professional",
+];
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const data = await request.json();
 
-    const { name, email, password, category } = body;
+    const name = data.name?.trim();
+    const email = data.email?.trim().toLowerCase();
+    const password = data.password;
+    const category = data.category;
 
     if (!name || !email || !password || !category) {
-      return NextResponse.json(
+      return Response.json(
         {
-          success: false,
-          message: "All fields are required.",
+          error:
+            "Name, email, password, and category are required.",
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    if (!VALID_CATEGORIES.includes(category)) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Invalid user category.",
-        },
-        { status: 400 },
+    if (!ALLOWED_CATEGORIES.includes(category)) {
+      return Response.json(
+        { error: "Invalid user category." },
+        { status: 400 }
       );
     }
 
     if (password.length < 8) {
-      return NextResponse.json(
+      return Response.json(
         {
-          success: false,
-          message: "Password must be at least 8 characters.",
+          error:
+            "Password must contain at least 8 characters.",
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    await connectDB();
+    await connectToDatabase();
 
-    const existingUser = await User.findOne({
-      email: email.toLowerCase(),
-    });
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      return NextResponse.json(
+      return Response.json(
         {
-          success: false,
-          message: "An account with this email already exists.",
+          error:
+            "An account with this email already exists.",
         },
-        { status: 409 },
+        { status: 409 }
       );
     }
 
@@ -67,17 +64,15 @@ export async function POST(request: NextRequest) {
 
     const user = await User.create({
       name,
-      email: email.toLowerCase(),
+      email,
       passwordHash,
       category,
       role: "USER",
-      status: "ACTIVE",
     });
 
-    return NextResponse.json(
+    return Response.json(
       {
-        success: true,
-        message: "Account created successfully.",
+        message: "Registration successful.",
         user: {
           id: user._id.toString(),
           name: user.name,
@@ -86,17 +81,14 @@ export async function POST(request: NextRequest) {
           role: user.role,
         },
       },
-      { status: 201 },
+      { status: 201 }
     );
   } catch (error) {
-    console.error("Registration error:", error);
+    console.error("Registration failed:", error);
 
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Unable to create account.",
-      },
-      { status: 500 },
+    return Response.json(
+      { error: "Registration failed." },
+      { status: 500 }
     );
   }
 }
