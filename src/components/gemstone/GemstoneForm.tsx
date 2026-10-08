@@ -472,16 +472,22 @@ export default function GemstoneForm() {
               {currentStep === 8 && "Review & Generate Evaluation"}
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              {currentStep === 4
-                ? "Step 4 of 8 · Naked-eye first, then 10x loupe protocol"
-                : `Step ${currentStep} of 8 · Choose the CAGS-supported variety closest to your stone`}
+              {currentStep === 4 && "Step 4 of 8 · Naked-eye first, then 10x loupe protocol"}
+              {currentStep === 5 && "Step 5 of 8 · Dimensions auto-calculate ratios — Inconsistencies are flagged"}
+              {currentStep !== 4 && currentStep !== 5 && `Step ${currentStep} of 8 · Choose the CAGS-supported variety closest to your stone`}
             </p>
           </div>
           
           <div className="flex items-center gap-3">
-            <span className="rounded-full border border-blue-200 bg-blue-50 text-blue-600 px-3 py-1 text-xs font-semibold flex items-center gap-1.5">
-              <span>👁</span> User Observed
-            </span>
+            {currentStep === 5 ? (
+              <span className="rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600 px-3 py-1 text-xs font-semibold flex items-center gap-1.5">
+                <span>✔</span> Measured
+              </span>
+            ) : (
+              <span className="rounded-full border border-blue-200 bg-blue-50 text-blue-600 px-3 py-1 text-xs font-semibold flex items-center gap-1.5">
+                <span>👁</span> User Observed
+              </span>
+            )}
           </div>
         </div>
 
