@@ -1,79 +1,128 @@
-import mongoose, { Document, Model, Schema } from "mongoose";
-
-export type GemstoneStatus = "ACTIVE" | "INACTIVE";
+import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IGemstone extends Document {
-  code: string;
-  name: string;
-  species: string;
-  supportedShapes: string[];
-  supportedOrigin: string;
-  description?: string;
-  status: GemstoneStatus;
+  variety: string;
+  caratWeight: number;
+  
+  color?: {
+    hue?: string;
+    tone?: string;
+    saturation?: string;
+    distribution?: string;
+    zoning?: string;
+  };
+  
+  clarity?: {
+    nakedEye?: string;
+    loupe10x?: string;
+    inclusionType?: string;
+    inclusionLocation?: string;
+    severity?: string;
+  };
+  
+  cut?: {
+    length?: number;
+    width?: number;
+    depth?: number;
+    symmetry?: string;
+    polish?: string;
+    windowing?: string;
+    extinction?: string;
+    bulging?: string;
+  };
+  
+  treatment?: {
+    status?: string;
+    type?: string;
+  };
+  
+  origin?: {
+    value?: string;
+    reliability?: string;
+  };
+
+  informationReliability?: {
+    measurements?: string;
+    treatment?: string;
+    origin?: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
 
-const GemstoneSchema = new Schema<IGemstone>(
+const gemstoneSchema = new Schema<IGemstone>(
   {
-    code: {
-      type: String,
-      required: true,
-      unique: true,
-      uppercase: true,
-      trim: true,
-      minlength: 2,
-      maxlength: 30,
-    },
-
-    name: {
+    variety: {
       type: String,
       required: true,
       trim: true,
-      maxlength: 100,
     },
 
-    species: {
-      type: String,
+    caratWeight: {
+      type: Number,
       required: true,
-      trim: true,
-      maxlength: 100,
+      min: 0,
+    },
+    
+    color: {
+      hue: String,
+      tone: String,
+      saturation: String,
+      distribution: String,
+      zoning: String,
+    },
+    
+    clarity: {
+      nakedEye: String,
+      loupe10x: String,
+      inclusionType: String,
+      inclusionLocation: String,
+      severity: String,
+    },
+    
+    cut: {
+      length: Number,
+      width: Number,
+      depth: Number,
+      symmetry: String,
+      polish: String,
+      windowing: String,
+      extinction: String,
+      bulging: String,
+    },
+    
+    treatment: {
+      status: { type: String },
+      type: { type: String },
+    },
+    
+    origin: {
+      value: String,
+      reliability: String,
     },
 
-    supportedShapes: {
-      type: [String],
-      default: [],
-    },
-
-    supportedOrigin: {
-      type: String,
-      required: true,
-      trim: true,
-      default: "Sri Lanka",
-      maxlength: 100,
-    },
-
-    description: {
-      type: String,
-      trim: true,
-      maxlength: 1000,
-      default: "",
-    },
-
-    status: {
-      type: String,
-      enum: ["ACTIVE", "INACTIVE"],
-      default: "ACTIVE",
-      required: true,
+    informationReliability: {
+      measurements: {
+        type: String,
+        default: "Unverified",
+      },
+      treatment: {
+        type: String,
+        default: "Unverified",
+      },
+      origin: {
+        type: String,
+        default: "Unverified",
+      },
     },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 const Gemstone: Model<IGemstone> =
   mongoose.models.Gemstone ||
-  mongoose.model<IGemstone>("Gemstone", GemstoneSchema);
+  mongoose.model<IGemstone>("Gemstone", gemstoneSchema);
 
 export default Gemstone;
