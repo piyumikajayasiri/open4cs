@@ -6,6 +6,7 @@ import BasicInformation from "./BasicInformation";
 import ColorSection from "./ColorSection";
 import ClaritySection from "./ClaritySection";
 import CutSection from "./CutSection";
+import CaratSection from "./CaratSection";
 import AdditionalInformationSection from "./AdditionalInformationSection";
 import EvaluationDetailsCard from "./EvaluationDetailsCard";
 import EvaluationProgress from "./EvaluationProgress";
@@ -467,19 +468,20 @@ export default function GemstoneForm() {
               {currentStep === 3 && "1. Color Evaluation"}
               {currentStep === 4 && "2. Clarity Evaluation"}
               {currentStep === 5 && "3. Cut Evaluation"}
-              {currentStep === 6 && "4. Carat Weight Evaluation"}
+              {currentStep === 6 && "4. Carat Weight"}
               {currentStep === 7 && "Supporting Factors & Reliability"}
               {currentStep === 8 && "Review & Generate Evaluation"}
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
               {currentStep === 4 && "Step 4 of 8 · Naked-eye first, then 10x loupe protocol"}
               {currentStep === 5 && "Step 5 of 8 · Dimensions auto-calculate ratios — Inconsistencies are flagged"}
-              {currentStep !== 4 && currentStep !== 5 && `Step ${currentStep} of 8 · Choose the CAGS-supported variety closest to your stone`}
+              {currentStep === 6 && "Step 6 of 8 · Weight is read together with dimensions and market size bands"}
+              {currentStep !== 4 && currentStep !== 5 && currentStep !== 6 && `Step ${currentStep} of 8 · Choose the CAGS-supported variety closest to your stone`}
             </p>
           </div>
           
           <div className="flex items-center gap-3">
-            {currentStep === 5 ? (
+            {currentStep === 5 || currentStep === 6 ? (
               <span className="rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600 px-3 py-1 text-xs font-semibold flex items-center gap-1.5">
                 <span>✔</span> Measured
               </span>
@@ -580,16 +582,13 @@ export default function GemstoneForm() {
         )}
 
         {currentStep === 6 && (
-          <section className="rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 shadow-xs space-y-4">
-            <h2 className="text-xl font-bold text-slate-900">Carat Weight Evaluation</h2>
-            <p className="text-xs text-slate-500">
-              Evaluating weight of {caratWeight || "1.5"} ct for {variety || "Ceylon Blue Sapphire"}.
-            </p>
-            <div className="rounded-xl bg-slate-50 p-4 border border-slate-200/60 text-xs text-slate-600">
-              <p className="font-bold text-slate-800">Carat Size Band: 1.00 - 1.99 ct</p>
-              <p className="mt-1">Standard market liquidity tier with high demand across B2B channels.</p>
-            </div>
-          </section>
+          <CaratSection
+            caratWeight={caratWeight}
+            length={length}
+            width={width}
+            depth={depth}
+            onCaratWeightChange={setCaratWeight}
+          />
         )}
 
         {(currentStep === 7 || currentStep === 8) && (
