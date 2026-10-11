@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import FourCBreakdownView from "./FourCBreakdownView";
+import ReliabilityAndColorSimilarityView from "./ReliabilityAndColorSimilarityView";
 
 type EvaluationCompleteDashboardProps = {
   stoneId?: string;
@@ -147,6 +148,13 @@ export default function EvaluationCompleteDashboard({
           cutLabel={cutLabel}
           caratScore={caratScore}
           caratLabel={caratLabel}
+        />
+      ) : activeTab === "comparables" ? (
+        <ReliabilityAndColorSimilarityView
+          stoneId={stoneId}
+          snapshotDate={evaluationDate}
+          caratWeight={`${caratScore.toFixed(2)} ct`}
+          color={colorLabel}
         />
       ) : (
         <>
