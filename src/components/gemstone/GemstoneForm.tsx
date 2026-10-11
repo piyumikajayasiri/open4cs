@@ -9,6 +9,7 @@ import CutSection from "./CutSection";
 import CaratSection from "./CaratSection";
 import AdditionalInformationSection from "./AdditionalInformationSection";
 import EvaluationProcessingScreen from "./EvaluationProcessingScreen";
+import ReviewSection from "./ReviewSection";
 import EvaluationDetailsCard from "./EvaluationDetailsCard";
 import EvaluationProgress from "./EvaluationProgress";
 import EvaluationResultSummary from "./EvaluationResultSummary";
@@ -291,8 +292,8 @@ export default function GemstoneForm() {
     }
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleSubmit(event?: FormEvent<HTMLFormElement>) {
+    if (event) event.preventDefault();
 
     if (!currentUser) {
       alert("Please log in before evaluating a gemstone.");
@@ -465,7 +466,7 @@ export default function GemstoneForm() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Step Header */}
-        {currentStep !== 8 && (
+        {!loading && (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
@@ -476,19 +477,24 @@ export default function GemstoneForm() {
                 {currentStep === 5 && "3. Cut Evaluation"}
                 {currentStep === 6 && "4. Carat Weight"}
                 {currentStep === 7 && "Additional Factors"}
-                {currentStep === 8 && "Review & Generate Evaluation"}
+                {currentStep === 8 && "Review Your Evaluation"}
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 mt-1">
                 {currentStep === 4 && "Step 4 of 8 · Naked-eye first, then 10x loupe protocol"}
                 {currentStep === 5 && "Step 5 of 8 · Dimensions auto-calculate ratios — Inconsistencies are flagged"}
                 {currentStep === 6 && "Step 6 of 8 · Weight is read together with dimensions and market size bands"}
                 {currentStep === 7 && "Step 7 of 8 · Treatment, origin and recut signals that modify the suggestion"}
-                {currentStep !== 4 && currentStep !== 5 && currentStep !== 6 && currentStep !== 7 && `Step ${currentStep} of 8 · Choose the CAGS-supported variety closest to your stone`}
+                {currentStep === 8 && "Step 8 of 8 · Confirm everything before the rule engine runs"}
+                {currentStep < 4 && `Step ${currentStep} of 8 · Choose the CAGS-supported variety closest to your stone`}
               </p>
             </div>
             
             <div className="flex items-center gap-3">
-              {currentStep === 7 ? (
+              {currentStep === 8 ? (
+                <span className="rounded-full border border-blue-200 bg-blue-50/70 text-blue-600 px-3.5 py-1 text-xs font-semibold">
+                  Rule engine v4.2
+                </span>
+              ) : currentStep === 7 ? (
                 <button
                   type="button"
                   onClick={() => alert("Draft evaluation saved successfully!")}
@@ -510,7 +516,7 @@ export default function GemstoneForm() {
         )}
 
         {/* 8-Step Progress Stepper Bar */}
-        {currentStep !== 8 && (
+        {!loading && (
           <EvaluationProgress
             currentStep={currentStep}
             onStepClick={(s) => setCurrentStep(s)}
@@ -629,12 +635,46 @@ export default function GemstoneForm() {
           />
         )}
 
-        {currentStep === 8 && (
+        {loading && (
           <EvaluationProcessingScreen stoneId="CEY-2026-0847" />
         )}
 
-        {/* Navigation Actions Footer Bar */}
-        <div className="flex items-center justify-between border-t border-slate-200 pt-6">
+        {currentStep === 8 && !loading && !evaluationResult && (
+          <ReviewSection
+            variety={variety}
+            caratWeight={caratWeight}
+            length={length}
+            width={width}
+            depth={depth}
+            hue={hue}
+            tone={tone}
+            saturation={saturation}
+            distribution={distribution}
+            zoning={zoning}
+            nakedEye={nakedEye}
+            loupe10x={loupe10x}
+            inclusionType={inclusionType}
+            inclusionLocation={inclusionLocation}
+            severity={severity}
+            symmetry={symmetry}
+            polish={polish}
+            windowing={windowing}
+            extinction={extinction}
+            bulging={bulging}
+            treatmentStatus={treatmentStatus}
+            treatmentType={treatmentType}
+            originValue={originValue}
+            originReliability={originReliability}
+            onEditStep={(step) => setCurrentStep(step)}
+            onRunEvaluation={() => handleSubmit()}
+            onSaveDraft={() => alert("Evaluation draft saved successfully!")}
+            loading={loading}
+          />
+        )}
+
+        {/* Navigation Actions Footer Bar (hidden on step 8 or when loading) */}
+        {currentStep < 8 && !loading && (
+          <div className="flex items-center justify-between border-t border-slate-200 pt-6">
           <button
             type="button"
             onClick={() => {
@@ -670,6 +710,7 @@ export default function GemstoneForm() {
             </button>
           )}
         </div>
+      )}
 
       {currentStep === 5 && (
         <div className="space-y-4 pt-4">
