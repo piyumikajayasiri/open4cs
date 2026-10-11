@@ -8,6 +8,7 @@ import ClaritySection from "./ClaritySection";
 import CutSection from "./CutSection";
 import CaratSection from "./CaratSection";
 import AdditionalInformationSection from "./AdditionalInformationSection";
+import EvaluationProcessingScreen from "./EvaluationProcessingScreen";
 import EvaluationDetailsCard from "./EvaluationDetailsCard";
 import EvaluationProgress from "./EvaluationProgress";
 import EvaluationResultSummary from "./EvaluationResultSummary";
@@ -460,53 +461,57 @@ export default function GemstoneForm() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Step Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-              {currentStep === 1 && "1. Select Gemstone Variety"}
-              {currentStep === 2 && "2. Basic Gemstone Information"}
-              {currentStep === 3 && "1. Color Evaluation"}
-              {currentStep === 4 && "2. Clarity Evaluation"}
-              {currentStep === 5 && "3. Cut Evaluation"}
-              {currentStep === 6 && "4. Carat Weight"}
-              {currentStep === 7 && "Additional Factors"}
-              {currentStep === 8 && "Review & Generate Evaluation"}
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              {currentStep === 4 && "Step 4 of 8 · Naked-eye first, then 10x loupe protocol"}
-              {currentStep === 5 && "Step 5 of 8 · Dimensions auto-calculate ratios — Inconsistencies are flagged"}
-              {currentStep === 6 && "Step 6 of 8 · Weight is read together with dimensions and market size bands"}
-              {currentStep === 7 && "Step 7 of 8 · Treatment, origin and recut signals that modify the suggestion"}
-              {currentStep !== 4 && currentStep !== 5 && currentStep !== 6 && currentStep !== 7 && `Step ${currentStep} of 8 · Choose the CAGS-supported variety closest to your stone`}
-            </p>
+        {currentStep !== 8 && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+                {currentStep === 1 && "1. Select Gemstone Variety"}
+                {currentStep === 2 && "2. Basic Gemstone Information"}
+                {currentStep === 3 && "1. Color Evaluation"}
+                {currentStep === 4 && "2. Clarity Evaluation"}
+                {currentStep === 5 && "3. Cut Evaluation"}
+                {currentStep === 6 && "4. Carat Weight"}
+                {currentStep === 7 && "Additional Factors"}
+                {currentStep === 8 && "Review & Generate Evaluation"}
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                {currentStep === 4 && "Step 4 of 8 · Naked-eye first, then 10x loupe protocol"}
+                {currentStep === 5 && "Step 5 of 8 · Dimensions auto-calculate ratios — Inconsistencies are flagged"}
+                {currentStep === 6 && "Step 6 of 8 · Weight is read together with dimensions and market size bands"}
+                {currentStep === 7 && "Step 7 of 8 · Treatment, origin and recut signals that modify the suggestion"}
+                {currentStep !== 4 && currentStep !== 5 && currentStep !== 6 && currentStep !== 7 && `Step ${currentStep} of 8 · Choose the CAGS-supported variety closest to your stone`}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              {currentStep === 7 ? (
+                <button
+                  type="button"
+                  onClick={() => alert("Draft evaluation saved successfully!")}
+                  className="rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-700 flex items-center gap-1.5 shadow-2xs transition"
+                >
+                  <span>🔖</span> Save Draft
+                </button>
+              ) : currentStep === 5 || currentStep === 6 ? (
+                <span className="rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600 px-3 py-1 text-xs font-semibold flex items-center gap-1.5">
+                  <span>✔</span> Measured
+                </span>
+              ) : (
+                <span className="rounded-full border border-blue-200 bg-blue-50 text-blue-600 px-3 py-1 text-xs font-semibold flex items-center gap-1.5">
+                  <span>👁</span> User Observed
+                </span>
+              )}
+            </div>
           </div>
-          
-          <div className="flex items-center gap-3">
-            {currentStep === 7 ? (
-              <button
-                type="button"
-                onClick={() => alert("Draft evaluation saved successfully!")}
-                className="rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-700 flex items-center gap-1.5 shadow-2xs transition"
-              >
-                <span>🔖</span> Save Draft
-              </button>
-            ) : currentStep === 5 || currentStep === 6 ? (
-              <span className="rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600 px-3 py-1 text-xs font-semibold flex items-center gap-1.5">
-                <span>✔</span> Measured
-              </span>
-            ) : (
-              <span className="rounded-full border border-blue-200 bg-blue-50 text-blue-600 px-3 py-1 text-xs font-semibold flex items-center gap-1.5">
-                <span>👁</span> User Observed
-              </span>
-            )}
-          </div>
-        </div>
+        )}
 
         {/* 8-Step Progress Stepper Bar */}
-        <EvaluationProgress
-          currentStep={currentStep}
-          onStepClick={(s) => setCurrentStep(s)}
-        />
+        {currentStep !== 8 && (
+          <EvaluationProgress
+            currentStep={currentStep}
+            onStepClick={(s) => setCurrentStep(s)}
+          />
+        )}
 
         {error && (
           <div
@@ -600,7 +605,7 @@ export default function GemstoneForm() {
           />
         )}
 
-        {(currentStep === 7 || currentStep === 8) && (
+        {currentStep === 7 && (
           <AdditionalInformationSection
             treatmentStatus={treatmentStatus}
             treatmentType={treatmentType}
@@ -618,6 +623,10 @@ export default function GemstoneForm() {
               }))
             }
           />
+        )}
+
+        {currentStep === 8 && (
+          <EvaluationProcessingScreen stoneId="CEY-2026-0847" />
         )}
 
         {/* Navigation Actions Footer Bar */}
