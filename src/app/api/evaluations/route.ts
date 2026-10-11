@@ -61,6 +61,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Engine tolerance normalizer for display names from UI
+    if (data.variety) {
+      const v = data.variety.toLowerCase();
+      if (v.includes("padparadscha")) data.variety = "Padparadscha";
+      else if (v.includes("ruby")) data.variety = "Ruby";
+      else if (v.includes("sapphire")) data.variety = "Blue Sapphire";
+    }
+
+    if (data.treatment?.status) {
+      const t = data.treatment.status.toLowerCase();
+      if (t.includes("untreated")) data.treatment.status = "Untreated";
+      else if (t.includes("treated") && !t.includes("untreated")) data.treatment.status = "Treated";
+      else if (t.includes("heated")) data.treatment.status = "Heated";
+      else if (t.includes("unknown")) data.treatment.status = "Unknown";
+    }
+
+    if (data.origin?.value) {
+      const o = data.origin.value.toLowerCase();
+      if (o.includes("sri lanka") || o.includes("ceylon")) data.origin.value = "Sri Lanka";
+      else if (o.includes("myanmar") || o.includes("burma")) data.origin.value = "Myanmar";
+      else if (o.includes("madagascar")) data.origin.value = "Madagascar";
+      else if (o.includes("other")) data.origin.value = "Other";
+      else if (o.includes("unknown")) data.origin.value = "Unknown";
+    }
+
+    if (data.origin?.reliability) {
+      const r = data.origin.reliability.toLowerCase();
+      if (r.includes("high") || r.includes("laboratory")) data.origin.reliability = "High";
+      else if (r.includes("medium") || r.includes("seller")) data.origin.reliability = "Medium";
+      else if (r.includes("low") || r.includes("observed") || r.includes("user")) data.origin.reliability = "Low";
+      else if (r.includes("unknown")) data.origin.reliability = "Unknown";
+    }
+
     if (
       !data.gemstoneId ||
       !mongoose.Types.ObjectId.isValid(data.gemstoneId)
