@@ -179,6 +179,7 @@ export default function ReviewSection({
               src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80"
               alt="Ceylon Blue Sapphire"
               fill
+              unoptimized
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 33vw"
             />
