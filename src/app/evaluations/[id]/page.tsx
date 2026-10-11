@@ -3,6 +3,7 @@
 import React, { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import PortalSidebar from "@/components/layout/PortalSidebar";
 import EvaluationCompleteDashboard from "@/components/gemstone/EvaluationCompleteDashboard";
 
 type EvaluationRecord = {
@@ -136,24 +137,12 @@ export default function EvaluationResultPage({
     : "1.68M";
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Navigation Breadcrumb */}
-        <div className="flex items-center justify-between text-xs">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-1.5 font-semibold text-slate-500 hover:text-slate-800 transition"
-          >
-            <span>←</span> Back to Dashboard
-          </Link>
-          <Link
-            href="/evaluate/gemstone"
-            className="font-bold text-blue-600 hover:text-blue-800 transition"
-          >
-            + Start New Evaluation
-          </Link>
-        </div>
+    <div className="min-h-screen bg-[#F8FAFC] flex font-sans text-slate-900">
+      {/* Left Portal Sidebar */}
+      <PortalSidebar activeItem="my_evaluations" />
 
+      {/* Main Content Area */}
+      <main className="flex-1 p-6 lg:p-10 max-w-7xl mx-auto space-y-6 overflow-y-auto">
         {/* Evaluation Dashboard Component */}
         <EvaluationCompleteDashboard
           stoneId={stoneCode}
@@ -178,7 +167,7 @@ export default function EvaluationResultPage({
           onCompare={() => { router.push("/compare"); }}
           onDownloadPdf={() => window.open(`/api/evaluations/${id}/report`, "_blank")}
         />
-      </div>
+      </main>
     </div>
   );
 }
