@@ -469,19 +469,28 @@ export default function GemstoneForm() {
               {currentStep === 4 && "2. Clarity Evaluation"}
               {currentStep === 5 && "3. Cut Evaluation"}
               {currentStep === 6 && "4. Carat Weight"}
-              {currentStep === 7 && "Supporting Factors & Reliability"}
+              {currentStep === 7 && "Additional Factors"}
               {currentStep === 8 && "Review & Generate Evaluation"}
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
               {currentStep === 4 && "Step 4 of 8 · Naked-eye first, then 10x loupe protocol"}
               {currentStep === 5 && "Step 5 of 8 · Dimensions auto-calculate ratios — Inconsistencies are flagged"}
               {currentStep === 6 && "Step 6 of 8 · Weight is read together with dimensions and market size bands"}
-              {currentStep !== 4 && currentStep !== 5 && currentStep !== 6 && `Step ${currentStep} of 8 · Choose the CAGS-supported variety closest to your stone`}
+              {currentStep === 7 && "Step 7 of 8 · Treatment, origin and recut signals that modify the suggestion"}
+              {currentStep !== 4 && currentStep !== 5 && currentStep !== 6 && currentStep !== 7 && `Step ${currentStep} of 8 · Choose the CAGS-supported variety closest to your stone`}
             </p>
           </div>
           
           <div className="flex items-center gap-3">
-            {currentStep === 5 || currentStep === 6 ? (
+            {currentStep === 7 ? (
+              <button
+                type="button"
+                onClick={() => alert("Draft evaluation saved successfully!")}
+                className="rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-700 flex items-center gap-1.5 shadow-2xs transition"
+              >
+                <span>🔖</span> Save Draft
+              </button>
+            ) : currentStep === 5 || currentStep === 6 ? (
               <span className="rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600 px-3 py-1 text-xs font-semibold flex items-center gap-1.5">
                 <span>✔</span> Measured
               </span>
@@ -635,7 +644,7 @@ export default function GemstoneForm() {
               onClick={() => setCurrentStep((step) => Math.min(8, step + 1))}
               className="bg-[#070D1E] hover:bg-[#152347] text-white text-xs font-semibold px-6 py-2.5 rounded-xl shadow-md transition flex items-center gap-2"
             >
-              <span>Continue</span>
+              <span>{currentStep === 7 ? "Review Evaluation" : "Continue"}</span>
               <span>→</span>
             </button>
           ) : (

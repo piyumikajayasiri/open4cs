@@ -1,10 +1,6 @@
-import { useEffect, useState } from "react";
+"use client";
 
-interface RegistryOption {
-  _id: string;
-  name: string;
-  description?: string;
-}
+import React, { useState } from "react";
 
 type AdditionalInformationSectionProps = {
   treatmentStatus: string;
@@ -28,323 +24,223 @@ type AdditionalInformationSectionProps = {
 
 export default function AdditionalInformationSection({
   treatmentStatus,
-  treatmentType,
   originValue,
-  originReliability,
   informationReliability,
   onTreatmentStatusChange,
-  onTreatmentTypeChange,
   onOriginValueChange,
-  onOriginReliabilityChange,
   onInformationReliabilityChange,
 }: AdditionalInformationSectionProps) {
-  const [treatmentOptions, setTreatmentOptions] = useState<RegistryOption[]>([]);
-  const [originOptions, setOriginOptions] = useState<RegistryOption[]>([]);
-  const [optionsLoading, setOptionsLoading] = useState(true);
-  const [optionsError, setOptionsError] = useState("");
+  const [recutPotential, setRecutPotential] = useState("Not recommended — good spread");
+  const [otherCharacteristics, setOtherCharacteristics] = useState("No colour zoning · No window");
 
-  useEffect(() => {
-    async function loadOptions() {
-      try {
-        setOptionsLoading(true);
-        setOptionsError("");
-
-        const response = await fetch("/api/gemstone-options");
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data.error || "Unable to load gemstone options."
-          );
-        }
-
-        setTreatmentOptions(data.treatments ?? []);
-        setOriginOptions(data.origins ?? []);
-      } catch (error) {
-        console.error("Failed to load gemstone options:", error);
-
-        setOptionsError(
-          error instanceof Error
-            ? error.message
-            : "Unable to load gemstone options."
-        );
-      } finally {
-        setOptionsLoading(false);
-      }
-    }
-
-    loadOptions();
-  }, []);
+  const currentTreatment = treatmentStatus || "Heated (H) — mild";
+  const currentOrigin = originValue || "Sri Lanka (Ceylon)";
+  const treatmentVerification = informationReliability.treatment || "Laboratory Verified";
+  const originVerification = informationReliability.origin || "Seller Provided";
 
   return (
-    <section className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-7">
-      <div className="mb-7">
-        <span className="inline-flex rounded-full bg-[var(--primary-soft)] px-3 py-1 text-sm font-semibold text-[var(--primary-dark)]">
-          Step 5
-        </span>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Left Main Form Container (2 cols on large screen) */}
+      <div className="lg:col-span-2 space-y-6">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-6">
+          {/* 2x3 Grid of Select Dropdowns */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {/* 1. Treatment Status */}
+            <div>
+              <label
+                htmlFor="treatment-status-select"
+                className="block text-xs font-semibold text-slate-700 mb-2"
+              >
+                Treatment Status
+              </label>
+              <select
+                id="treatment-status-select"
+                value={currentTreatment}
+                onChange={(e) => onTreatmentStatusChange(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+              >
+                <option value="Heated (H) — mild">Heated (H) — mild</option>
+                <option value="Untreated / Natural">Untreated / Natural</option>
+                <option value="Heated (Standard)">Heated (Standard)</option>
+                <option value="Beryllium Treated">Beryllium Treated</option>
+                <option value="Glass Filled">Glass Filled</option>
+              </select>
+            </div>
 
-        <h2 className="mt-3 text-2xl font-bold">
-          A few more details
-        </h2>
+            {/* 2. Treatment Verification */}
+            <div>
+              <label
+                htmlFor="treatment-verification-select"
+                className="block text-xs font-semibold text-slate-700 mb-2"
+              >
+                Treatment Verification
+              </label>
+              <select
+                id="treatment-verification-select"
+                value={treatmentVerification}
+                onChange={(e) =>
+                  onInformationReliabilityChange("treatment", e.target.value)
+                }
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+              >
+                <option value="Laboratory Verified">Laboratory Verified</option>
+                <option value="Seller Provided">Seller Provided</option>
+                <option value="User Observed">User Observed</option>
+                <option value="Unverified">Unverified</option>
+              </select>
+            </div>
 
-        <p className="mt-2 max-w-2xl leading-7 text-[var(--muted)]">
-          Treatment, origin, and the reliability of your information can
-          provide useful additional context for the evaluation.
-        </p>
-      </div>
+            {/* 3. Origin */}
+            <div>
+              <label
+                htmlFor="origin-select"
+                className="block text-xs font-semibold text-slate-700 mb-2"
+              >
+                Origin
+              </label>
+              <select
+                id="origin-select"
+                value={currentOrigin}
+                onChange={(e) => onOriginValueChange(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+              >
+                <option value="Sri Lanka (Ceylon)">Sri Lanka (Ceylon)</option>
+                <option value="Madagascar">Madagascar</option>
+                <option value="Myanmar (Burma)">Myanmar (Burma)</option>
+                <option value="Kashmir">Kashmir</option>
+                <option value="Unknown / Undetermined">Unknown / Undetermined</option>
+              </select>
+            </div>
 
-      <div className="mb-8 rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] p-5">
-        <p className="font-semibold">
-          💡 It&apos;s okay if you don&apos;t know
-        </p>
+            {/* 4. Origin Verification */}
+            <div>
+              <label
+                htmlFor="origin-verification-select"
+                className="block text-xs font-semibold text-slate-700 mb-2"
+              >
+                Origin Verification
+              </label>
+              <select
+                id="origin-verification-select"
+                value={originVerification}
+                onChange={(e) =>
+                  onInformationReliabilityChange("origin", e.target.value)
+                }
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+              >
+                <option value="Seller Provided">Seller Provided</option>
+                <option value="Laboratory Verified">Laboratory Verified</option>
+                <option value="User Observed">User Observed</option>
+                <option value="Unverified">Unverified</option>
+              </select>
+            </div>
 
-        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-          Some gemstone information cannot be reliably determined just by
-          looking at the stone. If you do not have reliable information,
-          choose an Unknown or Unverified option where available instead of
-          guessing.
-        </p>
-      </div>
+            {/* 5. Recut Potential */}
+            <div>
+              <label
+                htmlFor="recut-potential-select"
+                className="block text-xs font-semibold text-slate-700 mb-2"
+              >
+                Recut Potential
+              </label>
+              <select
+                id="recut-potential-select"
+                value={recutPotential}
+                onChange={(e) => setRecutPotential(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+              >
+                <option value="Not recommended — good spread">Not recommended — good spread</option>
+                <option value="Recut recommended — improve symmetry">Recut recommended — improve symmetry</option>
+                <option value="Minor pavilion touchup">Minor pavilion touchup</option>
+                <option value="Window closure possible">Window closure possible</option>
+              </select>
+            </div>
 
-      {optionsError && (
-        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {optionsError} Please refresh the page and try again.
-        </div>
-      )}
+            {/* 6. Other Characteristics */}
+            <div>
+              <label
+                htmlFor="other-characteristics-select"
+                className="block text-xs font-semibold text-slate-700 mb-2"
+              >
+                Other Characteristics
+              </label>
+              <select
+                id="other-characteristics-select"
+                value={otherCharacteristics}
+                onChange={(e) => setOtherCharacteristics(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+              >
+                <option value="No colour zoning · No window">No colour zoning · No window</option>
+                <option value="Slight colour banding">Slight colour banding</option>
+                <option value="Moderate extinction">Moderate extinction</option>
+                <option value="Slight windowing">Slight windowing</option>
+              </select>
+            </div>
+          </div>
 
-      <div className="space-y-8">
-        {/* Treatment Status */}
-        <div>
-          <label htmlFor="treatment-status" className="block text-base font-semibold">
-            Has the gemstone received treatment?
-          </label>
+          {/* Attached Document Card */}
+          <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 flex items-center justify-between">
+            <div className="flex items-center gap-2.5 text-xs font-medium text-slate-700">
+              <span className="text-base text-slate-500">📎</span>
+              <span>GIC-Colombo Report GIC-88412.pdf attached</span>
+            </div>
 
-          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-            Treatment means a process may have been used to alter or improve
-            characteristics of the gemstone.
-          </p>
-
-          <p className="mt-2 text-sm font-medium text-[var(--primary-dark)]">
-            If you have no reliable treatment information, choose Unknown.
-          </p>
-
-          <select
-            id="treatment-status"
-            value={treatmentStatus}
-            onChange={(e) => onTreatmentStatusChange(e.target.value)}
-            disabled={optionsLoading}
-            className="mt-3 w-full rounded-xl border border-[var(--border)] bg-white px-4 py-3 outline-none transition focus:border-[var(--primary)] disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            <option value="">
-              {optionsLoading
-                ? "Loading treatment options..."
-                : "Select treatment information"}
-            </option>
-            {treatmentOptions.map((option) => (
-              <option key={option._id} value={option.name}>
-                {option.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Treatment Type */}
-        <div>
-          <label htmlFor="treatment-type" className="block text-base font-semibold">
-            Treatment Type (Optional)
-          </label>
-
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            If known, enter specific treatment details (e.g. Traditional Heating).
-          </p>
-
-          <input
-            id="treatment-type"
-            type="text"
-            value={treatmentType}
-            onChange={(event) => onTreatmentTypeChange(event.target.value)}
-            placeholder="Enter treatment type"
-            className="mt-3 w-full rounded-xl border border-[var(--border)] bg-white px-4 py-3 outline-none transition focus:border-[var(--primary)]"
-          />
-        </div>
-
-        {/* Origin */}
-        <div>
-          <label htmlFor="origin-value" className="block text-base font-semibold">
-            Do you know the gemstone&apos;s geographic origin?
-          </label>
-
-          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-            Origin refers to the geographic source associated with the
-            gemstone, such as Sri Lanka, Myanmar, or Madagascar.
-          </p>
-
-          <p className="mt-2 text-sm font-medium text-[var(--primary-dark)]">
-            If the origin has not been reliably established, choose Unknown.
-          </p>
-
-          <select
-            id="origin-value"
-            value={originValue}
-            onChange={(e) => onOriginValueChange(e.target.value)}
-            disabled={optionsLoading}
-            className="mt-3 w-full rounded-xl border border-[var(--border)] bg-white px-4 py-3 outline-none transition focus:border-[var(--primary)] disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            <option value="">
-              {optionsLoading
-                ? "Loading origin options..."
-                : "Select reported origin"}
-            </option>
-            {originOptions.map((option) => (
-              <option key={option._id} value={option.name}>
-                {option.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Origin Reliability */}
-        <div>
-          <label htmlFor="origin-reliability" className="block text-base font-semibold">
-            How confident are you about the origin information?
-          </label>
-
-          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-            Tell us how reliable you believe the origin information is.
-          </p>
-
-          <select
-            id="origin-reliability"
-            value={originReliability}
-            onChange={(e) => onOriginReliabilityChange(e.target.value)}
-            className="mt-3 w-full rounded-xl border border-[var(--border)] bg-white px-4 py-3 outline-none transition focus:border-[var(--primary)]"
-          >
-            <option value="">Select origin reliability</option>
-            <option value="High">High</option>
-            <option value="Medium">Medium</option>
-            <option value="Low">Low</option>
-            <option value="Unknown">Unknown</option>
-          </select>
-        </div>
-
-        {/* Information Reliability section header */}
-        <div className="border-t border-[var(--border)] pt-8">
-          <h3 className="text-lg font-bold">
-            Where did your information come from?
-          </h3>
-
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-            Knowing the source of the information helps communicate how much
-            confidence should be placed in it.
-          </p>
-        </div>
-
-        <div>
-          <label htmlFor="info-rel-measurements" className="block text-sm font-semibold">
-            How were the gemstone&apos;s measurements obtained?
-          </label>
-
-          <select
-            id="info-rel-measurements"
-            value={informationReliability.measurements}
-            onChange={(e) =>
-              onInformationReliabilityChange(
-                "measurements",
-                e.target.value
-              )
-            }
-            className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-4 py-3 outline-none transition focus:border-[var(--primary)]"
-          >
-            <option value="Measured">Measured</option>
-            <option value="User Observed">User Observed</option>
-            <option value="Seller Provided">Seller Provided</option>
-            <option value="Laboratory Verified">Laboratory Verified</option>
-            <option value="Unverified">Unverified</option>
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="info-rel-treatment" className="block text-sm font-semibold">
-            Where did the treatment information come from?
-          </label>
-
-          <select
-            id="info-rel-treatment"
-            value={informationReliability.treatment}
-            onChange={(e) =>
-              onInformationReliabilityChange(
-                "treatment",
-                e.target.value
-              )
-            }
-            className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-4 py-3 outline-none transition focus:border-[var(--primary)]"
-          >
-            <option value="Measured">Measured</option>
-            <option value="User Observed">User Observed</option>
-            <option value="Seller Provided">Seller Provided</option>
-            <option value="Laboratory Verified">Laboratory Verified</option>
-            <option value="Unverified">Unverified</option>
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="info-rel-origin" className="block text-sm font-semibold">
-            Where did the origin information come from?
-          </label>
-
-          <select
-            id="info-rel-origin"
-            value={informationReliability.origin}
-            onChange={(e) =>
-              onInformationReliabilityChange(
-                "origin",
-                e.target.value
-              )
-            }
-            className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-4 py-3 outline-none transition focus:border-[var(--primary)]"
-          >
-            <option value="Measured">Measured</option>
-            <option value="User Observed">User Observed</option>
-            <option value="Seller Provided">Seller Provided</option>
-            <option value="Laboratory Verified">Laboratory Verified</option>
-            <option value="Unverified">Unverified</option>
-          </select>
-        </div>
-
-        {/* Reliability explanation footer */}
-        <div className="rounded-xl border border-[var(--border)] p-4">
-          <p className="font-semibold">
-            Understanding information reliability
-          </p>
-
-          <div className="mt-3 space-y-2 text-sm text-[var(--muted)]">
-            <p>
-              <strong className="text-[var(--foreground)]">Measured:</strong>{" "}
-              obtained through a measurement.
-            </p>
-
-            <p>
-              <strong className="text-[var(--foreground)]">User observed:</strong>{" "}
-              based on what you personally observed.
-            </p>
-
-            <p>
-              <strong className="text-[var(--foreground)]">Seller provided:</strong>{" "}
-              information supplied by a seller or another source.
-            </p>
-
-            <p>
-              <strong className="text-[var(--foreground)]">Laboratory verified:</strong>{" "}
-              supported by laboratory information.
-            </p>
-
-            <p>
-              <strong className="text-[var(--foreground)]">Unverified:</strong>{" "}
-              the information has not been independently confirmed.
-            </p>
+            <span className="rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold px-2.5 py-0.5">
+              Verified
+            </span>
           </div>
         </div>
       </div>
-    </section>
+
+      {/* Right Auxiliary Sidebar Cards (1 col on large screen) */}
+      <div className="space-y-6">
+        {/* Card 1: Information Reliability */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-4">
+          <h4 className="text-sm font-bold text-slate-900">
+            Information Reliability
+          </h4>
+
+          <div className="space-y-3">
+            {/* Treatment */}
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-600 font-medium">Treatment</span>
+              <span className="rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold px-2.5 py-0.5 flex items-center gap-1">
+                <span>✔</span> Laboratory Verified
+              </span>
+            </div>
+
+            {/* Origin */}
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-600 font-medium">Origin</span>
+              <span className="rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold px-2.5 py-0.5 flex items-center gap-1">
+                <span>⚠️</span> Seller Provided
+              </span>
+            </div>
+
+            {/* Recut note */}
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-600 font-medium">Recut note</span>
+              <span className="rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-semibold px-2.5 py-0.5 flex items-center gap-1">
+                <span>👁</span> User Observed
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: Why this matters */}
+        <div className="rounded-2xl border border-[#D5EFE3] bg-[#F0FAF5] p-5 shadow-xs space-y-2.5">
+          <div className="flex items-center gap-2 text-emerald-800">
+            <span className="text-sm">📖</span>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-900">
+              Why this matters
+            </h4>
+          </div>
+
+          <p className="text-xs text-emerald-900 leading-relaxed">
+            Heated Ceylon sapphire carries a modest, published modifier. Unverified origin caps the origin premium until a lab report confirms it — this protects both student and trader.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
