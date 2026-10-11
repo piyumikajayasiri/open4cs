@@ -1,8 +1,18 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
+export type GemstoneStatus = "ACTIVE" | "INACTIVE";
+
 export interface IGemstone extends Document {
-  variety: string;
-  caratWeight: number;
+  code?: string;
+  name?: string;
+  species?: string;
+  supportedShapes?: string[];
+  supportedOrigin?: string;
+  description?: string;
+  status?: GemstoneStatus | string;
+
+  variety?: string;
+  caratWeight?: number;
   
   color?: {
     hue?: string;
@@ -52,15 +62,46 @@ export interface IGemstone extends Document {
 
 const gemstoneSchema = new Schema<IGemstone>(
   {
+    code: {
+      type: String,
+      trim: true,
+    },
+    name: {
+      type: String,
+      trim: true,
+    },
+    species: {
+      type: String,
+      trim: true,
+    },
+    supportedShapes: {
+      type: [String],
+      default: [],
+    },
+    supportedOrigin: {
+      type: String,
+      trim: true,
+      default: "Sri Lanka",
+    },
+    description: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    status: {
+      type: String,
+      enum: ["ACTIVE", "INACTIVE"],
+      default: "ACTIVE",
+    },
     variety: {
       type: String,
-      required: true,
+      required: false,
       trim: true,
     },
 
     caratWeight: {
       type: Number,
-      required: true,
+      required: false,
       min: 0,
     },
     

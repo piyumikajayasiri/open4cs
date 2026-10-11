@@ -1,4 +1,4 @@
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { PDFDocument, PDFPage, StandardFonts, rgb } from "pdf-lib";
 
 export type ReportData = {
   reportTitle: string;
@@ -341,7 +341,7 @@ export async function generateEvaluationPdf(report: ReportData) {
 
   // Add Page Numbers
   const pages = pdf.getPages();
-  pages.forEach((currentPage, index) => {
+  pages.forEach((currentPage: PDFPage, index: number) => {
     const pageNumber = `Page ${index + 1} of ${pages.length}`;
     currentPage.drawText(pageNumber, {
       x: currentPage.getWidth() - margin - 60,

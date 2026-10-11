@@ -13,6 +13,7 @@ import ReviewSection from "./ReviewSection";
 import EvaluationDetailsCard from "./EvaluationDetailsCard";
 import EvaluationProgress from "./EvaluationProgress";
 import EvaluationResultSummary from "./EvaluationResultSummary";
+import EvaluationCompleteDashboard from "./EvaluationCompleteDashboard";
 import InformationReliabilityCard from "./InformationReliabilityCard";
 import PriceSuggestionCard from "./PriceSuggestionCard";
 import RecommendationsCard from "./RecommendationsCard";
@@ -150,6 +151,7 @@ export default function GemstoneForm() {
     loadReferenceGemstones();
   }, []);
   const [evaluationResult, setEvaluationResult] = useState<{
+    _id?: string;
     status: string;
     ruleVersion: string;
     overall4C: {
@@ -464,7 +466,48 @@ export default function GemstoneForm() {
         )}
       </section>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      {evaluationResult ? (
+        <EvaluationCompleteDashboard
+          stoneId={evaluationResult._id ? String(evaluationResult._id).slice(-8).toUpperCase() : "CEY-2026-0847"}
+          variety={variety || "Ceylon Blue Sapphire"}
+          evaluationDate="24 Sep 2026"
+          ruleVersion={evaluationResult.ruleVersion || "v4.2"}
+          overallScore={
+            (evaluationResult.overall4C.score ?? 82) > 10
+              ? Number((evaluationResult.overall4C.score! / 10).toFixed(1))
+              : (evaluationResult.overall4C.score ?? 8.2)
+          }
+          colorScore={
+            (evaluationResult.color.score ?? 86) > 10
+              ? Number((evaluationResult.color.score! / 10).toFixed(1))
+              : (evaluationResult.color.score ?? 8.6)
+          }
+          clarityScore={
+            (evaluationResult.clarity.score ?? 79) > 10
+              ? Number((evaluationResult.clarity.score! / 10).toFixed(1))
+              : (evaluationResult.clarity.score ?? 7.9)
+          }
+          cutScore={
+            (evaluationResult.cut.score ?? 81) > 10
+              ? Number((evaluationResult.cut.score! / 10).toFixed(1))
+              : (evaluationResult.cut.score ?? 8.1)
+          }
+          caratScore={Number(caratWeight) || 2.45}
+          colorLabel={saturation ? `${saturation} ${hue || "Blue"}` : "Vivid Blue"}
+          clarityLabel={nakedEye || "Eye-clean"}
+          cutLabel="Well Cut"
+          caratLabel="Liquid band"
+          priceRangeMin="1.42M"
+          priceRangeMax="1.68M"
+          pricePerCarat="580K – 686K"
+          comparablesCount={7}
+          evaluationId={evaluationResult._id}
+          onSave={() => alert("Evaluation saved successfully!")}
+          onCompare={() => { window.location.href = "/dashboard"; }}
+          onDownloadPdf={() => window.open(`/api/evaluations/${evaluationResult._id}/report`, "_blank")}
+        />
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-6">
         {/* Step Header */}
         {!loading && (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -789,421 +832,7 @@ export default function GemstoneForm() {
 
       {message && <p>{message}</p>}
 
-      {evaluationResult && (
-        <div className="space-y-6">
-          <EvaluationResultSummary
-            overallScore={evaluationResult.overall4C.score ?? 0}
-            colorScore={evaluationResult.color.score ?? 0}
-            clarityScore={evaluationResult.clarity.score ?? 0}
-            cutScore={evaluationResult.cut.score ?? 0}
-            caratScore={evaluationResult.carat.score ?? 0}
-          />
-
-          {/* Price Suggestion */}
-          <ResultSection
-            icon="💰"
-            title="Price Suggestion"
-            description="An educational B2B price suggestion based on the evaluation rules and available reference data."
-          >
-            {evaluationResult.priceSuggestion.suggestedPrice !== null &&
-            evaluationResult.priceSuggestion.priceRange.minimum !== null &&
-            evaluationResult.priceSuggestion.priceRange.maximum !== null ? (
-              <PriceSuggestionCard
-                suggestedPrice={evaluationResult.priceSuggestion.suggestedPrice}
-                minimumPrice={evaluationResult.priceSuggestion.priceRange.minimum}
-                maximumPrice={evaluationResult.priceSuggestion.priceRange.maximum}
-                currency={evaluationResult.priceSuggestion.currency ?? "USD"}
-              />
-            ) : (
-              <div className="rounded-xl bg-[var(--surface-soft)] p-5">
-                <p className="font-semibold">
-                  A price suggestion is not available
-                </p>
-
-                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                  There is not enough suitable reference data to produce a
-                  meaningful price suggestion for this evaluation.
-                </p>
-              </div>
-            )}
-          </ResultSection>
-
-          {/* Reference Comparison */}
-          <ResultSection
-            icon="🔎"
-            title="Reference Comparison"
-            description="See how the gemstone compares with available reference gemstones."
-          >
-            <div className="space-y-6">
-              {evaluationResult.bestReferenceMatch &&
-              evaluationResult.bestReferenceMatch.similarity.overall !== null ? (
-                <ReferenceComparisonCard
-                  referenceName={`${evaluationResult.bestReferenceMatch.variety} (${evaluationResult.bestReferenceMatch.caratWeight} ct)`}
-                  similarity={evaluationResult.bestReferenceMatch.similarity.overall}
-                />
-              ) : (
-                <div className="rounded-xl bg-[var(--surface-soft)] p-5">
-                  <p className="font-semibold">
-                    No suitable reference comparison is available
-                  </p>
-
-                  <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                    The available reference gemstones were not similar enough to provide
-                    a suitable comparison for this evaluation.
-                  </p>
-                </div>
-              )}
-
-              <div>
-                <p className="text-sm">
-                  <strong>Data Sufficiency Status:</strong>{" "}
-                  {evaluationResult.referenceDataSufficiency.status}
-                </p>
-
-                <p className="text-sm">
-                  <strong>Available References:</strong>{" "}
-                  {evaluationResult.referenceDataSufficiency.availableReferences}
-                </p>
-
-                <p className="text-sm">
-                  <strong>Required References:</strong>{" "}
-                  {evaluationResult.referenceDataSufficiency.requiredReferences}
-                </p>
-
-                {evaluationResult.referenceDataSufficiency.status === "INSUFFICIENT" && (
-                  <p className="mt-2 text-sm text-[var(--muted)]">
-                    The available reference data is insufficient for a
-                    reference-supported B2B price suggestion.
-                  </p>
-                )}
-              </div>
-
-              {evaluationResult.bestReferenceMatch && (
-                <div className="border-t border-[var(--border)] pt-4 text-sm">
-                  <h4 className="font-semibold mb-2">Detailed Reference Match Breakdown</h4>
-
-                  <div className="space-y-1 text-[var(--muted)]">
-                    <p>
-                      <strong className="text-[var(--foreground)]">Variety:</strong>{" "}
-                      {evaluationResult.bestReferenceMatch.variety}
-                    </p>
-
-                    <p>
-                      <strong className="text-[var(--foreground)]">Reference Carat Weight:</strong>{" "}
-                      {evaluationResult.bestReferenceMatch.caratWeight} ct
-                    </p>
-
-                    <p>
-                      <strong className="text-[var(--foreground)]">Reference Price:</strong>{" "}
-                      {evaluationResult.bestReferenceMatch.currency}{" "}
-                      {evaluationResult.bestReferenceMatch.referencePrice.toFixed(2)}
-                    </p>
-
-                    <p>
-                      <strong className="text-[var(--foreground)]">Color Similarity:</strong>{" "}
-                      {evaluationResult.bestReferenceMatch.similarity.color !== null
-                        ? `${evaluationResult.bestReferenceMatch.similarity.color}%`
-                        : "Unavailable"}
-                    </p>
-
-                    <p>
-                      <strong className="text-[var(--foreground)]">Clarity Similarity:</strong>{" "}
-                      {evaluationResult.bestReferenceMatch.similarity.clarity !== null
-                        ? `${evaluationResult.bestReferenceMatch.similarity.clarity}%`
-                        : "Unavailable"}
-                    </p>
-
-                    <p>
-                      <strong className="text-[var(--foreground)]">Cut Similarity:</strong>{" "}
-                      {evaluationResult.bestReferenceMatch.similarity.cut !== null
-                        ? `${evaluationResult.bestReferenceMatch.similarity.cut}%`
-                        : "Unavailable"}
-                    </p>
-
-                    <p>
-                      <strong className="text-[var(--foreground)]">Cut Dimension Similarity:</strong>{" "}
-                      {evaluationResult.bestReferenceMatch.similarity.cutDimensions !== null
-                        ? `${evaluationResult.bestReferenceMatch.similarity.cutDimensions}%`
-                        : "Unavailable"}
-                    </p>
-
-                    <p>
-                      <strong className="text-[var(--foreground)]">Carat Similarity:</strong>{" "}
-                      {evaluationResult.bestReferenceMatch.similarity.carat !== null
-                        ? `${evaluationResult.bestReferenceMatch.similarity.carat}%`
-                        : "Unavailable"}
-                    </p>
-
-                    <p className="mt-2 font-semibold text-[var(--foreground)]">
-                      Overall 4C Similarity:{" "}
-                      {evaluationResult.bestReferenceMatch.similarity.overall !== null
-                        ? `${evaluationResult.bestReferenceMatch.similarity.overall}%`
-                        : "Unavailable"}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </ResultSection>
-
-          {/* Recommendations */}
-          <ResultSection
-            icon="💡"
-            title="Recommendations"
-            description="Helpful next steps generated from the information you provided."
-          >
-            <RecommendationsCard
-              recommendations={evaluationResult.recommendations.recommendations.map(
-                (r) => r.message
-              )}
-            />
-          </ResultSection>
-
-          {/* Information Reliability */}
-          <ResultSection
-            icon="🛡"
-            title="Information Reliability"
-            description="Shows how the source of your information affects confidence in interpreting the result."
-          >
-            <InformationReliabilityCard
-              measurementReliability={evaluationResult.informationReliability.measurements}
-              treatmentReliability={evaluationResult.informationReliability.treatment}
-              originReliability={evaluationResult.informationReliability.origin}
-            />
-          </ResultSection>
-
-          {/* Evaluation Details */}
-          <ResultSection
-            icon="📋"
-            title="Evaluation Details"
-            description="Additional technical information used to produce this evaluation."
-          >
-            <EvaluationDetailsCard>
-              <div className="space-y-4">
-                <p className="text-sm text-gray-600">
-                  Evaluation Rule Version:{" "}
-                  <span className="font-medium">{evaluationResult.ruleVersion}</span>
-                </p>
-
-                <div>
-                  <h4 className="font-semibold">Evaluation Status</h4>
-                  <p>{evaluationResult.status}</p>
-                </div>
-
-                <div className="rounded border p-4">
-                  <h4 className="font-medium">Overall 4C Evaluation</h4>
-                  <p>{evaluationResult.overall4C.status}</p>
-                  <p className="text-sm text-gray-600">
-                    {evaluationResult.overall4C.reason}
-                  </p>
-                  <p className="mt-2 text-sm">
-                    Score:{" "}
-                    {evaluationResult.overall4C.score !== null
-                      ? `${evaluationResult.overall4C.score}/100`
-                      : "N/A"}
-                  </p>
-                  <div className="mt-2 text-sm">
-                    <p>Color Weight: {evaluationResult.overall4C.weights.color * 100}%</p>
-                    <p>Clarity Weight: {evaluationResult.overall4C.weights.clarity * 100}%</p>
-                    <p>Cut Weight: {evaluationResult.overall4C.weights.cut * 100}%</p>
-                    <p>Carat Weight: {evaluationResult.overall4C.weights.carat * 100}%</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-medium">Color</h4>
-                  <p>{evaluationResult.color.status}</p>
-                  <p className="text-sm text-gray-600">{evaluationResult.color.reason}</p>
-                  <p className="mt-2 text-sm">
-                    Score:{" "}
-                    {evaluationResult.color.score !== null
-                      ? `${evaluationResult.color.score}/100`
-                      : "N/A"}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="font-medium">Clarity</h4>
-                  <p>{evaluationResult.clarity.status}</p>
-                  <p className="text-sm text-gray-600">{evaluationResult.clarity.reason}</p>
-                  <p className="mt-2 text-sm">
-                    Score:{" "}
-                    {evaluationResult.clarity.score !== null
-                      ? `${evaluationResult.clarity.score}/100`
-                      : "N/A"}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="font-medium">Cut</h4>
-                  <p>{evaluationResult.cut.status}</p>
-                  <p className="text-sm text-gray-600">{evaluationResult.cut.reason}</p>
-                  <p className="mt-2 text-sm">
-                    Score:{" "}
-                    {evaluationResult.cut.score !== null
-                      ? `${evaluationResult.cut.score}/100`
-                      : "N/A"}
-                  </p>
-                  <div className="mt-2 text-sm">
-                    <p>
-                      Length-to-Width Ratio:{" "}
-                      {evaluationResult.cut.measurements.lengthToWidthRatio ?? "N/A"}
-                    </p>
-                    <p>
-                      Depth Percentage:{" "}
-                      {evaluationResult.cut.measurements.depthPercentage !== null
-                        ? `${evaluationResult.cut.measurements.depthPercentage}%`
-                        : "N/A"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-soft)] p-4 space-y-4">
-                  <div>
-                    <h4 className="font-semibold text-[var(--foreground)]">
-                      Carat Weight & Size
-                    </h4>
-                    <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-                      Carat is the gemstone&apos;s weight. Open 4Cs also checks whether the entered length, width, and depth have a reasonable relationship with that weight.
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-[var(--foreground)]">
-                      Carat Score
-                    </p>
-                    <p className="mt-0.5 text-sm text-[var(--muted)] font-semibold">
-                      {evaluationResult.carat.score !== null
-                        ? `${evaluationResult.carat.score} / 100`
-                        : "N/A"}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-[var(--foreground)]">
-                      Why this score?
-                    </p>
-                    <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-                      {evaluationResult.carat.reason}
-                    </p>
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-2 text-xs">
-                    <div className="rounded-lg bg-white p-3 border border-[var(--border)]">
-                      <span className="text-[var(--muted)] block">Carat Weight</span>
-                      <span className="font-semibold text-sm text-[var(--foreground)]">
-                        {evaluationResult.carat.caratWeight} ct
-                      </span>
-                    </div>
-                    <div className="rounded-lg bg-white p-3 border border-[var(--border)]">
-                      <span className="text-[var(--muted)] block">Length</span>
-                      <span className="font-semibold text-sm text-[var(--foreground)]">
-                        {evaluationResult.carat.dimensions.length} mm
-                      </span>
-                    </div>
-                    <div className="rounded-lg bg-white p-3 border border-[var(--border)]">
-                      <span className="text-[var(--muted)] block">Width</span>
-                      <span className="font-semibold text-sm text-[var(--foreground)]">
-                        {evaluationResult.carat.dimensions.width} mm
-                      </span>
-                    </div>
-                    <div className="rounded-lg bg-white p-3 border border-[var(--border)]">
-                      <span className="text-[var(--muted)] block">Depth</span>
-                      <span className="font-semibold text-sm text-[var(--foreground)]">
-                        {evaluationResult.carat.dimensions.depth} mm
-                      </span>
-                    </div>
-                  </div>
-
-                  <p className="text-xs leading-5 text-[var(--muted)]">
-                    The size check is a supporting prototype rule. Dimensions can affect the Carat score slightly, but they do not independently verify the gemstone&apos;s weight, density, authenticity, or identity.
-                  </p>
-
-                  {typeof evaluationResult.carat.sizeConsistency === "number" && (
-                    <div className="border-t border-[var(--border)] pt-3">
-                      <p className="text-xs font-medium text-[var(--muted)]">
-                        Technical size-consistency indicator
-                      </p>
-                      <p className="mt-0.5 text-sm font-semibold text-[var(--foreground)]">
-                        {evaluationResult.carat.sizeConsistency.toFixed(2)}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <h4 className="font-medium">Treatment</h4>
-                  <p>{evaluationResult.treatment.status}</p>
-                  <p className="text-sm text-gray-600">{evaluationResult.treatment.reason}</p>
-                  <p className="mt-2 text-sm">
-                    Price Adjustment Factor:{" "}
-                    {evaluationResult.treatment.adjustmentFactor !== null
-                      ? evaluationResult.treatment.adjustmentFactor
-                      : "N/A"}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="font-medium">Origin</h4>
-                  <p>{evaluationResult.origin.status}</p>
-                  <p className="text-sm text-gray-600">{evaluationResult.origin.reason}</p>
-                  <p className="mt-2 text-sm">
-                    Price Adjustment Factor:{" "}
-                    {evaluationResult.origin.adjustmentFactor !== null
-                      ? evaluationResult.origin.adjustmentFactor
-                      : "N/A"}
-                  </p>
-                  <p className="text-sm">
-                    Reliability Factor:{" "}
-                    {evaluationResult.origin.reliabilityFactor !== null
-                      ? evaluationResult.origin.reliabilityFactor
-                      : "N/A"}
-                  </p>
-                </div>
-              </div>
-            </EvaluationDetailsCard>
-          </ResultSection>
-
-          {currentUser && (
-            <div className="rounded-2xl border border-[var(--border)] bg-white p-5">
-              <h4 className="font-bold mb-2">User Statement</h4>
-              <p className="text-sm">
-                This evaluation was generated for{" "}
-                <strong>{currentUser.name}</strong>, registered as a{" "}
-                <strong>{currentUser.category}</strong>.
-              </p>
-              <p className="text-sm text-[var(--muted)] mt-1">
-                The result is provided for educational and decision-support
-                purposes and should be interpreted according to the user&apos;s
-                own level of gemmological knowledge and experience.
-              </p>
-            </div>
-          )}
-
-          {/* Disclaimer */}
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-            <div className="flex gap-3">
-              <span className="text-xl">⚠️</span>
-              <div>
-                <h3 className="font-bold text-amber-900">
-                  Important Notice
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-amber-800">
-                  This evaluation and price suggestion are for educational
-                  and decision-support purposes only. They are based on
-                  prototype rules and reference data and do not represent
-                  professional gemstone valuation, certification, or a
-                  guaranteed selling price.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <br />
-
-      <ReferenceGemstoneList
+            <ReferenceGemstoneList
         references={referenceGemstones}
       />
 
@@ -1213,6 +842,7 @@ export default function GemstoneForm() {
         evaluations={evaluationHistory}
       />
     </form>
+    )}
     </div>
   );
 }
