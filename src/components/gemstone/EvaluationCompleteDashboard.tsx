@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import FourCBreakdownView from "./FourCBreakdownView";
 
 type EvaluationCompleteDashboardProps = {
   stoneId?: string;
@@ -134,8 +135,23 @@ export default function EvaluationCompleteDashboard({
         ))}
       </div>
 
-      {/* Row 1: 4 Mini 4C Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {activeTab === "breakdown" ? (
+        <FourCBreakdownView
+          stoneId={stoneId}
+          ruleVersion={ruleVersion}
+          colorScore={colorScore}
+          colorLabel={colorLabel}
+          clarityScore={clarityScore}
+          clarityLabel={clarityLabel}
+          cutScore={cutScore}
+          cutLabel={cutLabel}
+          caratScore={caratScore}
+          caratLabel={caratLabel}
+        />
+      ) : (
+        <>
+          {/* Row 1: 4 Mini 4C Summary Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Color */}
         <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs space-y-2.5">
           <div className="flex items-center justify-between text-slate-400">
@@ -332,6 +348,8 @@ export default function EvaluationCompleteDashboard({
           This system provides an estimated B2B price suggestion based on the information provided, predefined evaluation and pricing rules, comparable gemstone data, and available reference information. It is not a professional laboratory valuation, gemstone certification, authentication, legally binding valuation, or guaranteed selling price.
         </p>
       </div>
+        </>
+      )}
     </div>
   );
 }
