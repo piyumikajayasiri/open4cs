@@ -6,7 +6,15 @@ import { usePathname } from "next/navigation";
 export default function Footer() {
   const pathname = usePathname();
 
-  if (pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin") || pathname?.startsWith("/evaluate") || pathname?.startsWith("/catalogue")) {
+  if (
+    pathname?.startsWith("/dashboard") ||
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/evaluate") ||
+    pathname?.startsWith("/evaluations") ||
+    pathname?.startsWith("/history") ||
+    pathname?.startsWith("/compare") ||
+    pathname?.startsWith("/catalogue")
+  ) {
     return null;
   }
 
