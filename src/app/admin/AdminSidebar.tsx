@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 import {
   Activity,
   BarChart3,
@@ -189,10 +190,11 @@ export default function AdminSidebar({ pathname, user }: AdminSidebarProps) {
           {/* Logout icon */}
           <button
             type="button"
-            title="Sign out"
-            className="rounded-md p-1.5 text-slate-400 transition hover:bg-white/10 hover:text-white"
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-300 transition hover:bg-white/10 hover:text-white"
           >
-            <LogOut className="h-4 w-4" strokeWidth={1.8} />
+            <LogOut className="h-4 w-4" />
+            <span>Logout</span>
           </button>
         </div>
       </div>

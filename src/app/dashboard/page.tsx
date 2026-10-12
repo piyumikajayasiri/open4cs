@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import EvaluationComparison from "@/components/gemstone/EvaluationComparison";
 
 type UserProfile = {
@@ -10,7 +11,7 @@ type UserProfile = {
   name: string;
   email: string;
   category: string;
-  role: "USER" | "CAGS_ADMIN";
+  role: "USER" | "ADMIN";
 };
 
 type EvaluationItem = {
@@ -79,13 +80,7 @@ export default function DashboardPage() {
   }, [router]);
 
   async function handleLogout() {
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/login");
-      router.refresh();
-    } catch {
-      router.push("/login");
-    }
+    await signOut({ callbackUrl: "/login" });
   }
 
   function handleDownloadReport(id: string) {
