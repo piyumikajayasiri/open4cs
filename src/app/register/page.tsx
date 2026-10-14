@@ -1,47 +1,30 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  Gem,
+  GraduationCap,
+  Building2,
+  FlaskConical,
+  UserRound,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+} from "lucide-react";
 
-const USER_CATEGORIES = [
-  {
-    id: "Student",
-    label: "Student",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 14l9-5-9-5-9 5 9 5z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-      </svg>
-    ),
-  },
-  {
-    id: "Trader",
-    label: "Trader",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h4m-4 0V11m0 0h4m-4 0H9m4 0V7m0 0h4m-4 0H9" />
-      </svg>
-    ),
-  },
-  {
-    id: "Gemologist",
-    label: "Gemologist",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L5.595 15.12a2 2 0 00-1.8 1.48L3 20h18l-1.572-4.572zM12 11a4 4 0 100-8 4 4 0 000 8z" />
-      </svg>
-    ),
-  },
-  {
-    id: "Professional",
-    label: "Professional",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
-    ),
-  },
+type UserCategory = "STUDENT" | "TRADER" | "GEMOLOGIST" | "PROFESSIONAL";
+
+const categories: {
+  value: UserCategory;
+  label: string;
+  icon: typeof GraduationCap;
+}[] = [
+  { value: "STUDENT", label: "Student", icon: GraduationCap },
+  { value: "TRADER", label: "Trader", icon: Building2 },
+  { value: "GEMOLOGIST", label: "Gemologist", icon: FlaskConical },
+  { value: "PROFESSIONAL", label: "Professional", icon: UserRound },
 ];
 
 export default function RegisterPage() {
@@ -51,37 +34,54 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [category, setCategory] = useState("Student");
-
-  const [message, setMessage] = useState("");
+  const [category, setCategory] = useState<UserCategory>("STUDENT");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Dynamic Password Strength Calculator
-  function getPasswordStrength(pass: string) {
-    if (!pass) return { score: 0, label: "None", color: "text-slate-400" };
-    let score = 0;
-    if (pass.length >= 8) score++;
-    if (pass.length >= 12) score++;
-    if (/[0-9]/.test(pass)) score++;
-    if (/[^A-Za-z0-9]/.test(pass)) score++;
+  const passwordChecks = useMemo(
+    () => ({
+      length: password.length >= 12,
+      number: /\d/.test(password),
+      symbol: /[^A-Za-z0-9]/.test(password),
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+    }),
+    [password],
+  );
 
-    if (score <= 1) return { score: 1, label: "Weak", color: "text-red-500" };
-    if (score === 2) return { score: 2, label: "Fair", color: "text-amber-500" };
-    if (score === 3) return { score: 3, label: "Good", color: "text-emerald-500" };
-    return { score: 4, label: "Strong", color: "text-emerald-600 font-semibold" };
-  }
+  const strength = Object.values(passwordChecks).filter(Boolean).length;
 
-  const strength = getPasswordStrength(password);
+  const strengthLabel =
+    password.length === 0
+      ? "Not entered"
+      : strength <= 2
+        ? "Weak"
+        : strength <= 3
+          ? "Fair"
+          : strength === 4
+            ? "Good"
+            : "Strong";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    setMessage("");
     setError("");
+    setSuccess("");
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      return;
+    }
+
+    if (password.length < 12) {
+      setError("Your password must contain at least 12 characters.");
+      return;
+    }
+
+    if (!passwordChecks.number || !passwordChecks.symbol) {
+      setError("Include at least one number and one symbol in your password.");
       return;
     }
 
@@ -90,236 +90,293 @@ export default function RegisterPage() {
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
           email,
           password,
+          confirmPassword,
           category,
         }),
       });
 
       const data = await response.json();
 
-      if (!response.ok) {
-        setError(data.error ?? "Registration failed.");
+      if (!response.ok || !data.success) {
+        setError(data.message || "Registration failed. Please try again.");
         return;
       }
 
-      setMessage("Registration successful! Redirecting to login...");
-      setTimeout(() => {
+      setSuccess("Account created successfully. Redirecting to sign in...");
+
+      window.setTimeout(() => {
         router.push("/login");
-      }, 1500);
+        router.refresh();
+      }, 900);
     } catch {
-      setError("Registration failed. Please try again.");
+      setError("Unable to connect to the server. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
+  const inputClass =
+    "w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-slate-500 focus:ring-2 focus:ring-slate-100";
+
+  const labelClass = "mb-1.5 block text-xs font-semibold text-slate-700";
+
   return (
-    <main className="min-h-[calc(100vh-80px)] bg-[#F8FAFC] py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-      <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl p-8 sm:p-10 border border-slate-100">
-        
-        {/* Header & Logo */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-9 h-9 rounded-xl bg-[#0B132B] flex items-center justify-center text-sky-400 shadow-md">
-            <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-              <path d="M12 2L2 9l10 13L22 9L12 2zm0 3.2L18.6 9 12 18.2 5.4 9 12 5.2z" />
-            </svg>
+    <main className="flex min-h-screen items-center justify-center bg-[#f0f2f5] px-4 py-8">
+      <section className="w-full max-w-[480px] rounded-2xl border border-slate-200 bg-white px-6 py-8 shadow-sm sm:px-8">
+        {/* Brand */}
+        <div className="mb-7 flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-white">
+            <Gem size={21} strokeWidth={1.8} />
           </div>
+
           <div>
-            <span className="font-bold text-slate-900 text-lg leading-none block">
+            <p className="text-base font-bold leading-tight text-slate-900">
               Open 4Cs
-            </span>
-            <span className="text-[10px] font-extrabold tracking-widest text-slate-400 uppercase block mt-0.5">
-              GEMSTONE EVALUATION
-            </span>
+            </p>
+            <p className="text-xs text-slate-500">Gemstone Evaluation</p>
           </div>
         </div>
 
-        {/* Title */}
+        {/* Heading */}
         <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             Create your account
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="mt-1 text-xs leading-5 text-slate-500">
             Statements and guidance adapt to your category.
           </p>
         </div>
 
-        {/* Status Messages */}
-        {error && (
-          <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
-            {error}
-          </div>
-        )}
-
-        {message && (
-          <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-700 font-medium">
-            {message}
-          </div>
-        )}
-
-        {/* Register Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          
-          {/* Full Name */}
+          {/* Full name */}
           <div>
-            <label
-              htmlFor="name"
-              className="block text-xs font-semibold text-slate-700 mb-1.5"
-            >
+            <label htmlFor="name" className={labelClass}>
               Full Name
             </label>
             <input
               id="name"
+              name="name"
               type="text"
+              autoComplete="name"
+              placeholder="Enter your full name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Amaya Fernando"
+              onChange={(event) => setName(event.target.value)}
+              minLength={2}
+              maxLength={100}
+              className={inputClass}
               required
-              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 placeholder:text-slate-400"
             />
           </div>
 
           {/* Email */}
           <div>
-            <label
-              htmlFor="email"
-              className="block text-xs font-semibold text-slate-700 mb-1.5"
-            >
+            <label htmlFor="email" className={labelClass}>
               Email
             </label>
             <input
               id="email"
+              name="email"
               type="email"
+              autoComplete="email"
+              placeholder="you@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="amaya@uni.lk"
+              onChange={(event) => setEmail(event.target.value)}
+              maxLength={254}
+              className={inputClass}
               required
-              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 placeholder:text-slate-400"
             />
           </div>
 
-          {/* Password & Confirm Password Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Passwords */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label
-                htmlFor="password"
-                className="block text-xs font-semibold text-slate-700 mb-1.5"
-              >
+              <label htmlFor="password" className={labelClass}>
                 Password
               </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="samplepassword"
-                required
-                minLength={8}
-                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 placeholder:text-slate-400"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="Create password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className={`${inputClass} pr-10`}
+                  minLength={12}
+                  required
+                />
+                <button
+                  type="button"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  onClick={() => setShowPassword((value) => !value)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800"
+                >
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
             </div>
 
             <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-xs font-semibold text-slate-700 mb-1.5"
-              >
+              <label htmlFor="confirmPassword" className={labelClass}>
                 Confirm Password
               </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="samplepassword"
-                required
-                minLength={8}
-                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 placeholder:text-slate-400"
-              />
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="Confirm password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  className={`${inputClass} pr-10`}
+                  required
+                />
+                <button
+                  type="button"
+                  aria-label={
+                    showConfirmPassword
+                      ? "Hide confirm password"
+                      : "Show confirm password"
+                  }
+                  onClick={() => setShowConfirmPassword((value) => !value)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={17} />
+                  ) : (
+                    <Eye size={17} />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Password Strength Indicator */}
-          <div className="space-y-1 pt-1">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-slate-700">Password strength</span>
-              <span className={strength.color}>{strength.label}</span>
+          {/* Password strength */}
+          <div>
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="font-medium text-slate-600">
+                Password strength
+              </span>
+              <span
+                className={
+                  strength >= 4
+                    ? "font-semibold text-emerald-600"
+                    : "text-slate-500"
+                }
+              >
+                {strengthLabel}
+              </span>
             </div>
 
-            <div className="grid grid-cols-4 gap-1.5">
-              {[1, 2, 3, 4].map((seg) => (
+            <div className="mt-2 grid grid-cols-4 gap-1.5">
+              {[1, 2, 3, 4].map((segment) => (
                 <div
-                  key={seg}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    seg <= strength.score ? "bg-emerald-600" : "bg-slate-200"
+                  key={segment}
+                  className={`h-1.5 rounded-full transition-colors ${
+                    strength >= segment
+                      ? strength <= 2
+                        ? "bg-red-500"
+                        : strength === 3
+                          ? "bg-amber-500"
+                          : "bg-teal-600"
+                      : "bg-slate-200"
                   }`}
                 />
               ))}
             </div>
 
-            <p className="text-[11px] text-emerald-600 font-medium flex items-center gap-1 pt-0.5">
-              <span>✓</span>
-              <span>12+ characters with a number and symbol</span>
-            </p>
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-500">
+              <span className={passwordChecks.length ? "text-teal-700" : ""}>
+                {passwordChecks.length ? "✓" : "○"} 12+ characters
+              </span>
+              <span className={passwordChecks.number ? "text-teal-700" : ""}>
+                {passwordChecks.number ? "✓" : "○"} Number
+              </span>
+              <span className={passwordChecks.symbol ? "text-teal-700" : ""}>
+                {passwordChecks.symbol ? "✓" : "○"} Symbol
+              </span>
+            </div>
           </div>
 
-          {/* User Category Selection */}
-          <div className="pt-2">
-            <label className="block text-xs font-semibold text-slate-700 mb-2">
-              User Category
-            </label>
-            <div className="grid grid-cols-4 gap-2">
-              {USER_CATEGORIES.map((cat) => {
-                const isSelected = category === cat.id;
+          {/* Category */}
+          <fieldset className="pt-1">
+            <legend className={`${labelClass} mb-2`}>User Category</legend>
+
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {categories.map((item) => {
+                const Icon = item.icon;
+                const selected = category === item.value;
+
                 return (
                   <button
-                    key={cat.id}
+                    key={item.value}
                     type="button"
-                    onClick={() => setCategory(cat.id)}
-                    className={`flex flex-col items-center justify-center p-3 rounded-2xl transition duration-150 text-center ${
-                      isSelected
-                        ? "border-2 border-[#0B132B] bg-slate-50/80 shadow-xs text-slate-900 font-bold"
-                        : "border border-slate-200 hover:border-slate-300 hover:bg-slate-50/50 text-slate-500 font-medium"
+                    aria-pressed={selected}
+                    onClick={() => setCategory(item.value)}
+                    className={`flex min-h-[68px] flex-col items-center justify-center gap-1.5 rounded-lg border px-2 py-3 transition ${
+                      selected
+                        ? "border-2 border-slate-900 bg-slate-50 text-slate-900"
+                        : "border-slate-200 text-slate-500 hover:border-slate-400"
                     }`}
                   >
-                    <div className={`mb-1.5 ${isSelected ? "text-[#0B132B]" : "text-slate-400"}`}>
-                      {cat.icon}
-                    </div>
-                    <span className="text-xs">{cat.label}</span>
+                    <Icon size={18} strokeWidth={1.8} />
+                    <span className="text-[11px] font-medium">
+                      {item.label}
+                    </span>
                   </button>
                 );
               })}
             </div>
-          </div>
+          </fieldset>
 
-          {/* Submit Button */}
+          {/* Feedback */}
+          {error && (
+            <div
+              role="alert"
+              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-red-700"
+            >
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div
+              role="status"
+              className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs text-emerald-700"
+            >
+              <CheckCircle2 size={16} />
+              {success}
+            </div>
+          )}
+
+          {/* Submit */}
           <button
             type="submit"
-            disabled={loading}
-            className="w-full bg-[#0B132B] hover:bg-[#1C2A4D] text-white font-semibold py-3 rounded-xl shadow-md text-sm transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+            disabled={loading || Boolean(success)}
+            className="w-full rounded-lg bg-slate-900 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? "Creating Account..." : "Create Account"}
+            {loading ? "Creating account..." : "Create Account"}
           </button>
         </form>
 
-        {/* Already have an account link */}
-        <div className="text-center text-xs sm:text-sm text-slate-500 mt-6">
+        {/* Login link */}
+        <p className="mt-5 text-center text-xs text-slate-500">
           Already have an account?{" "}
           <Link
             href="/login"
             className="font-semibold text-blue-600 hover:underline"
           >
-            Login
+            Sign In
           </Link>
-        </div>
-
-      </div>
+        </p>
+      </section>
     </main>
   );
 }

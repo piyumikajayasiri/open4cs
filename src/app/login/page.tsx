@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,33 +18,45 @@ export default function LoginPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     setError("");
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+      const result = await signIn("credentials", {
+        email: email.trim().toLowerCase(),
+        password,
+        redirect: false,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error ?? "Invalid email or password.");
+      if (!result || !result.ok || result.error) {
+        setError("Invalid email or password.");
         return;
       }
 
-      // Successful login -> Redirect to dashboard
-      router.push("/dashboard");
+      const response = await fetch("/api/auth/session", {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        setError("Unable to retrieve your session.");
+        return;
+      }
+
+      const session = await response.json();
+      const loggedInEmail = session?.user?.email?.trim().toLowerCase();
+      const enteredEmail = email.trim().toLowerCase();
+
+      if (!loggedInEmail || loggedInEmail !== enteredEmail) {
+        setError("The session does not match the account you entered.");
+        return;
+      }
+
+      router.replace(
+        session.user.role === "ADMIN" ? "/admin/dashboard" : "/dashboard",
+      );
       router.refresh();
-    } catch {
+    } catch (error) {
+      console.error("Login error:", error);
       setError("An error occurred during login. Please try again.");
     } finally {
       setLoading(false);
@@ -53,17 +66,13 @@ export default function LoginPage() {
   return (
     <main className="min-h-[calc(100vh-80px)] bg-[#F8FAFC] py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="w-full max-w-4xl bg-white rounded-3xl shadow-xl overflow-hidden grid lg:grid-cols-2 border border-slate-100 min-h-[580px]">
-        
         {/* Left Column: Form Panel */}
         <div className="p-8 sm:p-10 flex flex-col justify-between">
           <div>
             {/* Logo & Brand Header */}
             <div className="flex items-center gap-3 mb-8">
               <div className="w-9 h-9 rounded-xl bg-[#0B132B] flex items-center justify-center text-sky-400 shadow-md">
-                <svg
-                  className="w-5 h-5 fill-current"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                   <path d="M12 2L2 9l10 13L22 9L12 2zm0 3.2L18.6 9 12 18.2 5.4 9 12 5.2z" />
                 </svg>
               </div>
@@ -131,13 +140,38 @@ export default function LoginPage() {
                     title={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858-5.908a10.046 10.046 0 012.122-.363c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m-3.269 1.126a3.001 3.001 0 01-4.243-4.243m4.243 4.243L3 3l18 18" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858-5.908a10.046 10.046 0 012.122-.363c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m-3.269 1.126a3.001 3.001 0 01-4.243-4.243m4.243 4.243L3 3l18 18"
+                        />
                       </svg>
                     ) : (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
                       </svg>
                     )}
                   </button>
@@ -160,7 +194,9 @@ export default function LoginPage() {
                   href="#forgot-password"
                   onClick={(e) => {
                     e.preventDefault();
-                    alert("Please contact your system administrator or CAGS panel to reset your password.");
+                    alert(
+                      "Please contact your system administrator or CAGS panel to reset your password.",
+                    );
                   }}
                   className="font-semibold text-blue-600 hover:text-blue-700 hover:underline"
                 >
@@ -209,7 +245,8 @@ export default function LoginPage() {
               <path strokeWidth="2" d="M12 8v4m0 4h.01" />
             </svg>
             <span>
-              Outputs are suggested B2B market price ranges for valuation and reference — not certifications or guaranteed prices.
+              Outputs are suggested B2B market price ranges for valuation and
+              reference — not certifications or guaranteed prices.
             </span>
           </div>
         </div>
@@ -218,8 +255,16 @@ export default function LoginPage() {
         <div className="bg-[#070D1E] p-8 sm:p-10 flex-col justify-end text-white relative overflow-hidden hidden lg:flex">
           {/* Subtle Background Graphics Watermark */}
           <div className="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center">
-            <svg className="w-80 h-80 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeWidth="0.5" d="M12 2L2 9l10 13L22 9L12 2zm0 3.2L18.6 9 12 18.2 5.4 9 12 5.2z" />
+            <svg
+              className="w-80 h-80 text-blue-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeWidth="0.5"
+                d="M12 2L2 9l10 13L22 9L12 2zm0 3.2L18.6 9 12 18.2 5.4 9 12 5.2z"
+              />
             </svg>
           </div>
 
@@ -230,7 +275,8 @@ export default function LoginPage() {
             </div>
 
             <h2 className="text-xl sm:text-2xl font-bold text-white leading-snug">
-              “Every score traces back to a published rule and a real reference stone.”
+              “Every score traces back to a published rule and a real reference
+              stone.”
             </h2>
 
             <p className="text-xs text-slate-400 font-medium">
@@ -238,7 +284,6 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
-
       </div>
     </main>
   );
