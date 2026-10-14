@@ -1,57 +1,94 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-
 import { connectDB } from "@/lib/mongodb";
-import User from "@/models/User";
+import User, { UserCategory } from "@/models/User";
 
-const VALID_CATEGORIES = [
+const ALLOWED_CATEGORIES: UserCategory[] = [
   "STUDENT",
   "TRADER",
   "GEMOLOGIST",
   "PROFESSIONAL",
-] as const;
+];
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const { name, email, password, category } = body;
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const email =
+      typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    const password = typeof body.password === "string" ? body.password : "";
+    const confirmPassword =
+      typeof body.confirmPassword === "string" ? body.confirmPassword : "";
+    const rawCategory =
+      body.category ?? body.userCategory ?? body.selectedCategory;
 
+    const category =
+      typeof rawCategory === "string" ? rawCategory.trim().toUpperCase() : "";
+
+    // Validate required fields
     if (!name || !email || !password || !category) {
+      return NextResponse.json(
+        { success: false, message: "Please complete all required fields." },
+        { status: 400 },
+      );
+    }
+
+    if (name.length < 2 || name.length > 100) {
       return NextResponse.json(
         {
           success: false,
-          message: "All fields are required.",
+          message: "Name must be between 2 and 100 characters.",
         },
         { status: 400 },
       );
     }
 
-    if (!VALID_CATEGORIES.includes(category)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
+      return NextResponse.json(
+        { success: false, message: "Please enter a valid email address." },
+        { status: 400 },
+      );
+    }
+
+    if (!ALLOWED_CATEGORIES.includes(category as UserCategory)) {
+      console.error("Invalid registration category:", {
+        received: rawCategory,
+        type: typeof rawCategory,
+      });
+
       return NextResponse.json(
         {
           success: false,
           message: "Invalid user category.",
+          receivedCategory: rawCategory ?? null,
         },
         { status: 400 },
       );
     }
 
-    if (password.length < 8) {
+    if (password.length < 12) {
       return NextResponse.json(
         {
           success: false,
-          message: "Password must be at least 8 characters.",
+          message: "Password must contain at least 12 characters.",
         },
         { status: 400 },
       );
     }
 
+    if (confirmPassword && password !== confirmPassword) {
+      return NextResponse.json(
+        { success: false, message: "Passwords do not match." },
+        { status: 400 },
+      );
+    }
+
+    // Connect to the database
     await connectDB();
 
-    const existingUser = await User.findOne({
-      email: email.toLowerCase(),
-    });
+    // Check for an existing account
+    const existingUser = await User.findOne({ email }).select("_id");
 
     if (existingUser) {
       return NextResponse.json(
@@ -63,13 +100,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Hash the password before saving it
     const passwordHash = await bcrypt.hash(password, 12);
 
+    // Public registration always creates a normal user
     const user = await User.create({
       name,
-      email: email.toLowerCase(),
+      email,
       passwordHash,
-      category,
+      category: category as UserCategory,
       role: "USER",
       status: "ACTIVE",
     });
@@ -77,7 +116,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        message: "Account created successfully.",
+        message: "Account created successfully. You can now sign in.",
         user: {
           id: user._id.toString(),
           name: user.name,
@@ -88,14 +127,27 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 },
     );
-  } catch (error) {
+  } catch (error: unknown) {
+    // Handle duplicate email race conditions
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === 11000
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "An account with this email already exists.",
+        },
+        { status: 409 },
+      );
+    }
+
     console.error("Registration error:", error);
 
     return NextResponse.json(
-      {
-        success: false,
-        message: "Unable to create account.",
-      },
+      { success: false, message: "Registration failed. Please try again." },
       { status: 500 },
     );
   }
