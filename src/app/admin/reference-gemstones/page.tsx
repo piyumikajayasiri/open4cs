@@ -35,7 +35,7 @@ export default function ReferenceGemstonesPage() {
   const [references, setReferences] = useState<ReferenceGemstone[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
 
@@ -69,6 +69,63 @@ export default function ReferenceGemstonesPage() {
   useEffect(() => {
     loadReferences();
   }, []);
+
+  async function handleToggleStatus(reference: ReferenceGemstone) {
+    const activating = reference.status !== "ACTIVE";
+
+    if (
+      !activating &&
+      !window.confirm(`Deactivate reference ${reference.referenceId}?`)
+    ) {
+      return;
+    }
+
+    try {
+      setUpdatingId(reference._id);
+
+      const response = await fetch(
+        `/api/admin/reference-gemstones/${reference._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status: activating ? "ACTIVE" : "INACTIVE",
+          }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to update reference status.");
+      }
+
+      // Refresh the list from the API so the displayed status is current.
+      const listResponse = await fetch("/api/admin/reference-gemstones", {
+        cache: "no-store",
+      });
+
+      const listData = await listResponse.json();
+
+      if (!listResponse.ok || !listData.success) {
+        throw new Error(
+          listData.message || "Status updated, but the list could not refresh.",
+        );
+      }
+
+      setReferences(listData.references ?? []);
+    } catch (error) {
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to update reference status.",
+      );
+    } finally {
+      setUpdatingId(null);
+    }
+  }
 
   const filteredReferences = useMemo(() => {
     return references.filter((reference) => {
@@ -396,13 +453,40 @@ export default function ReferenceGemstonesPage() {
 
                     {/* Actions */}
                     <td className="px-5 py-5 text-right">
-                      <Link
-                        href={`/admin/reference-gemstones/${reference._id}`}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                        title="View"
-                      >
-                        <span className="text-lg leading-none">⋮</span>
-                      </Link>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/admin/reference-gemstones/${reference._id}`}
+                            className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                          >
+                            View
+                          </Link>
+
+                          <Link
+                            href={`/admin/reference-gemstones/${reference._id}/edit`}
+                            className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                          >
+                            Edit
+                          </Link>
+
+                          <button
+                            type="button"
+                            onClick={() => handleToggleStatus(reference)}
+                            disabled={updatingId === reference._id}
+                            className={`rounded-lg px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                              reference.status === "ACTIVE"
+                                ? "border border-red-200 text-red-700 hover:bg-red-50"
+                                : "border border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                            }`}
+                          >
+                            {updatingId === reference._id
+                              ? "Updating..."
+                              : reference.status === "ACTIVE"
+                                ? "Deactivate"
+                                : "Activate"}
+                          </button>
+                        </div>
+                      </td>
                     </td>
                   </tr>
                 ))}
