@@ -24,6 +24,7 @@ type EvaluationCompleteDashboardProps = {
   pricePerCarat?: string;
   comparablesCount?: number;
   evaluationId?: string;
+  initialTab?: "overview" | "breakdown" | "comparables" | "pricing" | "recommendations";
   onDownloadPdf?: () => void;
   onCompare?: () => void;
   onSave?: () => void;
@@ -48,13 +49,14 @@ export default function EvaluationCompleteDashboard({
   pricePerCarat = "580K – 686K",
   comparablesCount = 7,
   evaluationId,
+  initialTab = "overview",
   onDownloadPdf,
   onCompare,
   onSave,
 }: EvaluationCompleteDashboardProps) {
   const [activeTab, setActiveTab] = useState<
     "overview" | "breakdown" | "comparables" | "pricing" | "recommendations"
-  >("overview");
+  >(initialTab);
 
   const tabs = [
     { id: "overview", label: "Overview" },

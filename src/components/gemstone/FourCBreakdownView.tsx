@@ -134,29 +134,27 @@ export default function FourCBreakdownView({
           </div>
 
           {/* Color Similarity Bar */}
-          <div className="rounded-xl bg-slate-50 border border-slate-100 p-3 flex items-center justify-between gap-4">
-            <span className="text-xs font-semibold text-slate-600 flex-shrink-0">
-              Color similarity
-            </span>
-            <div className="flex-1 bg-slate-200 h-1.5 rounded-full overflow-hidden">
+          <div className="rounded-xl bg-slate-50/80 border border-slate-200/60 p-3 space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-medium text-slate-600">Color similarity</span>
+              <span className="font-bold text-blue-600">{colorSimilarity}%</span>
+            </div>
+            <div className="w-full bg-slate-200/80 h-1.5 rounded-full overflow-hidden">
               <div
                 className="bg-blue-600 h-full rounded-full"
                 style={{ width: `${colorSimilarity}%` }}
               />
             </div>
-            <span className="text-xs font-bold text-blue-600 flex-shrink-0">
-              {colorSimilarity}%
-            </span>
           </div>
 
           {/* Collapsible Section */}
-          <div className="pt-1 border-t border-slate-100">
+          <div className="pt-1">
             <button
               type="button"
               onClick={() => toggleSection("color")}
               className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition"
             >
-              <span>{expandedSections.color ? "▲" : "▼"}</span>
+              <span>{expandedSections.color ? "▴" : "▾"}</span>
               <span>Why did this result occur?</span>
             </button>
             {expandedSections.color && (
@@ -220,13 +218,13 @@ export default function FourCBreakdownView({
           </div>
 
           {/* Collapsible Section */}
-          <div className="pt-1 border-t border-slate-100">
+          <div className="pt-1">
             <button
               type="button"
               onClick={() => toggleSection("clarity")}
               className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition"
             >
-              <span>{expandedSections.clarity ? "▲" : "▼"}</span>
+              <span>{expandedSections.clarity ? "▴" : "▾"}</span>
               <span>Why did this result occur?</span>
             </button>
             {expandedSections.clarity && (
@@ -299,13 +297,13 @@ export default function FourCBreakdownView({
           </div>
 
           {/* Collapsible Section */}
-          <div className="pt-1 border-t border-slate-100">
+          <div className="pt-1">
             <button
               type="button"
               onClick={() => toggleSection("cut")}
               className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition"
             >
-              <span>{expandedSections.cut ? "▲" : "▼"}</span>
+              <span>{expandedSections.cut ? "▴" : "▾"}</span>
               <span>Why did this result occur?</span>
             </button>
             {expandedSections.cut && (
@@ -369,13 +367,13 @@ export default function FourCBreakdownView({
           </div>
 
           {/* Collapsible Section */}
-          <div className="pt-1 border-t border-slate-100">
+          <div className="pt-1">
             <button
               type="button"
               onClick={() => toggleSection("carat")}
               className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition"
             >
-              <span>{expandedSections.carat ? "▲" : "▼"}</span>
+              <span>{expandedSections.carat ? "▴" : "▾"}</span>
               <span>Why did this result occur?</span>
             </button>
             {expandedSections.carat && (
