@@ -69,7 +69,7 @@ export default function ReportsView({
   };
 
   const handlePreview = (item: ReportItem) => {
-    window.open(`/api/evaluations/${item.evaluationId}/report`, "_blank");
+    router.push(`/reports/${item.id}`);
   };
 
   const handleDownload = (item: ReportItem) => {
