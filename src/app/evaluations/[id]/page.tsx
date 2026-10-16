@@ -48,7 +48,7 @@ export default function EvaluationResultPage({
   useEffect(() => {
     async function loadEvaluation() {
       // If demo or CEY-2026-0847 requested, load the reference record directly
-      if (id === "CEY-2026-0847" || id === "demo" || id === "breakdown" || id === "reliability" || id === "similarity" || id === "pricing" || id === "b2b-price" || id === "market-price" || id === "price") {
+      if (id === "CEY-2026-0847" || id === "demo" || id === "breakdown" || id === "reliability" || id === "similarity" || id === "pricing" || id === "b2b-price" || id === "market-price" || id === "price" || id === "recommendations" || id === "advice") {
         setEvaluation({
           _id: "CEY-2026-0847",
           ruleVersion: "v4.2",
@@ -193,7 +193,9 @@ export default function EvaluationResultPage({
           priceRangeMax={maxPriceFormatted}
           pricePerCarat="580K – 686K"
           initialTab={
-            id === "b2b-price" || id === "market-price" || id === "price"
+            id === "recommendations" || id === "advice"
+              ? "recommendations"
+              : id === "b2b-price" || id === "market-price" || id === "price"
               ? "b2b_price"
               : id === "pricing"
               ? "pricing"
