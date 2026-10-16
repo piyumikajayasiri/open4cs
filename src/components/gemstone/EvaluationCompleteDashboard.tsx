@@ -7,6 +7,7 @@ import ReliabilityAndColorSimilarityView from "./ReliabilityAndColorSimilarityVi
 import HistoricalPricingView from "./HistoricalPricingView";
 import SuggestedB2BPriceView from "./SuggestedB2BPriceView";
 import RecommendationsView from "./RecommendationsView";
+import EvaluationStatementView from "./EvaluationStatementView";
 
 type EvaluationCompleteDashboardProps = {
   stoneId?: string;
@@ -27,7 +28,7 @@ type EvaluationCompleteDashboardProps = {
   pricePerCarat?: string;
   comparablesCount?: number;
   evaluationId?: string;
-  initialTab?: "overview" | "breakdown" | "comparables" | "pricing" | "b2b_price" | "recommendations";
+  initialTab?: "overview" | "breakdown" | "comparables" | "pricing" | "b2b_price" | "recommendations" | "statement";
   onDownloadPdf?: () => void;
   onCompare?: () => void;
   onSave?: () => void;
@@ -58,7 +59,7 @@ export default function EvaluationCompleteDashboard({
   onSave,
 }: EvaluationCompleteDashboardProps) {
   const [activeTab, setActiveTab] = useState<
-    "overview" | "breakdown" | "comparables" | "pricing" | "b2b_price" | "recommendations"
+    "overview" | "breakdown" | "comparables" | "pricing" | "b2b_price" | "recommendations" | "statement"
   >(initialTab);
 
   const tabs = [
@@ -68,6 +69,7 @@ export default function EvaluationCompleteDashboard({
     { id: "pricing", label: "Historical Pricing" },
     { id: "b2b_price", label: "Suggested B2B Price" },
     { id: "recommendations", label: "Recommendations" },
+    { id: "statement", label: "Statement" },
   ] as const;
 
   const handleDownloadPdf = () => {
@@ -191,6 +193,19 @@ export default function EvaluationCompleteDashboard({
         <RecommendationsView
           stoneId={stoneId}
           ruleSetVersion="REC rule set v2.8"
+        />
+      ) : activeTab === "statement" ? (
+        <EvaluationStatementView
+          stoneId={stoneId}
+          variety={variety}
+          caratWeight={caratScore}
+          overallScore={overallScore}
+          suggestedPriceMin={priceRangeMin}
+          suggestedPriceMax={priceRangeMax}
+          comparablesCount={comparablesCount}
+          onDownloadPdf={handleDownloadPdf}
+          onCompare={onCompare}
+          onSave={onSave}
         />
       ) : (
         <>
