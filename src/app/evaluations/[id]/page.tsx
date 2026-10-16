@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PortalSidebar from "@/components/layout/PortalSidebar";
 import EvaluationCompleteDashboard from "@/components/gemstone/EvaluationCompleteDashboard";
+import EvaluationStatementView from "@/components/gemstone/EvaluationStatementView";
 
 type EvaluationRecord = {
   _id: string;
@@ -48,7 +49,7 @@ export default function EvaluationResultPage({
   useEffect(() => {
     async function loadEvaluation() {
       // If demo or CEY-2026-0847 requested, load the reference record directly
-      if (id === "CEY-2026-0847" || id === "demo" || id === "breakdown" || id === "reliability" || id === "similarity" || id === "pricing" || id === "b2b-price" || id === "market-price" || id === "price" || id === "recommendations" || id === "advice") {
+      if (id === "CEY-2026-0847" || id === "demo" || id === "breakdown" || id === "reliability" || id === "similarity" || id === "pricing" || id === "b2b-price" || id === "market-price" || id === "price" || id === "recommendations" || id === "advice" || id === "statement") {
         setEvaluation({
           _id: "CEY-2026-0847",
           ruleVersion: "v4.2",
@@ -174,41 +175,59 @@ export default function EvaluationResultPage({
 
       {/* Main Content Area */}
       <main className="flex-1 p-6 lg:p-10 max-w-7xl mx-auto space-y-6 overflow-y-auto">
-        {/* Evaluation Dashboard Component */}
-        <EvaluationCompleteDashboard
-          stoneId={stoneCode}
-          variety={gem?.variety || "Ceylon Blue Sapphire"}
-          evaluationDate={evalDate}
-          ruleVersion={evaluation.ruleVersion || "v4.2"}
-          overallScore={overall > 10 ? Number((overall / 10).toFixed(1)) : overall}
-          colorScore={colorSc > 10 ? Number((colorSc / 10).toFixed(1)) : colorSc}
-          clarityScore={claritySc > 10 ? Number((claritySc / 10).toFixed(1)) : claritySc}
-          cutScore={cutSc > 10 ? Number((cutSc / 10).toFixed(1)) : cutSc}
-          caratScore={caratWeight}
-          colorLabel={gem?.color?.saturation ? `${gem.color.saturation} Blue` : "Vivid Blue"}
-          clarityLabel={gem?.clarity?.nakedEye || "Eye-clean"}
-          cutLabel="Well Cut"
-          caratLabel="Liquid band"
-          priceRangeMin={minPriceFormatted}
-          priceRangeMax={maxPriceFormatted}
-          pricePerCarat="580K – 686K"
-          initialTab={
-            id === "recommendations" || id === "advice"
-              ? "recommendations"
-              : id === "b2b-price" || id === "market-price" || id === "price"
-              ? "b2b_price"
-              : id === "pricing"
-              ? "pricing"
-              : id === "reliability" || id === "similarity"
-              ? "comparables"
-              : "breakdown"
-          }
-          comparablesCount={7}
-          evaluationId={evaluation._id}
-          onSave={() => alert("Evaluation saved to your profile history!")}
-          onCompare={() => { router.push("/compare"); }}
-          onDownloadPdf={() => window.open(`/api/evaluations/${id}/report`, "_blank")}
-        />
+        {id === "statement" ? (
+          <EvaluationStatementView
+            stoneId={stoneCode}
+            variety={gem?.variety || "Ceylon Blue Sapphire"}
+            caratWeight={caratWeight}
+            overallScore={overall > 10 ? Number((overall / 10).toFixed(1)) : overall}
+            overallScoreLabel="Excellent"
+            suggestedPriceMin={minPriceFormatted}
+            suggestedPriceMax={maxPriceFormatted}
+            comparablesCount={7}
+            similarityRange="84-93%"
+            initialPersona="trader"
+            onSave={() => alert("Evaluation saved to your profile history!")}
+            onCompare={() => { router.push("/compare"); }}
+            onDownloadPdf={() => window.open(`/api/evaluations/${id}/report`, "_blank")}
+          />
+        ) : (
+          /* Evaluation Dashboard Component */
+          <EvaluationCompleteDashboard
+            stoneId={stoneCode}
+            variety={gem?.variety || "Ceylon Blue Sapphire"}
+            evaluationDate={evalDate}
+            ruleVersion={evaluation.ruleVersion || "v4.2"}
+            overallScore={overall > 10 ? Number((overall / 10).toFixed(1)) : overall}
+            colorScore={colorSc > 10 ? Number((colorSc / 10).toFixed(1)) : colorSc}
+            clarityScore={claritySc > 10 ? Number((claritySc / 10).toFixed(1)) : claritySc}
+            cutScore={cutSc > 10 ? Number((cutSc / 10).toFixed(1)) : cutSc}
+            caratScore={caratWeight}
+            colorLabel={gem?.color?.saturation ? `${gem.color.saturation} Blue` : "Vivid Blue"}
+            clarityLabel={gem?.clarity?.nakedEye || "Eye-clean"}
+            cutLabel="Well Cut"
+            caratLabel="Liquid band"
+            priceRangeMin={minPriceFormatted}
+            priceRangeMax={maxPriceFormatted}
+            pricePerCarat="580K – 686K"
+            initialTab={
+              id === "recommendations" || id === "advice"
+                ? "recommendations"
+                : id === "b2b-price" || id === "market-price" || id === "price"
+                ? "b2b_price"
+                : id === "pricing"
+                ? "pricing"
+                : id === "reliability" || id === "similarity"
+                ? "comparables"
+                : "breakdown"
+            }
+            comparablesCount={7}
+            evaluationId={evaluation._id}
+            onSave={() => alert("Evaluation saved to your profile history!")}
+            onCompare={() => { router.push("/compare"); }}
+            onDownloadPdf={() => window.open(`/api/evaluations/${id}/report`, "_blank")}
+          />
+        )}
       </main>
     </div>
   );
