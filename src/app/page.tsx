@@ -1,5 +1,4 @@
 import Link from "next/link";
-import GemstoneForm from "@/components/gemstone/GemstoneForm";
 
 export default function Home() {
   return (
@@ -27,15 +26,15 @@ export default function Home() {
               </p>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
-                <a
-                  href="#evaluation"
+                <Link
+                  href="/evaluate/gemstone"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0B1530] px-6 py-3.5 font-semibold text-white hover:bg-slate-800 transition shadow-sm"
                 >
                   Start Evaluation
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
-                </a>
+                </Link>
 
                 <a
                   href="#how-it-works"
@@ -362,27 +361,43 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Section 5: Interactive Gemstone Evaluation Form Anchor */}
+      {/* Section 5: Evaluation Launch Card */}
       <section
         id="evaluation"
         className="scroll-mt-20 border-t border-slate-200 bg-white py-16"
       >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-10 text-center max-w-3xl mx-auto">
-            <span className="inline-flex rounded-full bg-blue-50 px-3.5 py-1 text-xs font-semibold text-blue-700 border border-blue-100">
-              Interactive Evaluation Engine
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl bg-radial from-slate-900 to-[#0A1128] text-white p-8 sm:p-12 shadow-xl border border-slate-800 text-center space-y-6">
+            <span className="inline-flex rounded-full bg-blue-500/20 px-3.5 py-1 text-xs font-semibold text-blue-300 border border-blue-400/30">
+              Interactive 4Cs Evaluation
             </span>
 
-            <h2 className="mt-3 text-3xl font-extrabold text-slate-900 sm:text-4xl">
-              Start Your Gemstone Evaluation
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+              Ready to Evaluate Your Gemstone?
             </h2>
 
-            <p className="mt-3 text-sm text-slate-600">
-              Follow the guided steps below to record your gemstone observation and generate explainable 4C scores & pricing suggestions.
+            <p className="max-w-xl mx-auto text-sm sm:text-base text-slate-300 leading-relaxed">
+              Step through our 6-stage guided observation wizard to record color, clarity, cut proportions, and weight. Get instant explainable scores and B2B benchmark suggestions.
             </p>
-          </div>
 
-          <GemstoneForm />
+            <div className="pt-2">
+              <Link
+                href="/evaluate/gemstone"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 px-8 py-4 font-bold text-white transition shadow-lg shadow-blue-600/30 text-sm sm:text-base"
+              >
+                Launch Evaluation Flow
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </Link>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-xs text-slate-400 border-t border-slate-800">
+              <span>✓ 6 Guided Steps</span>
+              <span>✓ Draft Auto-Saves</span>
+              <span>✓ Instant Explainable Output</span>
+            </div>
+          </div>
         </div>
       </section>
     </main>
