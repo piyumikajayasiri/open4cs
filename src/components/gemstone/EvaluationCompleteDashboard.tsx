@@ -5,6 +5,7 @@ import Image from "next/image";
 import FourCBreakdownView from "./FourCBreakdownView";
 import ReliabilityAndColorSimilarityView from "./ReliabilityAndColorSimilarityView";
 import HistoricalPricingView from "./HistoricalPricingView";
+import SuggestedB2BPriceView from "./SuggestedB2BPriceView";
 
 type EvaluationCompleteDashboardProps = {
   stoneId?: string;
@@ -25,7 +26,7 @@ type EvaluationCompleteDashboardProps = {
   pricePerCarat?: string;
   comparablesCount?: number;
   evaluationId?: string;
-  initialTab?: "overview" | "breakdown" | "comparables" | "pricing" | "recommendations";
+  initialTab?: "overview" | "breakdown" | "comparables" | "pricing" | "b2b_price" | "recommendations";
   onDownloadPdf?: () => void;
   onCompare?: () => void;
   onSave?: () => void;
@@ -56,14 +57,15 @@ export default function EvaluationCompleteDashboard({
   onSave,
 }: EvaluationCompleteDashboardProps) {
   const [activeTab, setActiveTab] = useState<
-    "overview" | "breakdown" | "comparables" | "pricing" | "recommendations"
+    "overview" | "breakdown" | "comparables" | "pricing" | "b2b_price" | "recommendations"
   >(initialTab);
 
   const tabs = [
     { id: "overview", label: "Overview" },
     { id: "breakdown", label: "4C Breakdown" },
     { id: "comparables", label: "Comparables" },
-    { id: "pricing", label: "Pricing" },
+    { id: "pricing", label: "Historical Pricing" },
+    { id: "b2b_price", label: "Suggested B2B Price" },
     { id: "recommendations", label: "Recommendations" },
   ] as const;
 
@@ -171,6 +173,18 @@ export default function EvaluationCompleteDashboard({
           yourPositionMax="686K"
           twelveMonthMovement="+8.4%"
           movementContext="Seasonal B2B demand"
+        />
+      ) : activeTab === "b2b_price" ? (
+        <SuggestedB2BPriceView
+          stoneId={stoneId}
+          ruleVersion={ruleVersion}
+          snapshotDate={evaluationDate}
+          priceRangeMin={priceRangeMin}
+          priceRangeMax={priceRangeMax}
+          pricePerCaratMin={pricePerCarat.split("–")[0]?.trim() || "580K"}
+          pricePerCaratMax={pricePerCarat.split("–")[1]?.trim() || "686K"}
+          caratWeight={caratScore.toFixed(2)}
+          finalRangeText={`LKR ${priceRangeMin} – ${priceRangeMax}`}
         />
       ) : (
         <>
