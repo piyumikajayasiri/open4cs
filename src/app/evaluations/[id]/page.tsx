@@ -47,6 +47,37 @@ export default function EvaluationResultPage({
 
   useEffect(() => {
     async function loadEvaluation() {
+      // If demo or CEY-2026-0847 requested, load the reference record directly
+      if (id === "CEY-2026-0847" || id === "demo" || id === "breakdown") {
+        setEvaluation({
+          _id: "CEY-2026-0847",
+          ruleVersion: "v4.2",
+          createdAt: "2026-09-24T10:00:00.000Z",
+          gemstoneId: {
+            variety: "Ceylon Blue Sapphire",
+            caratWeight: 2.45,
+            color: { hue: "Blue", tone: "Medium Dark", saturation: "Vivid" },
+            clarity: { nakedEye: "Eye-clean" },
+          },
+          result: {
+            overall4C: { score: 82 },
+            color: { score: 86 },
+            clarity: { score: 79 },
+            cut: { score: 81 },
+            carat: { score: 2.45 },
+          },
+          priceSuggestion: {
+            currency: "USD",
+            suggestedPrice: 1550000,
+            minimumPrice: 1420000,
+            maximumPrice: 1680000,
+            formattedPriceRange: "$1.42M – $1.68M",
+          },
+        });
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         const res = await fetch(`/api/evaluations/${id}`);
@@ -161,6 +192,7 @@ export default function EvaluationResultPage({
           priceRangeMin={minPriceFormatted}
           priceRangeMax={maxPriceFormatted}
           pricePerCarat="580K – 686K"
+          initialTab={id === "breakdown" || id === "CEY-2026-0847" ? "breakdown" : "overview"}
           comparablesCount={7}
           evaluationId={evaluation._id}
           onSave={() => alert("Evaluation saved to your profile history!")}
