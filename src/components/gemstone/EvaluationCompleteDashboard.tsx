@@ -6,6 +6,7 @@ import FourCBreakdownView from "./FourCBreakdownView";
 import ReliabilityAndColorSimilarityView from "./ReliabilityAndColorSimilarityView";
 import HistoricalPricingView from "./HistoricalPricingView";
 import SuggestedB2BPriceView from "./SuggestedB2BPriceView";
+import RecommendationsView from "./RecommendationsView";
 
 type EvaluationCompleteDashboardProps = {
   stoneId?: string;
@@ -185,6 +186,11 @@ export default function EvaluationCompleteDashboard({
           pricePerCaratMax={pricePerCarat.split("–")[1]?.trim() || "686K"}
           caratWeight={caratScore.toFixed(2)}
           finalRangeText={`LKR ${priceRangeMin} – ${priceRangeMax}`}
+        />
+      ) : activeTab === "recommendations" ? (
+        <RecommendationsView
+          stoneId={stoneId}
+          ruleSetVersion="REC rule set v2.8"
         />
       ) : (
         <>
