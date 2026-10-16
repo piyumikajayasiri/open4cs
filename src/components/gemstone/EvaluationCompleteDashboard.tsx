@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import FourCBreakdownView from "./FourCBreakdownView";
 import ReliabilityAndColorSimilarityView from "./ReliabilityAndColorSimilarityView";
+import HistoricalPricingView from "./HistoricalPricingView";
 
 type EvaluationCompleteDashboardProps = {
   stoneId?: string;
@@ -157,6 +158,19 @@ export default function EvaluationCompleteDashboard({
           snapshotDate={evaluationDate}
           caratWeight={`${caratScore.toFixed(2)} ct`}
           color={colorLabel}
+        />
+      ) : activeTab === "pricing" ? (
+        <HistoricalPricingView
+          stoneCategory={`Heated ${variety.replace("Sapphire", "").trim()} 2.0–3.0 ct`}
+          currencyUnit="LKR per carat"
+          timeframe={`12 months to ${evaluationDate.split(" ").slice(-2).join(" ") || "Sep 2026"}`}
+          recordsCount={14}
+          referenceRangeMin="545K"
+          referenceRangeMax="640K"
+          yourPositionMin="580K"
+          yourPositionMax="686K"
+          twelveMonthMovement="+8.4%"
+          movementContext="Seasonal B2B demand"
         />
       ) : (
         <>
