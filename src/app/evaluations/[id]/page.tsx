@@ -187,7 +187,7 @@ export default function EvaluationResultPage({
             comparablesCount={7}
             similarityRange="84-93%"
             initialPersona="trader"
-            onSave={() => alert("Evaluation saved to your profile history!")}
+            onSave={() => undefined}
             onCompare={() => { router.push("/compare"); }}
             onDownloadPdf={() => window.open(`/api/evaluations/${id}/report`, "_blank")}
           />
@@ -223,7 +223,7 @@ export default function EvaluationResultPage({
             }
             comparablesCount={7}
             evaluationId={evaluation._id}
-            onSave={() => alert("Evaluation saved to your profile history!")}
+            onSave={() => undefined}
             onCompare={() => { router.push("/compare"); }}
             onDownloadPdf={() => window.open(`/api/evaluations/${id}/report`, "_blank")}
           />
