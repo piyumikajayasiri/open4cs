@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ShadcnSelect } from "@/components/ui/select";
 
 export type EvaluationHistoryRecord = {
   id: string;
@@ -155,55 +156,48 @@ export default function MyEvaluationHistoryView({
             placeholder="Search by ID, variety, report..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white border border-slate-200/90 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
+            className="w-full bg-white border border-slate-200/90 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
           />
         </div>
 
         {/* Variety Dropdown (2-3 cols on lg) */}
         <div className="lg:col-span-2">
-          <select
+          <ShadcnSelect
             value={selectedVariety}
-            onChange={(e) => setSelectedVariety(e.target.value)}
-            aria-label="Filter by Variety"
-            className="w-full bg-white border border-slate-200/90 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs cursor-pointer"
-          >
-            <option value="All">All Varieties</option>
-            {varieties.map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </select>
+            onValueChange={setSelectedVariety}
+            options={[
+              { value: "All", label: "All Varieties" },
+              ...varieties.map((v) => ({ value: v, label: v })),
+            ]}
+          />
         </div>
 
         {/* Status Dropdown (2-3 cols on lg) */}
         <div className="lg:col-span-2">
-          <select
+          <ShadcnSelect
             value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            aria-label="Filter by Status"
-            className="w-full bg-white border border-slate-200/90 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs cursor-pointer"
-          >
-            <option value="All">All Statuses</option>
-            <option value="Complete">Complete</option>
-            <option value="Draft">Draft</option>
-            <option value="Archived">Archived</option>
-          </select>
+            onValueChange={setSelectedStatus}
+            options={[
+              { value: "All", label: "All Statuses" },
+              { value: "Complete", label: "Complete" },
+              { value: "Draft", label: "Draft" },
+              { value: "Archived", label: "Archived" },
+            ]}
+          />
         </div>
 
         {/* Timeframe Dropdown (3 cols on lg) */}
         <div className="lg:col-span-3">
-          <select
+          <ShadcnSelect
             value={selectedTimeframe}
-            onChange={(e) => setSelectedTimeframe(e.target.value)}
-            aria-label="Filter by Timeframe"
-            className="w-full bg-white border border-slate-200/90 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs cursor-pointer"
-          >
-            <option value="90_days">Last 90 days</option>
-            <option value="30_days">Last 30 days</option>
-            <option value="6_months">Last 6 months</option>
-            <option value="all">All time</option>
-          </select>
+            onValueChange={setSelectedTimeframe}
+            options={[
+              { value: "90_days", label: "Last 90 days" },
+              { value: "30_days", label: "Last 30 days" },
+              { value: "6_months", label: "Last 6 months" },
+              { value: "all", label: "All time" },
+            ]}
+          />
         </div>
       </div>
 

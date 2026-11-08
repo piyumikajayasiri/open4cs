@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { ShadcnSelect } from "@/components/ui/select";
 
 type ClaritySectionProps = {
   nakedEye: string;
@@ -115,18 +116,18 @@ export default function ClaritySection({
               >
                 Inclusion Visibility
               </label>
-              <select
+              <ShadcnSelect
                 id="inclusion-visibility"
                 value={loupe10x || "Very Slight"}
-                onChange={(e) => onLoupe10xChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="Very Slight">Barely visible at 10×</option>
-                <option value="Clean">Not visible under 10× (Clean)</option>
-                <option value="Slight">Easily visible at 10×</option>
-                <option value="Noticeable">Noticeable at 10×</option>
-                <option value="Obvious">Obvious under 10×</option>
-              </select>
+                onValueChange={onLoupe10xChange}
+                options={[
+                  { value: "Very Slight", label: "Barely visible at 10×" },
+                  { value: "Clean", label: "Not visible under 10× (Clean)" },
+                  { value: "Slight", label: "Easily visible at 10×" },
+                  { value: "Noticeable", label: "Noticeable at 10×" },
+                  { value: "Obvious", label: "Obvious under 10×" },
+                ]}
+              />
             </div>
 
             {/* Inclusion Type */}
@@ -137,19 +138,19 @@ export default function ClaritySection({
               >
                 Inclusion Type
               </label>
-              <select
+              <ShadcnSelect
                 id="inclusion-type"
                 value={inclusionType || "Fine silk needles"}
-                onChange={(e) => onInclusionTypeChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="Fine silk needles">Fine silk needles</option>
-                <option value="Feathers & fissures">Feathers & fissures</option>
-                <option value="Mineral crystals">Mineral crystals</option>
-                <option value="Clouds & pinpoints">Clouds & pinpoints</option>
-                <option value="Cavities or chips">Cavities or chips</option>
-                <option value="None / Clean">None / Clean</option>
-              </select>
+                onValueChange={onInclusionTypeChange}
+                options={[
+                  "Fine silk needles",
+                  "Feathers & fissures",
+                  "Mineral crystals",
+                  "Clouds & pinpoints",
+                  "Cavities or chips",
+                  "None / Clean",
+                ]}
+              />
             </div>
 
             {/* Inclusion Location */}
@@ -160,18 +161,18 @@ export default function ClaritySection({
               >
                 Inclusion Location
               </label>
-              <select
+              <ShadcnSelect
                 id="inclusion-location"
                 value={inclusionLocation || "Near edge — low impact"}
-                onChange={(e) => onInclusionLocationChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="Near edge — low impact">Near edge — low impact</option>
-                <option value="Table center — high impact">Table center — high impact</option>
-                <option value="Pavilion side — moderate impact">Pavilion side — moderate impact</option>
-                <option value="Girdle region — low impact">Girdle region — low impact</option>
-                <option value="Scattered throughout">Scattered throughout</option>
-              </select>
+                onValueChange={onInclusionLocationChange}
+                options={[
+                  "Near edge — low impact",
+                  "Table center — high impact",
+                  "Pavilion side — moderate impact",
+                  "Girdle region — low impact",
+                  "Scattered throughout",
+                ]}
+              />
             </div>
 
             {/* Inclusion Severity */}
@@ -182,17 +183,17 @@ export default function ClaritySection({
               >
                 Inclusion Severity
               </label>
-              <select
+              <ShadcnSelect
                 id="inclusion-severity"
                 value={severity || "Minor"}
-                onChange={(e) => onSeverityChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="Minor">Minor (Grade 2)</option>
-                <option value="None">None (Grade 1)</option>
-                <option value="Moderate">Moderate (Grade 3)</option>
-                <option value="Severe">Severe (Grade 4)</option>
-              </select>
+                onValueChange={onSeverityChange}
+                options={[
+                  { value: "Minor", label: "Minor (Grade 2)" },
+                  { value: "None", label: "None (Grade 1)" },
+                  { value: "Moderate", label: "Moderate (Grade 3)" },
+                  { value: "Severe", label: "Severe (Grade 4)" },
+                ]}
+              />
             </div>
           </div>
         </div>

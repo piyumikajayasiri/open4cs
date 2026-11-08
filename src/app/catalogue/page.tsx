@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ShadcnSelect } from "@/components/ui/select";
 
 type UserProfile = {
   id: string;
@@ -316,34 +317,29 @@ export default function GemstoneCataloguePage() {
             />
           </div>
 
-          <select
-            value={varietyFilter}
-            onChange={(e) => setVarietyFilter(e.target.value)}
-            className="w-full md:w-auto bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 outline-none focus:border-blue-600 cursor-pointer"
-          >
-            <option>All Varieties</option>
-            <option>Blue Sapphires</option>
-            <option>Specialty Sapphires</option>
-          </select>
+          <div className="w-full md:w-44">
+            <ShadcnSelect
+              value={varietyFilter}
+              onValueChange={setVarietyFilter}
+              options={["All Varieties", "Blue Sapphires", "Specialty Sapphires"]}
+            />
+          </div>
 
-          <select
-            value={originFilter}
-            onChange={(e) => setOriginFilter(e.target.value)}
-            className="w-full md:w-auto bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 outline-none focus:border-blue-600 cursor-pointer"
-          >
-            <option>Sri Lanka Origin</option>
-            <option>Ratnapura</option>
-            <option>Elahera</option>
-          </select>
+          <div className="w-full md:w-44">
+            <ShadcnSelect
+              value={originFilter}
+              onValueChange={setOriginFilter}
+              options={["Sri Lanka Origin", "Ratnapura", "Elahera"]}
+            />
+          </div>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full md:w-auto bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 outline-none focus:border-blue-600 cursor-pointer"
-          >
-            <option>Supported Only</option>
-            <option>All Statuses</option>
-          </select>
+          <div className="w-full md:w-44">
+            <ShadcnSelect
+              value={statusFilter}
+              onValueChange={setStatusFilter}
+              options={["Supported Only", "All Statuses"]}
+            />
+          </div>
         </div>
 
         {/* Gemstone Grid */}

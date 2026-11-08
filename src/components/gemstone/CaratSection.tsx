@@ -17,10 +17,19 @@ export default function CaratSection({
   depth = "4.55",
   onCaratWeightChange,
 }: CaratSectionProps) {
-  const cw = parseFloat(caratWeight) || 2.45;
+  // Disallow negative numbers strictly
+  const handleWeightChange = (val: string) => {
+    const clean = val.replace(/-/g, "");
+    onCaratWeightChange(clean);
+  };
+
+  const parsedWeight = parseFloat(caratWeight);
+  const isValidWeight = !isNaN(parsedWeight) && parsedWeight > 0;
+  const cw = isValidWeight ? parsedWeight : 2.45;
 
   // Determine weight band display
   const getWeightBandLabel = (weight: number) => {
+    if (!isValidWeight) return "Positive weight required";
     if (weight < 0.5) return "0.01 – 0.49 ct band";
     if (weight < 1.0) return "0.50 – 0.99 ct band";
     if (weight < 2.0) return "1.00 – 1.99 ct band";
@@ -30,6 +39,9 @@ export default function CaratSection({
   };
 
   const getMarketCategory = (weight: number) => {
+    if (!isValidWeight) {
+      return { title: "Invalid Weight", sub: "Please enter a valid positive carat weight" };
+    }
     if (weight < 1.0) return { title: "Commercial accent range", sub: "Standard retail & accent demand" };
     if (weight < 3.0) return { title: "Liquid commercial range", sub: "Strong B2B demand in Colombo & Beruwala" };
     if (weight < 5.0) return { title: "High-tier commercial range", sub: "Premium trade & collector demand" };
@@ -61,9 +73,15 @@ export default function CaratSection({
                 type="number"
                 step="0.01"
                 min="0.01"
-                value={caratWeight || "2.45"}
-                onChange={(e) => onCaratWeightChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base font-extrabold text-slate-900 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600 pr-12"
+                max="500"
+                value={caratWeight}
+                placeholder="2.45"
+                onChange={(e) => handleWeightChange(e.target.value)}
+                className={`w-full rounded-xl border bg-white px-4 py-3 text-base font-extrabold outline-none transition pr-12 ${
+                  !isValidWeight && caratWeight !== ""
+                    ? "border-rose-400 text-rose-700 focus:border-rose-600 focus:ring-rose-200"
+                    : "border-slate-200 text-slate-900 focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                }`}
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">
                 ct
@@ -85,7 +103,7 @@ export default function CaratSection({
               <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
                 WEIGHT CLASS
               </p>
-              <p className="text-sm font-bold text-slate-900">
+              <p className={`text-sm font-bold ${isValidWeight ? "text-slate-900" : "text-rose-600"}`}>
                 {weightBandLabel}
               </p>
             </div>
@@ -96,7 +114,7 @@ export default function CaratSection({
                 SIZE CHARACTERISTICS
               </p>
               <p className="text-sm font-bold text-slate-900">
-                Faces up true to weight · no belly excess
+                {isValidWeight ? "Faces up true to weight · no belly excess" : "Weight verification required"}
               </p>
             </div>
 
@@ -134,11 +152,15 @@ export default function CaratSection({
             CARAT PREVIEW
           </p>
           <p className="text-3xl font-extrabold text-slate-900 tracking-tight mb-3">
-            {cw.toFixed(2)} ct
+            {isValidWeight ? `${cw.toFixed(2)} ct` : "— ct"}
           </p>
 
-          <span className="inline-block rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold px-3 py-1">
-            Well-proportioned for weight
+          <span className={`inline-block rounded-full border text-xs font-semibold px-3 py-1 ${
+            isValidWeight
+              ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+              : "bg-rose-50 border-rose-200 text-rose-700"
+          }`}>
+            {isValidWeight ? "Well-proportioned for weight" : "Positive carat required"}
           </span>
         </div>
 
