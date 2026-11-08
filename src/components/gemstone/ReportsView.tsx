@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ToastNotification, { ToastMessage } from "../ui/ToastNotification";
 
 export type ReportItem = {
   id: string;
@@ -59,6 +60,16 @@ export default function ReportsView({
 }: ReportsViewProps) {
   const router = useRouter();
   const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  const addToast = (message: string) => {
+    const id = `${Date.now()}-${Math.random()}`;
+    setToasts((prev) => [...prev, { id, message, type: "success" }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
 
   const handleGenerate = () => {
     if (onGenerateReport) {
@@ -80,12 +91,15 @@ export default function ReportsView({
     setRegeneratingId(item.id);
     setTimeout(() => {
       setRegeneratingId(null);
-      alert(`Report ${item.id} regenerated successfully with latest rule engine!`);
-    }, 1000);
+      addToast(`Report ${item.id} regenerated successfully with latest rule engine!`);
+    }, 800);
   };
 
   return (
     <div className="space-y-6">
+      {/* Toast Notification Container */}
+      <ToastNotification toasts={toasts} onDismiss={removeToast} />
+
       {/* Top Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

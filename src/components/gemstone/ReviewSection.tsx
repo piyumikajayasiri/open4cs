@@ -231,7 +231,7 @@ export default function ReviewSection({
 
             <button
               type="button"
-              onClick={onSaveDraft || (() => alert("Draft saved!"))}
+              onClick={onSaveDraft || (() => {})}
               className="w-full border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold py-3 rounded-xl transition text-center"
             >
               Save Draft
