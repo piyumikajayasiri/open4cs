@@ -11,12 +11,12 @@ export default function InformationReliabilityCard({
 }: InformationReliabilityCardProps) {
   return (
     <div className="space-y-5">
-      <div className="rounded-2xl bg-[var(--surface-soft)] p-5">
-        <h3 className="font-bold">
+      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 shadow-xs">
+        <h3 className="text-base font-bold text-slate-900">
           How reliable is the information?
         </h3>
 
-        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+        <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-slate-600">
           These labels describe where the information came from. They
           help you understand how much confidence to place in the
           information used for this evaluation.
@@ -43,9 +43,9 @@ export default function InformationReliabilityCard({
         />
       </div>
 
-      <div className="rounded-xl border border-[var(--border)] p-4">
-        <p className="text-sm leading-6 text-[var(--muted)]">
-          <strong className="text-[var(--foreground)]">
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <p className="text-xs leading-relaxed text-slate-600">
+          <strong className="font-bold text-slate-900">
             Important:
           </strong>{" "}
           Reliability describes the source of the information. It does
@@ -66,16 +66,16 @@ function ReliabilityItem({
   description: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--border)] p-5">
-      <p className="text-sm font-semibold text-[var(--muted)]">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs hover:border-slate-300 transition">
+      <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
         {title}
       </p>
 
-      <p className="mt-2 text-lg font-bold text-[var(--primary-dark)]">
+      <p className="mt-2 text-lg sm:text-xl font-extrabold text-blue-700">
         {formatReliability(value)}
       </p>
 
-      <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
+      <p className="mt-3 text-xs leading-5 text-slate-600">
         {description}
       </p>
     </div>
