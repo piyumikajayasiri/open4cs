@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ShadcnSelect } from "@/components/ui/select";
 
 type BasicInformationProps = {
   variety: string;
@@ -192,18 +193,18 @@ export default function BasicInformation({
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Gemstone Variety <span className="text-red-500">*</span>
             </label>
-            <select
+            <ShadcnSelect
               value={variety || "Ceylon Blue Sapphire"}
-              onChange={(e) => onVarietyChange(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer"
-            >
-              <option value="Ceylon Blue Sapphire">Ceylon Blue Sapphire</option>
-              <option value="Padparadscha Sapphire">Padparadscha Sapphire</option>
-              <option value="Pink Sapphire">Pink Sapphire</option>
-              <option value="Yellow Sapphire">Yellow Sapphire</option>
-              <option value="White Sapphire">White Sapphire</option>
-              <option value="Star Sapphire">Star Sapphire</option>
-            </select>
+              onValueChange={onVarietyChange}
+              options={[
+                "Ceylon Blue Sapphire",
+                "Padparadscha Sapphire",
+                "Pink Sapphire",
+                "Yellow Sapphire",
+                "White Sapphire",
+                "Star Sapphire",
+              ]}
+            />
           </div>
         </div>
 
@@ -215,20 +216,20 @@ export default function BasicInformation({
               <span className="text-red-500">*</span>
               <span className="text-slate-400 text-[10px]">🕒</span>
             </label>
-            <select
+            <ShadcnSelect
               value={originValue || localOrigin}
-              onChange={(e) => {
-                setLocalOrigin(e.target.value);
-                if (onOriginValueChange) onOriginValueChange(e.target.value);
+              onValueChange={(val) => {
+                setLocalOrigin(val);
+                if (onOriginValueChange) onOriginValueChange(val);
               }}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer"
-            >
-              <option value="Sri Lanka (Ceylon)">Sri Lanka (Ceylon)</option>
-              <option value="Madagascar">Madagascar</option>
-              <option value="Burma (Myanmar)">Burma (Myanmar)</option>
-              <option value="Kashmir">Kashmir</option>
-              <option value="Other / Unknown">Other / Unknown</option>
-            </select>
+              options={[
+                "Sri Lanka (Ceylon)",
+                "Madagascar",
+                "Burma (Myanmar)",
+                "Kashmir",
+                "Other / Unknown",
+              ]}
+            />
           </div>
 
           <div>
@@ -236,18 +237,18 @@ export default function BasicInformation({
               <span>Origin Verification</span>
               <span className="text-slate-400 text-[10px]">🕒</span>
             </label>
-            <select
+            <ShadcnSelect
               value={currentOriginVer}
-              onChange={(e) => {
-                setLocalOriginRel(e.target.value);
-                if (onOriginReliabilityChange) onOriginReliabilityChange(e.target.value);
+              onValueChange={(val) => {
+                setLocalOriginRel(val);
+                if (onOriginReliabilityChange) onOriginReliabilityChange(val);
               }}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer"
-            >
-              <option value="Seller Provided">Seller Provided</option>
-              <option value="Laboratory Verified">Laboratory Verified</option>
-              <option value="Unverified / Self-Claimed">Unverified / Self-Claimed</option>
-            </select>
+              options={[
+                "Seller Provided",
+                "Laboratory Verified",
+                "Unverified / Self-Claimed",
+              ]}
+            />
           </div>
         </div>
 
@@ -259,19 +260,19 @@ export default function BasicInformation({
               <span className="text-red-500">*</span>
               <span className="text-slate-400 text-[10px]">🕒</span>
             </label>
-            <select
+            <ShadcnSelect
               value={treatmentStatus || localTreatment}
-              onChange={(e) => {
-                setLocalTreatment(e.target.value);
-                if (onTreatmentStatusChange) onTreatmentStatusChange(e.target.value);
+              onValueChange={(val) => {
+                setLocalTreatment(val);
+                if (onTreatmentStatusChange) onTreatmentStatusChange(val);
               }}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer"
-            >
-              <option value="Heated (H)">Heated (H)</option>
-              <option value="Unheated (N)">Unheated (N)</option>
-              <option value="Beryllium Treated (BE)">Beryllium Treated (BE)</option>
-              <option value="Glass Filled (GF)">Glass Filled (GF)</option>
-            </select>
+              options={[
+                "Heated (H)",
+                "Unheated (N)",
+                "Beryllium Treated (BE)",
+                "Glass Filled (GF)",
+              ]}
+            />
           </div>
 
           <div>
@@ -279,18 +280,18 @@ export default function BasicInformation({
               <span>Treatment Verification</span>
               <span className="text-slate-400 text-[10px]">🕒</span>
             </label>
-            <select
+            <ShadcnSelect
               value={currentTreatmentVer}
-              onChange={(e) => {
-                setLocalTreatmentVer(e.target.value);
-                if (onTreatmentTypeChange) onTreatmentTypeChange(e.target.value);
+              onValueChange={(val) => {
+                setLocalTreatmentVer(val);
+                if (onTreatmentTypeChange) onTreatmentTypeChange(val);
               }}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer"
-            >
-              <option value="Laboratory Verified">Laboratory Verified</option>
-              <option value="Seller Provided">Seller Provided</option>
-              <option value="Unverified">Unverified</option>
-            </select>
+              options={[
+                "Laboratory Verified",
+                "Seller Provided",
+                "Unverified",
+              ]}
+            />
           </div>
         </div>
 
@@ -300,20 +301,20 @@ export default function BasicInformation({
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Shape / Cut Style
             </label>
-            <select
+            <ShadcnSelect
               value={shape || localShape}
-              onChange={(e) => {
-                setLocalShape(e.target.value);
-                if (onShapeChange) onShapeChange(e.target.value);
+              onValueChange={(val) => {
+                setLocalShape(val);
+                if (onShapeChange) onShapeChange(val);
               }}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer"
-            >
-              <option value="Oval · Mixed Cut">Oval · Mixed Cut</option>
-              <option value="Cushion · Brilliant Cut">Cushion · Brilliant Cut</option>
-              <option value="Round · Mixed Cut">Round · Mixed Cut</option>
-              <option value="Emerald Cut">Emerald Cut</option>
-              <option value="Pear Cut">Pear Cut</option>
-            </select>
+              options={[
+                "Oval · Mixed Cut",
+                "Cushion · Brilliant Cut",
+                "Round · Mixed Cut",
+                "Emerald Cut",
+                "Pear Cut",
+              ]}
+            />
           </div>
 
           <div>

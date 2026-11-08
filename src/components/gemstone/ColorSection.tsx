@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ShadcnSelect } from "@/components/ui/select";
 
 type ColorSectionProps = {
   hue: string;
@@ -105,35 +106,31 @@ export default function ColorSection({
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Secondary Tone
               </label>
-              <select
+              <ShadcnSelect
                 value={secondaryTone || localSecTone}
-                onChange={(e) => {
-                  setLocalSecTone(e.target.value);
-                  if (onSecondaryToneChange) onSecondaryToneChange(e.target.value);
+                onValueChange={(val) => {
+                  setLocalSecTone(val);
+                  if (onSecondaryToneChange) onSecondaryToneChange(val);
                 }}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-900 outline-none transition focus:border-blue-600 cursor-pointer"
-              >
-                <option value="Slight violet">Slight violet</option>
-                <option value="None">None</option>
-                <option value="Violetish">Violetish</option>
-                <option value="Greenish">Greenish</option>
-                <option value="Purplish">Purplish</option>
-              </select>
+                options={[
+                  "Slight violet",
+                  "None",
+                  "Violetish",
+                  "Greenish",
+                  "Purplish",
+                ]}
+              />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Color Distribution
               </label>
-              <select
+              <ShadcnSelect
                 value={currentDist}
-                onChange={(e) => onDistributionChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-900 outline-none transition focus:border-blue-600 cursor-pointer"
-              >
-                <option value="Even">Even</option>
-                <option value="Slightly uneven">Slightly uneven</option>
-                <option value="Uneven">Uneven</option>
-              </select>
+                onValueChange={onDistributionChange}
+                options={["Even", "Slightly uneven", "Uneven"]}
+              />
             </div>
           </div>
         </div>
@@ -219,34 +216,25 @@ export default function ColorSection({
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Uniformity
               </label>
-              <select
+              <ShadcnSelect
                 value={uniformity || localUniformity}
-                onChange={(e) => {
-                  setLocalUniformity(e.target.value);
-                  if (onUniformityChange) onUniformityChange(e.target.value);
+                onValueChange={(val) => {
+                  setLocalUniformity(val);
+                  if (onUniformityChange) onUniformityChange(val);
                 }}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-900 outline-none transition focus:border-blue-600 cursor-pointer"
-              >
-                <option value="Uniform">Uniform</option>
-                <option value="Slightly non-uniform">Slightly non-uniform</option>
-                <option value="Non-uniform">Non-uniform</option>
-              </select>
+                options={["Uniform", "Slightly non-uniform", "Non-uniform"]}
+              />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Color Zoning
               </label>
-              <select
+              <ShadcnSelect
                 value={currentZoning}
-                onChange={(e) => onZoningChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-900 outline-none transition focus:border-blue-600 cursor-pointer"
-              >
-                <option value="None visible">None visible</option>
-                <option value="Slight">Slight</option>
-                <option value="Moderate">Moderate</option>
-                <option value="Severe">Severe</option>
-              </select>
+                onValueChange={onZoningChange}
+                options={["None visible", "Slight", "Moderate", "Severe"]}
+              />
             </div>
           </div>
 

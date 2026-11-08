@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { ShadcnSelect } from "@/components/ui/select";
 
 type CutSectionProps = {
   length: string;
@@ -41,16 +42,68 @@ export default function CutSection({
 }: CutSectionProps) {
   const [proportions, setProportions] = useState("Well proportioned");
 
-  // Defaults if empty for preview match
-  const lVal = parseFloat(length) || 8.42;
-  const wVal = parseFloat(width) || 6.31;
-  const dVal = parseFloat(depth) || 4.55;
+  // Sanitize negative input strictly
+  const handlePositiveInput = (val: string, setter: (v: string) => void) => {
+    const clean = val.replace(/-/g, "");
+    setter(clean);
+  };
 
-  const lwRatio = wVal > 0 ? (lVal / wVal).toFixed(2) : "1.33";
-  const depthPercent = wVal > 0 ? ((dVal / wVal) * 100).toFixed(1) : "72.1";
+  const lVal = parseFloat(length);
+  const wVal = parseFloat(width);
+  const dVal = parseFloat(depth);
+
+  const isValidL = !isNaN(lVal) && lVal > 0;
+  const isValidW = !isNaN(wVal) && wVal > 0;
+  const isValidD = !isNaN(dVal) && dVal > 0;
+
+  const hasValidDimensions = isValidL && isValidW;
+  const hasValidDepth = isValidD && isValidW;
+
+  const lwRatioNumber = hasValidDimensions ? lVal / wVal : null;
+  const lwRatio = lwRatioNumber !== null ? lwRatioNumber.toFixed(2) : "—";
+
+  const depthPercentNumber = hasValidDepth ? (dVal / wVal) * 100 : null;
+  const depthPercent = depthPercentNumber !== null ? depthPercentNumber.toFixed(1) : "—";
+
+  const getLwAssessment = () => {
+    if (lwRatioNumber === null) {
+      return { text: "Positive dimensions required", color: "text-rose-500 font-medium" };
+    }
+    if (lwRatioNumber < 1.15) {
+      return { text: "Nearly round / square", color: "text-slate-600 font-semibold" };
+    }
+    if (lwRatioNumber < 1.30) {
+      return { text: "Slightly wide", color: "text-blue-600 font-semibold" };
+    }
+    if (lwRatioNumber <= 1.55) {
+      return { text: "Ideal oval range", color: "text-emerald-600 font-semibold" };
+    }
+    return { text: "Elongated oval", color: "text-amber-600 font-semibold" };
+  };
+
+  const getDepthAssessment = () => {
+    if (depthPercentNumber === null) {
+      return { text: "Positive depth required", color: "text-rose-500 font-medium" };
+    }
+    if (depthPercentNumber < 55) {
+      return { text: "Shallow cut", color: "text-amber-600 font-semibold" };
+    }
+    if (depthPercentNumber <= 68) {
+      return { text: "Ideal depth", color: "text-emerald-600 font-semibold" };
+    }
+    if (depthPercentNumber <= 76) {
+      return { text: "Slightly deep", color: "text-blue-600 font-semibold" };
+    }
+    return { text: "Deep pavilion", color: "text-amber-600 font-semibold" };
+  };
+
+  const lwAssessment = getLwAssessment();
+  const depthAssessment = getDepthAssessment();
 
   // Helper score calculation for Cut preview
   const calculateCutScore = () => {
+    if (!hasValidDimensions || !hasValidDepth) return "—";
+
     let symScore = 85;
     if (symmetry === "Excellent") symScore = 100;
     else if (symmetry === "Fair") symScore = 65;
@@ -91,9 +144,16 @@ export default function CutSection({
                 id="cut-length"
                 type="number"
                 step="0.01"
-                value={length || "8.42"}
-                onChange={(e) => onLengthChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 text-center outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                min="0.01"
+                max="100"
+                value={length}
+                placeholder="8.42"
+                onChange={(e) => handlePositiveInput(e.target.value, onLengthChange)}
+                className={`w-full rounded-xl border bg-white px-3 py-2 text-xs font-semibold text-center outline-none transition focus:ring-1 ${
+                  !isValidL && length !== ""
+                    ? "border-rose-400 text-rose-700 focus:border-rose-600 focus:ring-rose-200"
+                    : "border-slate-200 text-slate-800 focus:border-blue-600 focus:ring-blue-600"
+                }`}
               />
             </div>
 
@@ -105,9 +165,16 @@ export default function CutSection({
                 id="cut-width"
                 type="number"
                 step="0.01"
-                value={width || "6.31"}
-                onChange={(e) => onWidthChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 text-center outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                min="0.01"
+                max="100"
+                value={width}
+                placeholder="6.31"
+                onChange={(e) => handlePositiveInput(e.target.value, onWidthChange)}
+                className={`w-full rounded-xl border bg-white px-3 py-2 text-xs font-semibold text-center outline-none transition focus:ring-1 ${
+                  !isValidW && width !== ""
+                    ? "border-rose-400 text-rose-700 focus:border-rose-600 focus:ring-rose-200"
+                    : "border-slate-200 text-slate-800 focus:border-blue-600 focus:ring-blue-600"
+                }`}
               />
             </div>
 
@@ -119,9 +186,16 @@ export default function CutSection({
                 id="cut-depth"
                 type="number"
                 step="0.01"
-                value={depth || "4.55"}
-                onChange={(e) => onDepthChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 text-center outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                min="0.01"
+                max="100"
+                value={depth}
+                placeholder="4.55"
+                onChange={(e) => handlePositiveInput(e.target.value, onDepthChange)}
+                className={`w-full rounded-xl border bg-white px-3 py-2 text-xs font-semibold text-center outline-none transition focus:ring-1 ${
+                  !isValidD && depth !== ""
+                    ? "border-rose-400 text-rose-700 focus:border-rose-600 focus:ring-rose-200"
+                    : "border-slate-200 text-slate-800 focus:border-blue-600 focus:ring-blue-600"
+                }`}
               />
             </div>
           </div>
@@ -137,8 +211,8 @@ export default function CutSection({
                 </svg>
               </div>
               <div className="mt-2 text-[10px] font-bold text-blue-600 leading-tight text-center">
-                <p>↔ Length {length || "8.42"}</p>
-                <p>↕ Width {width || "6.31"}</p>
+                <p>↔ Length {isValidL ? lVal.toFixed(2) : "—"}</p>
+                <p>↕ Width {isValidW ? wVal.toFixed(2) : "—"}</p>
               </div>
             </div>
 
@@ -148,7 +222,7 @@ export default function CutSection({
                 <span className="text-[10px] font-bold text-amber-600">Side</span>
               </div>
               <div className="mt-2 text-[10px] font-bold text-amber-600 leading-tight text-center">
-                <p>Depth {depth || "4.55"}</p>
+                <p>Depth {isValidD ? dVal.toFixed(2) : "—"}</p>
               </div>
             </div>
           </div>
@@ -162,8 +236,8 @@ export default function CutSection({
               <p className="text-xl font-extrabold text-slate-900 mt-1">
                 {lwRatio}
               </p>
-              <p className="text-[10px] font-semibold text-emerald-600 mt-0.5">
-                Ideal oval range
+              <p className={`text-[10px] mt-0.5 ${lwAssessment.color}`}>
+                {lwAssessment.text}
               </p>
             </div>
 
@@ -172,10 +246,10 @@ export default function CutSection({
                 DEPTH %
               </p>
               <p className="text-xl font-extrabold text-slate-900 mt-1">
-                {depthPercent}%
+                {depthPercentNumber !== null ? `${depthPercent}%` : "—"}
               </p>
-              <p className="text-[10px] font-semibold text-blue-600 mt-0.5">
-                Slightly deep
+              <p className={`text-[10px] mt-0.5 ${depthAssessment.color}`}>
+                {depthAssessment.text}
               </p>
             </div>
           </div>
@@ -195,17 +269,17 @@ export default function CutSection({
               <label htmlFor="cut-proportions" className="block text-xs font-semibold text-slate-600 mb-1.5">
                 Proportions
               </label>
-              <select
+              <ShadcnSelect
                 id="cut-proportions"
                 value={proportions}
-                onChange={(e) => setProportions(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="Well proportioned">Well proportioned</option>
-                <option value="Deep pavilion">Deep pavilion</option>
-                <option value="Shallow crown">Shallow crown</option>
-                <option value="Bulging">Bulging</option>
-              </select>
+                onValueChange={setProportions}
+                options={[
+                  "Well proportioned",
+                  "Deep pavilion",
+                  "Shallow crown",
+                  "Bulging",
+                ]}
+              />
             </div>
 
             {/* Symmetry */}
@@ -213,17 +287,12 @@ export default function CutSection({
               <label htmlFor="cut-symmetry" className="block text-xs font-semibold text-slate-600 mb-1.5">
                 Symmetry
               </label>
-              <select
+              <ShadcnSelect
                 id="cut-symmetry"
                 value={symmetry || "Good"}
-                onChange={(e) => onSymmetryChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="Good">Good</option>
-                <option value="Excellent">Excellent</option>
-                <option value="Fair">Fair</option>
-                <option value="Poor">Poor</option>
-              </select>
+                onValueChange={onSymmetryChange}
+                options={["Good", "Excellent", "Fair", "Poor"]}
+              />
             </div>
 
             {/* Polish */}
@@ -231,17 +300,12 @@ export default function CutSection({
               <label htmlFor="cut-polish" className="block text-xs font-semibold text-slate-600 mb-1.5">
                 Polish
               </label>
-              <select
+              <ShadcnSelect
                 id="cut-polish"
                 value={polish || "Excellent"}
-                onChange={(e) => onPolishChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="Excellent">Excellent</option>
-                <option value="Good">Good</option>
-                <option value="Fair">Fair</option>
-                <option value="Poor">Poor</option>
-              </select>
+                onValueChange={onPolishChange}
+                options={["Excellent", "Good", "Fair", "Poor"]}
+              />
             </div>
 
             {/* Windowing */}
@@ -249,17 +313,12 @@ export default function CutSection({
               <label htmlFor="cut-windowing" className="block text-xs font-semibold text-slate-600 mb-1.5">
                 Windowing
               </label>
-              <select
+              <ShadcnSelect
                 id="cut-windowing"
                 value={windowing || "None"}
-                onChange={(e) => onWindowingChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="None">None</option>
-                <option value="Slight">Slight</option>
-                <option value="Moderate">Moderate</option>
-                <option value="Severe">Severe</option>
-              </select>
+                onValueChange={onWindowingChange}
+                options={["None", "Slight", "Moderate", "Severe"]}
+              />
             </div>
 
             {/* Extinction */}
@@ -267,18 +326,12 @@ export default function CutSection({
               <label htmlFor="cut-extinction" className="block text-xs font-semibold text-slate-600 mb-1.5">
                 Extinction
               </label>
-              <select
+              <ShadcnSelect
                 id="cut-extinction"
                 value={extinction || "Minimal"}
-                onChange={(e) => onExtinctionChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="Minimal">Minimal</option>
-                <option value="None">None</option>
-                <option value="Slight">Slight</option>
-                <option value="Moderate">Moderate</option>
-                <option value="Severe">Severe</option>
-              </select>
+                onValueChange={onExtinctionChange}
+                options={["Minimal", "None", "Slight", "Moderate", "Severe"]}
+              />
             </div>
 
             {/* Bulging */}
@@ -286,17 +339,12 @@ export default function CutSection({
               <label htmlFor="cut-bulging" className="block text-xs font-semibold text-slate-600 mb-1.5">
                 Bulging
               </label>
-              <select
+              <ShadcnSelect
                 id="cut-bulging"
                 value={bulging || "None"}
-                onChange={(e) => onBulgingChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="None">None</option>
-                <option value="Slight">Slight</option>
-                <option value="Moderate">Moderate</option>
-                <option value="Severe">Severe</option>
-              </select>
+                onValueChange={onBulgingChange}
+                options={["None", "Slight", "Moderate", "Severe"]}
+              />
             </div>
           </div>
         </div>
@@ -304,25 +352,36 @@ export default function CutSection({
 
       {/* Column 3: Validation & Cut Preview Cards (3 cols on large) */}
       <div className="lg:col-span-3 space-y-4">
-        {/* Card 1: Green Validation Alert */}
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-xs flex items-start gap-3">
-          <div className="w-5 h-5 rounded-full border border-emerald-400 bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0 mt-0.5">
-            <svg className="w-3 h-3 stroke-current" fill="none" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-            </svg>
+        {/* Card 1: Dynamic Validation Alert */}
+        {hasValidDimensions && hasValidDepth ? (
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-xs flex items-start gap-3">
+            <div className="w-5 h-5 rounded-full border border-emerald-400 bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0 mt-0.5">
+              <svg className="w-3 h-3 stroke-current" fill="none" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p className="text-xs text-emerald-900 leading-relaxed">
+              <strong className="font-bold">Measurements valid.</strong> Ratio {lwRatio} sits inside the oval tolerance under Rule CUT-02.
+            </p>
           </div>
-          <p className="text-xs text-emerald-900 leading-relaxed">
-            <strong className="font-bold">Measurements valid.</strong> Ratio {lwRatio} sits inside the oval tolerance 1.30–1.50 under Rule CUT-02.
-          </p>
-        </div>
+        ) : (
+          <div className="rounded-2xl border border-rose-200 bg-rose-50/80 p-4 shadow-xs flex items-start gap-3">
+            <span className="text-sm flex-shrink-0 mt-0.5">⚠️</span>
+            <p className="text-xs text-rose-900 leading-relaxed">
+              <strong className="font-bold">Invalid Measurements.</strong> Dimensions must be positive real numbers in millimetres (&gt; 0 mm).
+            </p>
+          </div>
+        )}
 
-        {/* Card 2: Yellow Warning Alert */}
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-4 shadow-xs flex items-start gap-3">
-          <span className="text-sm flex-shrink-0 mt-0.5">⚠️</span>
-          <p className="text-xs text-amber-900 leading-relaxed">
-            <strong className="font-bold">Depth {depthPercent}% is slightly deep.</strong> Expect a -2% cut adjustment; recut note will appear in recommendations.
-          </p>
-        </div>
+        {/* Card 2: Depth Warning Alert */}
+        {hasValidDepth && depthPercentNumber !== null && (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-4 shadow-xs flex items-start gap-3">
+            <span className="text-sm flex-shrink-0 mt-0.5">⚠️</span>
+            <p className="text-xs text-amber-900 leading-relaxed">
+              <strong className="font-bold">Depth {depthPercent}% is {depthAssessment.text.toLowerCase()}.</strong> {depthPercentNumber > 68 ? "Expect a cut adjustment in recommendations." : "Proportions within expected boundaries."}
+            </p>
+          </div>
+        )}
 
         {/* Card 3: CUT PREVIEW Card */}
         <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
@@ -334,7 +393,7 @@ export default function CutSection({
               {previewScore}
             </span>
             <span className="text-sm font-bold text-slate-800">
-              · Well Cut
+              · {previewScore !== "—" ? "Well Cut" : "Incomplete"}
             </span>
           </div>
 
