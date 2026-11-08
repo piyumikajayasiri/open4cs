@@ -63,18 +63,18 @@ export default function Header() {
   }
 
   return (
-    <header className="border-b border-[var(--border)] bg-white sticky top-0 z-50 shadow-xs">
+    <header className="border-b border-slate-200 bg-white sticky top-0 z-50 shadow-xs">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primary)] text-lg font-bold text-white shadow-xs">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-lg font-bold text-white shadow-xs">
             4C
           </div>
 
           <div>
-            <p className="font-bold text-[var(--foreground)] leading-tight">
+            <p className="font-bold text-slate-900 leading-tight">
               Open 4Cs
             </p>
-            <p className="hidden text-xs text-[var(--muted)] sm:block">
+            <p className="hidden text-xs text-slate-500 sm:block">
               Gemstone Evaluation
             </p>
           </div>
@@ -86,8 +86,8 @@ export default function Header() {
             href="/"
             className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
               pathname === "/"
-                ? "bg-[var(--primary-soft)] text-[var(--primary-dark)]"
-                : "hover:bg-[var(--surface-soft)] text-[var(--foreground)]"
+                ? "bg-blue-50 text-blue-700 font-semibold"
+                : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
             }`}
           >
             Evaluate
@@ -97,8 +97,8 @@ export default function Header() {
             href="/learn"
             className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
               pathname === "/learn"
-                ? "bg-[var(--primary-soft)] text-[var(--primary-dark)]"
-                : "hover:bg-[var(--surface-soft)] text-[var(--foreground)]"
+                ? "bg-blue-50 text-blue-700 font-semibold"
+                : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
             }`}
           >
             Learn
@@ -109,8 +109,8 @@ export default function Header() {
               href="/dashboard"
               className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
                 pathname === "/dashboard"
-                  ? "bg-[var(--primary-soft)] text-[var(--primary-dark)]"
-                  : "hover:bg-[var(--surface-soft)] text-[var(--foreground)]"
+                  ? "bg-blue-50 text-blue-700 font-semibold"
+                  : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
               My Evaluations
@@ -122,7 +122,7 @@ export default function Header() {
               href="/admin"
               className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
                 pathname?.startsWith("/admin")
-                  ? "bg-amber-100 text-amber-900"
+                  ? "bg-amber-100 text-amber-900 font-semibold"
                   : "bg-amber-50 text-amber-800 hover:bg-amber-100"
               }`}
             >
@@ -133,19 +133,19 @@ export default function Header() {
           {!loading && (
             <>
               {user ? (
-                <div className="flex items-center gap-3 pl-2 border-l border-[var(--border)]">
+                <div className="flex items-center gap-3 pl-2 border-l border-slate-200">
                   <div className="text-right">
-                    <p className="text-xs font-semibold text-[var(--foreground)] leading-tight">
+                    <p className="text-xs font-semibold text-slate-900 leading-tight">
                       {user.name}
                     </p>
-                    <span className="inline-block text-[10px] uppercase font-semibold text-[var(--primary-dark)] bg-[var(--primary-soft)] px-1.5 py-0.5 rounded">
+                    <span className="inline-block text-[10px] uppercase font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
                       {user.category}
                     </span>
                   </div>
 
                   <button
                     onClick={handleLogout}
-                    className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium hover:bg-[var(--surface-soft)] transition"
+                    className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 transition"
                   >
                     Logout
                   </button>
@@ -154,14 +154,14 @@ export default function Header() {
                 <div className="flex items-center gap-2">
                   <Link
                     href="/login"
-                    className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium hover:bg-[var(--surface-soft)] transition"
+                    className="rounded-lg border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100 hover:text-slate-900 bg-white transition shadow-2xs"
                   >
                     Login
                   </Link>
 
                   <Link
                     href="/register"
-                    className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--primary-dark)] transition"
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition shadow-xs"
                   >
                     Create Account
                   </Link>
@@ -175,7 +175,7 @@ export default function Header() {
         <button
           type="button"
           onClick={() => setMenuOpen((open) => !open)}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] md:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-300 text-slate-800 hover:bg-slate-100 md:hidden"
           aria-label="Toggle navigation menu"
           aria-expanded={menuOpen}
         >
@@ -187,12 +187,12 @@ export default function Header() {
 
       {/* Mobile Navigation Dropdown */}
       {menuOpen && (
-        <div className="border-t border-[var(--border)] md:hidden bg-white">
+        <div className="border-t border-slate-200 md:hidden bg-white">
           <nav className="mx-auto max-w-6xl space-y-2 px-5 py-4">
             <Link
               href="/#evaluation"
               onClick={() => setMenuOpen(false)}
-              className="block rounded-xl px-4 py-3 font-semibold hover:bg-[var(--surface-soft)]"
+              className="block rounded-xl px-4 py-3 font-semibold text-slate-800 hover:bg-slate-100"
             >
               Evaluate
             </Link>
@@ -200,7 +200,7 @@ export default function Header() {
             <Link
               href="/learn"
               onClick={() => setMenuOpen(false)}
-              className="block rounded-xl px-4 py-3 font-semibold hover:bg-[var(--surface-soft)]"
+              className="block rounded-xl px-4 py-3 font-semibold text-slate-800 hover:bg-slate-100"
             >
               Learn
             </Link>
@@ -209,7 +209,7 @@ export default function Header() {
               <Link
                 href="/dashboard"
                 onClick={() => setMenuOpen(false)}
-                className="block rounded-xl px-4 py-3 font-semibold hover:bg-[var(--surface-soft)]"
+                className="block rounded-xl px-4 py-3 font-semibold text-slate-800 hover:bg-slate-100"
               >
                 My Evaluations & History
               </Link>
@@ -219,23 +219,23 @@ export default function Header() {
               <Link
                 href="/admin"
                 onClick={() => setMenuOpen(false)}
-                className="block rounded-xl px-4 py-3 font-semibold hover:bg-[var(--surface-soft)] text-amber-900 bg-amber-50"
+                className="block rounded-xl px-4 py-3 font-semibold text-amber-900 bg-amber-50 hover:bg-amber-100"
               >
                 Admin Dashboard
               </Link>
             )}
 
             {user && (
-              <div className="mt-3 border-t border-[var(--border)] pt-4">
-                <div className="rounded-xl bg-[var(--surface-soft)] p-4">
-                  <p className="font-semibold">{user.name}</p>
-                  <p className="mt-1 text-sm text-[var(--muted)]">{user.category}</p>
+              <div className="mt-3 border-t border-slate-200 pt-4">
+                <div className="rounded-xl bg-slate-50 border border-slate-200 p-4">
+                  <p className="font-semibold text-slate-900">{user.name}</p>
+                  <p className="mt-1 text-sm text-slate-600">{user.category}</p>
                 </div>
 
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="mt-3 w-full rounded-xl border border-[var(--border)] px-4 py-3 text-left font-semibold hover:bg-[var(--surface-soft)]"
+                  className="mt-3 w-full rounded-xl border border-slate-300 px-4 py-3 text-left font-semibold text-slate-800 hover:bg-slate-100"
                 >
                   Sign Out
                 </button>
@@ -243,11 +243,11 @@ export default function Header() {
             )}
 
             {!user && (
-              <div className="mt-3 grid gap-3 border-t border-[var(--border)] pt-4">
+              <div className="mt-3 grid gap-3 border-t border-slate-200 pt-4">
                 <Link
                   href="/login"
                   onClick={() => setMenuOpen(false)}
-                  className="rounded-xl border border-[var(--border)] px-4 py-3 text-center font-semibold"
+                  className="rounded-xl border border-slate-300 px-4 py-3 text-center font-semibold text-slate-800 hover:bg-slate-100"
                 >
                   Sign In
                 </Link>
@@ -255,7 +255,7 @@ export default function Header() {
                 <Link
                   href="/register"
                   onClick={() => setMenuOpen(false)}
-                  className="rounded-xl bg-[var(--primary)] px-4 py-3 text-center font-semibold text-white"
+                  className="rounded-xl bg-blue-600 px-4 py-3 text-center font-semibold text-white hover:bg-blue-700"
                 >
                   Create Account
                 </Link>
