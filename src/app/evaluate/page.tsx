@@ -10,7 +10,7 @@ type UserProfile = {
   name: string;
   email: string;
   category: string;
-  role: "USER" | "CAGS_ADMIN";
+  role: "USER" | "ADMIN";
 };
 
 export default function EvaluatePage() {
