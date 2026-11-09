@@ -1,12 +1,12 @@
 export default function ClarityVisualGuide() {
   return (
     <div className="space-y-5">
-      <div className="rounded-xl border border-[var(--border)] p-4">
-        <p className="font-semibold">
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+        <p className="text-sm font-bold text-slate-900">
           How visible are the inclusions?
         </p>
 
-        <p className="mt-1 text-sm text-[var(--muted)]">
+        <p className="mt-1 text-xs text-slate-600">
           These simple diagrams show the idea of increasing visibility.
         </p>
 
@@ -32,36 +32,36 @@ export default function ClarityVisualGuide() {
           />
         </div>
 
-        <p className="mt-4 text-xs leading-5 text-[var(--muted)]">
+        <p className="mt-4 text-xs leading-5 text-slate-600">
           These are simplified learning examples only. Real gemstone
           inclusions vary in type, size, position, visibility, and
           appearance.
         </p>
       </div>
 
-      <div className="rounded-xl border border-[var(--border)] p-4">
-        <p className="font-semibold">
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+        <p className="text-sm font-bold text-slate-900">
           👁 Naked eye vs 🔍 10× loupe
         </p>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl bg-[var(--surface-soft)] p-4">
-            <p className="font-semibold">
+          <div className="rounded-xl bg-slate-50 border border-slate-200 p-4">
+            <p className="font-bold text-sm text-slate-900">
               👁 Naked eye
             </p>
 
-            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+            <p className="mt-2 text-xs leading-5 text-slate-600">
               Observe the gemstone normally without magnification.
               Record what you can actually see.
             </p>
           </div>
 
-          <div className="rounded-xl bg-[var(--surface-soft)] p-4">
-            <p className="font-semibold">
+          <div className="rounded-xl bg-slate-50 border border-slate-200 p-4">
+            <p className="font-bold text-sm text-slate-900">
               🔍 10× loupe
             </p>
 
-            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+            <p className="mt-2 text-xs leading-5 text-slate-600">
               A loupe magnifies the gemstone and may make smaller
               features easier to observe.
             </p>
@@ -91,18 +91,18 @@ function ClarityExample({
 
   return (
     <div className="text-center">
-      <div className="relative mx-auto h-24 w-20 overflow-hidden rounded-[45%] border-2 border-blue-300 bg-blue-100 shadow-inner">
+      <div className="relative mx-auto h-24 w-20 overflow-hidden rounded-[45%] border-2 border-blue-400 bg-blue-50 shadow-inner">
         <div className="absolute inset-3 rounded-[45%] border border-blue-300" />
 
         {positions.slice(0, marks).map((position, index) => (
           <span
             key={index}
-            className={`absolute h-1.5 w-1.5 rounded-full bg-slate-700 ${position}`}
+            className={`absolute h-1.5 w-1.5 rounded-full bg-slate-800 ${position}`}
           />
         ))}
       </div>
 
-      <p className="mt-2 text-sm font-semibold">
+      <p className="mt-2 text-sm font-semibold text-slate-800">
         {label}
       </p>
     </div>
