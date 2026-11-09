@@ -57,6 +57,7 @@ export default function EvaluationStatementView({
   const router = useRouter();
   const [selectedPersona, setSelectedPersona] = useState<PersonaType>(initialPersona);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   const activeStatement = STATEMENTS[selectedPersona];
 
@@ -80,7 +81,8 @@ export default function EvaluationStatementView({
     if (onSave) {
       onSave();
     } else {
-      alert("Evaluation statement saved to your account!");
+      setIsSaved(true);
+    setTimeout(() => setIsSaved(false), 3000);
     }
   };
 

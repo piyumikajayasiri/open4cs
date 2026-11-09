@@ -58,6 +58,13 @@ export default function EvaluationCompleteDashboard({
   onCompare,
   onSave,
 }: EvaluationCompleteDashboardProps) {
+  const [isSaved, setIsSaved] = useState(false);
+  const handleSaveClick = () => {
+    setIsSaved(true);
+    setTimeout(() => setIsSaved(false), 3000);
+    if (onSave) onSave();
+  };
+
   const [activeTab, setActiveTab] = useState<
     "overview" | "breakdown" | "comparables" | "pricing" | "b2b_price" | "recommendations" | "statement"
   >(initialTab);
@@ -99,10 +106,10 @@ export default function EvaluationCompleteDashboard({
         <div className="flex items-center gap-2.5">
           <button
             type="button"
-            onClick={onSave || (() => alert("Evaluation saved to your account!"))}
+            onClick={handleSaveClick}
             className="rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-700 flex items-center gap-1.5 shadow-2xs transition"
           >
-            <span>🔖</span> Save
+            <span>{isSaved ? "✓" : "🔖"}</span> {isSaved ? "Saved!" : "Save"}
           </button>
 
           <button
