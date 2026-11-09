@@ -32,6 +32,11 @@ type AdminSidebarProps = {
 
 const navigation = [
   {
+    label: "Add Administrator",
+    href: "/admin/administrators/new",
+    icon: ShieldCheck,
+  },
+  {
     label: "Dashboard",
     href: "/admin/dashboard",
     icon: LayoutDashboard,
