@@ -9,7 +9,7 @@ type UserProfile = {
   name: string;
   email: string;
   category: string;
-  role: "USER" | "CAGS_ADMIN";
+  role: "USER" | "ADMIN";
 };
 
 const CATALOGUE_ITEMS = [
