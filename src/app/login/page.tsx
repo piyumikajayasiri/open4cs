@@ -4,6 +4,8 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,7 +13,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,6 +21,14 @@ export default function LoginPage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    const errors: { email?: string; password?: string } = {};
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) || email.trim().length > 254) errors.email = "Enter a valid email address.";
+    if (!password) errors.password = "Enter your password.";
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) {
+      document.getElementById(errors.email ? "email" : "password")?.focus();
+      return;
+    }
     setLoading(true);
 
     try {
@@ -97,7 +107,7 @@ export default function LoginPage() {
             </div>
 
             {/* Login Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form noValidate onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label
                   htmlFor="email"
@@ -105,17 +115,21 @@ export default function LoginPage() {
                 >
                   Email
                 </label>
-                <input
+                <Input
                   id="email"
+                  autoComplete="email"
+                  aria-invalid={Boolean(fieldErrors.email)}
+                  aria-describedby={fieldErrors.email ? "login-email-error" : undefined}
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); setFieldErrors((previous) => ({ ...previous, email: undefined })); }}
                   placeholder="nimal@traders.lk"
                   required
                   className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 placeholder:text-slate-400"
                 />
               </div>
 
+              {fieldErrors.email && <p id="login-email-error" role="alert" className="text-sm text-destructive">{fieldErrors.email}</p>}
               <div>
                 <label
                   htmlFor="password"
@@ -124,11 +138,14 @@ export default function LoginPage() {
                   Password
                 </label>
                 <div className="relative">
-                  <input
+                  <Input
                     id="password"
+                    autoComplete="current-password"
+                    aria-invalid={Boolean(fieldErrors.password)}
+                    aria-describedby={fieldErrors.password ? "login-password-error" : undefined}
                     type={showPassword ? "text" : "password"}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => { setPassword(e.target.value); setFieldErrors((previous) => ({ ...previous, password: undefined })); }}
                     placeholder="••••••••••••"
                     required
                     className="w-full rounded-xl border border-slate-300 px-4 py-2.5 pr-10 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 placeholder:text-slate-400"
@@ -178,17 +195,10 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              {fieldErrors.password && <p id="login-password-error" role="alert" className="text-sm text-destructive">{fieldErrors.password}</p>}
               {/* Options Row */}
               <div className="flex items-center justify-between text-xs sm:text-sm pt-1">
-                <label className="flex items-center gap-2 cursor-pointer text-slate-700 font-medium select-none">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span>Remember me</span>
-                </label>
+<span className="text-slate-500">Use your registered email.</span>
 
                 <a
                   href="#forgot-password"
@@ -206,19 +216,19 @@ export default function LoginPage() {
 
               {/* Error Message */}
               {error && (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+                <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
                   {error}
                 </div>
               )}
 
               {/* Submit Button */}
-              <button
+              <Button
                 type="submit"
                 disabled={loading}
                 className="w-full bg-[#0B132B] hover:bg-[#1C2A4D] text-white font-semibold py-3 rounded-xl shadow-md text-sm transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
               >
                 {loading ? "Signing in..." : "Login"}
-              </button>
+              </Button>
             </form>
 
             {/* Create Account Link */}

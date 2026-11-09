@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 type UserProfile = {
   id: string;
@@ -106,13 +107,7 @@ export default function GemstoneCataloguePage() {
   }, []);
 
   async function handleLogout() {
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/login");
-      router.refresh();
-    } catch {
-      router.push("/login");
-    }
+    await signOut({ callbackUrl: "/login" });
   }
 
   const userInitials = user?.name
