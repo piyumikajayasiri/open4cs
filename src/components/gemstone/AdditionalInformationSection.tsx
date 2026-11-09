@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { ShadcnSelect } from "@/components/ui/select";
 
 type AdditionalInformationSectionProps = {
   treatmentStatus: string;
@@ -53,18 +54,18 @@ export default function AdditionalInformationSection({
               >
                 Treatment Status
               </label>
-              <select
+              <ShadcnSelect
                 id="treatment-status-select"
                 value={currentTreatment}
-                onChange={(e) => onTreatmentStatusChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="Heated (H) — mild">Heated (H) — mild</option>
-                <option value="Untreated / Natural">Untreated / Natural</option>
-                <option value="Heated (Standard)">Heated (Standard)</option>
-                <option value="Beryllium Treated">Beryllium Treated</option>
-                <option value="Glass Filled">Glass Filled</option>
-              </select>
+                onValueChange={onTreatmentStatusChange}
+                options={[
+                  "Heated (H) — mild",
+                  "Untreated / Natural",
+                  "Heated (Standard)",
+                  "Beryllium Treated",
+                  "Glass Filled",
+                ]}
+              />
             </div>
 
             {/* 2. Treatment Verification */}
@@ -75,19 +76,19 @@ export default function AdditionalInformationSection({
               >
                 Treatment Verification
               </label>
-              <select
+              <ShadcnSelect
                 id="treatment-verification-select"
                 value={treatmentVerification}
-                onChange={(e) =>
-                  onInformationReliabilityChange("treatment", e.target.value)
+                onValueChange={(val) =>
+                  onInformationReliabilityChange("treatment", val)
                 }
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="Laboratory Verified">Laboratory Verified</option>
-                <option value="Seller Provided">Seller Provided</option>
-                <option value="User Observed">User Observed</option>
-                <option value="Unverified">Unverified</option>
-              </select>
+                options={[
+                  "Laboratory Verified",
+                  "Seller Provided",
+                  "User Observed",
+                  "Unverified",
+                ]}
+              />
             </div>
 
             {/* 3. Origin */}
@@ -98,18 +99,18 @@ export default function AdditionalInformationSection({
               >
                 Origin
               </label>
-              <select
+              <ShadcnSelect
                 id="origin-select"
                 value={currentOrigin}
-                onChange={(e) => onOriginValueChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="Sri Lanka (Ceylon)">Sri Lanka (Ceylon)</option>
-                <option value="Madagascar">Madagascar</option>
-                <option value="Myanmar (Burma)">Myanmar (Burma)</option>
-                <option value="Kashmir">Kashmir</option>
-                <option value="Unknown / Undetermined">Unknown / Undetermined</option>
-              </select>
+                onValueChange={onOriginValueChange}
+                options={[
+                  "Sri Lanka (Ceylon)",
+                  "Madagascar",
+                  "Myanmar (Burma)",
+                  "Kashmir",
+                  "Unknown / Undetermined",
+                ]}
+              />
             </div>
 
             {/* 4. Origin Verification */}
@@ -120,19 +121,19 @@ export default function AdditionalInformationSection({
               >
                 Origin Verification
               </label>
-              <select
+              <ShadcnSelect
                 id="origin-verification-select"
                 value={originVerification}
-                onChange={(e) =>
-                  onInformationReliabilityChange("origin", e.target.value)
+                onValueChange={(val) =>
+                  onInformationReliabilityChange("origin", val)
                 }
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="Seller Provided">Seller Provided</option>
-                <option value="Laboratory Verified">Laboratory Verified</option>
-                <option value="User Observed">User Observed</option>
-                <option value="Unverified">Unverified</option>
-              </select>
+                options={[
+                  "Seller Provided",
+                  "Laboratory Verified",
+                  "User Observed",
+                  "Unverified",
+                ]}
+              />
             </div>
 
             {/* 5. Recut Potential */}
@@ -143,17 +144,17 @@ export default function AdditionalInformationSection({
               >
                 Recut Potential
               </label>
-              <select
+              <ShadcnSelect
                 id="recut-potential-select"
                 value={recutPotential}
-                onChange={(e) => setRecutPotential(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="Not recommended — good spread">Not recommended — good spread</option>
-                <option value="Recut recommended — improve symmetry">Recut recommended — improve symmetry</option>
-                <option value="Minor pavilion touchup">Minor pavilion touchup</option>
-                <option value="Window closure possible">Window closure possible</option>
-              </select>
+                onValueChange={setRecutPotential}
+                options={[
+                  "Not recommended — good spread",
+                  "Recut recommended — improve symmetry",
+                  "Minor pavilion touchup",
+                  "Window closure possible",
+                ]}
+              />
             </div>
 
             {/* 6. Other Characteristics */}
@@ -164,80 +165,68 @@ export default function AdditionalInformationSection({
               >
                 Other Characteristics
               </label>
-              <select
+              <ShadcnSelect
                 id="other-characteristics-select"
                 value={otherCharacteristics}
-                onChange={(e) => setOtherCharacteristics(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="No colour zoning · No window">No colour zoning · No window</option>
-                <option value="Slight colour banding">Slight colour banding</option>
-                <option value="Moderate extinction">Moderate extinction</option>
-                <option value="Slight windowing">Slight windowing</option>
-              </select>
+                onValueChange={setOtherCharacteristics}
+                options={[
+                  "No colour zoning · No window",
+                  "Slight colour banding",
+                  "Moderate extinction",
+                  "Slight windowing",
+                ]}
+              />
             </div>
           </div>
+        </div>
 
-          {/* Attached Document Card */}
-          <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 flex items-center justify-between">
-            <div className="flex items-center gap-2.5 text-xs font-medium text-slate-700">
-              <span className="text-base text-slate-500">📎</span>
-              <span>GIC-Colombo Report GIC-88412.pdf attached</span>
-            </div>
-
-            <span className="rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold px-2.5 py-0.5">
-              Verified
-            </span>
+        {/* Informational Guidance Alert */}
+        <div className="rounded-2xl border border-blue-100 bg-[#F4F8FF] p-5 shadow-xs flex items-start gap-3">
+          <div className="w-5 h-5 rounded-full border border-blue-400 bg-white flex items-center justify-center text-blue-600 flex-shrink-0 mt-0.5">
+            <span className="text-xs font-bold">i</span>
+          </div>
+          <div className="text-xs text-slate-700 space-y-1">
+            <p className="font-semibold text-slate-900">
+              Reliability shapes the confidence interval
+            </p>
+            <p className="leading-relaxed text-slate-600">
+              Laboratory-verified origins and unheated treatments receive tighter pricing spreads. Self-reported or unverified stones trigger automatic verification warnings on appraisal sheets.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Right Auxiliary Sidebar Cards (1 col on large screen) */}
+      {/* Right Column Auxiliary Cards (1 col on large screens) */}
       <div className="space-y-6">
-        {/* Card 1: Information Reliability */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-4">
-          <h4 className="text-sm font-bold text-slate-900">
-            Information Reliability
-          </h4>
-
+        {/* Card 1: Additional Factors Summary */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
+          <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-3">
+            VERIFICATION STATUS
+          </p>
+          
           <div className="space-y-3">
-            {/* Treatment */}
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-600 font-medium">Treatment</span>
-              <span className="rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold px-2.5 py-0.5 flex items-center gap-1">
-                <span>✔</span> Laboratory Verified
-              </span>
+            <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-100">
+              <span className="text-slate-600 font-medium">Origin verified:</span>
+              <span className="font-semibold text-slate-900">{originVerification}</span>
             </div>
-
-            {/* Origin */}
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-600 font-medium">Origin</span>
-              <span className="rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold px-2.5 py-0.5 flex items-center gap-1">
-                <span>⚠️</span> Seller Provided
-              </span>
+            <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-100">
+              <span className="text-slate-600 font-medium">Treatment verified:</span>
+              <span className="font-semibold text-slate-900">{treatmentVerification}</span>
             </div>
-
-            {/* Recut note */}
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-600 font-medium">Recut note</span>
-              <span className="rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-semibold px-2.5 py-0.5 flex items-center gap-1">
-                <span>👁</span> User Observed
-              </span>
+              <span className="text-slate-600 font-medium">Recut note:</span>
+              <span className="font-semibold text-emerald-700">Spread preserved</span>
             </div>
           </div>
         </div>
 
-        {/* Card 2: Why this matters */}
-        <div className="rounded-2xl border border-[#D5EFE3] bg-[#F0FAF5] p-5 shadow-xs space-y-2.5">
-          <div className="flex items-center gap-2 text-emerald-800">
-            <span className="text-sm">📖</span>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-900">
-              Why this matters
-            </h4>
-          </div>
-
-          <p className="text-xs text-emerald-900 leading-relaxed">
-            Heated Ceylon sapphire carries a modest, published modifier. Unverified origin caps the origin premium until a lab report confirms it — this protects both student and trader.
+        {/* Card 2: Market Tip */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+          <h4 className="text-xs font-bold text-slate-900 mb-2">
+            💡 Market Intelligence
+          </h4>
+          <p className="text-xs text-slate-600 leading-relaxed">
+            Unheated Ceylon sapphires with verified origins currently trade at a 40–80% premium over heat-treated equivalents of identical color and clarity.
           </p>
         </div>
       </div>

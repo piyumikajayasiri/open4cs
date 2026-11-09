@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ShadcnSelect } from "@/components/ui/select";
 
 export type EvaluationOption = {
   _id: string;
@@ -269,26 +270,22 @@ function EvaluationSelector({
         {label}
       </label>
 
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-4 py-3 outline-none focus:border-[var(--primary)] text-sm"
-      >
-        <option value="">
-          Select a saved evaluation
-        </option>
-
-        {evaluations.map((evaluation) => (
-          <option
-            key={evaluation._id}
-            value={evaluation._id}
-            disabled={evaluation._id === disabledId}
-          >
-            {evaluation.variety} — {formatDate(evaluation.createdAt)} —{" "}
-            {formatScore(evaluation.overallScore)}/100
-          </option>
-        ))}
-      </select>
+      <div className="mt-2">
+        <ShadcnSelect
+          value={value}
+          onValueChange={onChange}
+          placeholder="Select a saved evaluation"
+          options={[
+            { value: "", label: "Select a saved evaluation" },
+            ...evaluations
+              .filter((ev) => ev._id !== disabledId)
+              .map((evaluation) => ({
+                value: evaluation._id,
+                label: `${evaluation.variety} — ${formatDate(evaluation.createdAt)} — ${formatScore(evaluation.overallScore)}/100`,
+              })),
+          ]}
+        />
+      </div>
     </div>
   );
 }
