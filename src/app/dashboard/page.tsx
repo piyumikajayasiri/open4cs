@@ -104,43 +104,7 @@ export default function DashboardPage() {
     }
   }
 
-  // Sample data fallback if no evaluations exist in DB yet
-  const sampleEvaluations: EvaluationItem[] = [
-    {
-      _id: "EV-2026-0847",
-      gemstoneId: { variety: "Ceylon Blue Sapphire", caratWeight: 1.8 },
-      status: "COMPLETED",
-      createdAt: "2026-09-24T10:00:00.000Z",
-      result: { overall4C: { score: 8.4 } },
-      priceSuggestion: { formattedPriceRange: "LKR 1.42M – 1.68M" },
-    },
-    {
-      _id: "EV-2026-0841",
-      gemstoneId: { variety: "Padparadscha", caratWeight: 2.1 },
-      status: "COMPLETED",
-      createdAt: "2026-09-21T14:30:00.000Z",
-      result: { overall4C: { score: 7.8 } },
-      priceSuggestion: { formattedPriceRange: "LKR 2.05M – 2.40M" },
-    },
-    {
-      _id: "EV-2026-0839",
-      gemstoneId: { variety: "Pink Sapphire", caratWeight: 1.2 },
-      status: "DRAFT",
-      createdAt: "2026-09-19T09:15:00.000Z",
-      result: { overall4C: { score: null } },
-      priceSuggestion: { formattedPriceRange: "—" },
-    },
-    {
-      _id: "EV-2026-0832",
-      gemstoneId: { variety: "Yellow Sapphire", caratWeight: 1.5 },
-      status: "COMPLETED",
-      createdAt: "2026-09-14T16:45:00.000Z",
-      result: { overall4C: { score: 7.1 } },
-      priceSuggestion: { formattedPriceRange: "LKR 310K – 385K" },
-    },
-  ];
-
-  const displayEvaluations = evaluations.length > 0 ? evaluations : sampleEvaluations;
+  const displayEvaluations = evaluations;
 
   if (loading) {
     return (
@@ -203,7 +167,7 @@ export default function DashboardPage() {
             </button>
 
             <Link
-              href="/#evaluation"
+              href="/evaluate/gemstone"
               className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800/60 hover:text-white transition"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -212,47 +176,25 @@ export default function DashboardPage() {
               <span>New Evaluation</span>
             </Link>
 
-            <button
-              onClick={() => { setActiveTab("evaluations"); setIsComparing(false); }}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
-                activeTab === "evaluations"
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
-              </svg>
-              <span>My Evaluations</span>
-            </button>
-
-            <button
-              onClick={() => { setActiveTab("history"); setIsComparing(false); }}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
-                activeTab === "history"
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
-              }`}
+            <Link
+              href="/history"
+              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800/60 hover:text-white transition"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span>Evaluation History</span>
-            </button>
+            </Link>
 
-            <button
-              onClick={() => { setIsComparing(true); }}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
-                isComparing
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
-              }`}
+            <Link
+              href="/compare"
+              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800/60 hover:text-white transition"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
               <span>Compare Gemstones</span>
-            </button>
+            </Link>
 
             <button
               onClick={() => alert("Report generation center: Select any evaluation below to download the official PDF.")}
@@ -413,10 +355,10 @@ export default function DashboardPage() {
                   <p className="text-xs font-medium text-slate-500">Total Evaluations</p>
                   <div className="flex items-baseline gap-2 mt-2">
                     <span className="text-2xl font-bold text-slate-900">
-                      {evaluations.length > 0 ? evaluations.length : 48}
+                      {evaluations.length}
                     </span>
                     <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                      +6 this month
+                      Live
                     </span>
                   </div>
                 </div>
@@ -432,8 +374,8 @@ export default function DashboardPage() {
                 <div>
                   <p className="text-xs font-medium text-slate-500">Saved Evaluations</p>
                   <div className="mt-2">
-                    <span className="text-2xl font-bold text-slate-900">12</span>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Drafts & finalised</p>
+                    <span className="text-2xl font-bold text-slate-900">{evaluations.length}</span>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Stored in database</p>
                   </div>
                 </div>
                 <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
@@ -446,15 +388,17 @@ export default function DashboardPage() {
               {/* Card 3 */}
               <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-xs flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-slate-500">Evaluations This Month</p>
+                  <p className="text-xs font-medium text-slate-500">Compare Tool</p>
                   <div className="mt-2">
-                    <span className="text-2xl font-bold text-slate-900">9</span>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Across 3 varieties</p>
+                    <Link href="/compare" className="text-xs font-bold text-blue-600 hover:underline">
+                      Launch Tool →
+                    </Link>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Side-by-side analysis</p>
                   </div>
                 </div>
                 <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
               </div>
@@ -462,10 +406,12 @@ export default function DashboardPage() {
               {/* Card 4 */}
               <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-xs flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-slate-500">Generated Reports</p>
+                  <p className="text-xs font-medium text-slate-500">History Center</p>
                   <div className="mt-2">
-                    <span className="text-2xl font-bold text-slate-900">21</span>
-                    <p className="text-[11px] text-slate-400 mt-0.5">PDF · A4 lab format</p>
+                    <Link href="/history" className="text-xs font-bold text-blue-600 hover:underline">
+                      View All ({evaluations.length}) →
+                    </Link>
+                    <p className="text-[11px] text-slate-400 mt-0.5">PDF & report export</p>
                   </div>
                 </div>
                 <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
