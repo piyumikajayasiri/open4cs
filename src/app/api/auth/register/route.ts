@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongodb";
-import User, { UserCategory } from "@/models/User";
+import User, { USER_CATEGORIES, type UserCategory } from "@/models/User";
 
-const ALLOWED_CATEGORIES: UserCategory[] = [
-  "STUDENT",
-  "TRADER",
-  "GEMOLOGIST",
-  "PROFESSIONAL",
-];
+const ALLOWED_CATEGORIES = USER_CATEGORIES;
 
 export async function POST(request: NextRequest) {
   try {
