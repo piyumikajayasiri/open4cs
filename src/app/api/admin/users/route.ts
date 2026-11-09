@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { validateAccount } from "@/lib/account-validation";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
 import User, { USER_CATEGORIES, USER_ROLES, USER_STATUSES } from "@/models/User";
@@ -82,7 +83,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
     }
 
-    const body = await request.json();
+    let body;
+    try { body = await request.json(); } catch {
+      return NextResponse.json({ message: "Invalid request body." }, { status: 400 });
+    }
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ message: "Invalid request body." }, { status: 400 });
+    }
+    const errors = validateAccount(body);
+    if (Object.keys(errors).length) {
+      return NextResponse.json({ message: "Please correct the highlighted fields.", errors }, { status: 400 });
+    }
 
     const name = typeof body.name === "string" ? body.name.trim() : "";
     const email =
@@ -98,34 +109,6 @@ export async function POST(request: NextRequest) {
       typeof body.status === "string"
         ? body.status.trim().toUpperCase()
         : "ACTIVE";
-
-    if (name.length < 2 || name.length > 100) {
-      return NextResponse.json(
-        { message: "Name must contain 2–100 characters." },
-        { status: 400 },
-      );
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return NextResponse.json(
-        { message: "Enter a valid email address." },
-        { status: 400 },
-      );
-    }
-
-    if (password.length < 8) {
-      return NextResponse.json(
-        { message: "Password must contain at least 8 characters." },
-        { status: 400 },
-      );
-    }
-
-    if (!CATEGORIES.includes(category as (typeof CATEGORIES)[number])) {
-      return NextResponse.json(
-        { message: "Invalid user category." },
-        { status: 400 },
-      );
-    }
 
     if (!ROLES.includes(role as (typeof ROLES)[number])) {
       return NextResponse.json(

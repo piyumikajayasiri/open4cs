@@ -14,6 +14,7 @@ export default auth((request) => {
   const isProtectedRoute =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/evaluation") ||
+    pathname.startsWith("/evaluate") ||
     pathname.startsWith("/history") ||
     pathname.startsWith("/settings") ||
     pathname.startsWith("/reports") ||
@@ -31,7 +32,7 @@ export default auth((request) => {
   // User is already logged in and tries to access login/register
   if (isLoggedIn && isAuthPage) {
     if (session.user.role === "ADMIN") {
-      return NextResponse.redirect(new URL("/admin", request.url));
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     }
 
     return NextResponse.redirect(new URL("/dashboard", request.url));
@@ -51,6 +52,7 @@ export const config = {
     "/register",
     "/dashboard/:path*",
     "/evaluation/:path*",
+    "/evaluate/:path*",
     "/history/:path*",
     "/settings/:path*",
     "/reports/:path*",

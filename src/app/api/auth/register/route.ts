@@ -1,83 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { validateAccount } from "@/lib/account-validation";
 import { connectDB } from "@/lib/mongodb";
-import User, { USER_CATEGORIES, type UserCategory } from "@/models/User";
+import User, { type UserCategory } from "@/models/User";
 
-const ALLOWED_CATEGORIES = USER_CATEGORIES;
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    let body;
+    try { body = await request.json(); } catch {
+      return NextResponse.json({ message: "Invalid request body." }, { status: 400 });
+    }
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ message: "Invalid request body." }, { status: 400 });
+    }
+    const errors = validateAccount({ ...body, category: body.category ?? body.userCategory ?? body.selectedCategory });
+    if (Object.keys(errors).length) {
+      return NextResponse.json({ success: false, message: "Please correct the highlighted fields.", errors }, { status: 400 });
+    }
 
     const name = typeof body.name === "string" ? body.name.trim() : "";
     const email =
       typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
     const password = typeof body.password === "string" ? body.password : "";
-    const confirmPassword =
-      typeof body.confirmPassword === "string" ? body.confirmPassword : "";
     const rawCategory =
       body.category ?? body.userCategory ?? body.selectedCategory;
 
     const category =
       typeof rawCategory === "string" ? rawCategory.trim().toUpperCase() : "";
-
-    // Validate required fields
-    if (!name || !email || !password || !category) {
-      return NextResponse.json(
-        { success: false, message: "Please complete all required fields." },
-        { status: 400 },
-      );
-    }
-
-    if (name.length < 2 || name.length > 100) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Name must be between 2 and 100 characters.",
-        },
-        { status: 400 },
-      );
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
-      return NextResponse.json(
-        { success: false, message: "Please enter a valid email address." },
-        { status: 400 },
-      );
-    }
-
-    if (!ALLOWED_CATEGORIES.includes(category as UserCategory)) {
-      console.error("Invalid registration category:", {
-        received: rawCategory,
-        type: typeof rawCategory,
-      });
-
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Invalid user category.",
-          receivedCategory: rawCategory ?? null,
-        },
-        { status: 400 },
-      );
-    }
-
-    if (password.length < 12) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Password must contain at least 12 characters.",
-        },
-        { status: 400 },
-      );
-    }
-
-    if (confirmPassword && password !== confirmPassword) {
-      return NextResponse.json(
-        { success: false, message: "Passwords do not match." },
-        { status: 400 },
-      );
-    }
 
     // Connect to the database
     await connectDB();

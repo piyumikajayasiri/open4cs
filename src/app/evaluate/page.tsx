@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import GemstoneForm from "@/components/gemstone/GemstoneForm";
 
 type UserProfile = {
@@ -14,7 +14,6 @@ type UserProfile = {
 };
 
 export default function EvaluatePage() {
-  const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -39,13 +38,7 @@ export default function EvaluatePage() {
   }, []);
 
   async function handleLogout() {
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/login");
-      router.refresh();
-    } catch {
-      router.push("/login");
-    }
+    await signOut({ callbackUrl: "/login" });
   }
 
   const userInitials = user?.name
