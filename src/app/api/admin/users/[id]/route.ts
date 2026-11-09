@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { Types } from "mongoose";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
-import User from "@/models/User";
+import User, { USER_CATEGORIES, USER_ROLES, USER_STATUSES } from "@/models/User";
 
-const CATEGORIES = ["STUDENT", "TRADER", "GEMOLOGIST", "PROFESSIONAL"];
+const CATEGORIES = USER_CATEGORIES;
 
-const ROLES = ["USER", "ADMIN"];
-const STATUSES = ["ACTIVE", "INACTIVE"];
+const ROLES = USER_ROLES;
+const STATUSES = USER_STATUSES;
 
 async function isAdmin() {
   const session = await auth();
