@@ -99,8 +99,8 @@ const navigation = [
 
 export default function AdminSidebar({ pathname, user }: AdminSidebarProps) {
   function isActive(href: string) {
-    if (href === "/admin") {
-      return pathname === "/admin";
+    if (href === "/admin" || href === "/admin/dashboard") {
+      return pathname === "/admin" || pathname === "/admin/dashboard";
     }
 
     return pathname === href || pathname.startsWith(`${href}/`);

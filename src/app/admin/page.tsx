@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { EVALUATION_RULE_VERSION } from "@/lib/evaluation/rules";
 
 type AdminUser = {
@@ -176,6 +177,11 @@ function createEmptyReferenceForm() {
 }
 
 export default function AdminPage() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/admin/dashboard");
+  }, [router]);
+
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [referenceGemstones, setReferenceGemstones] = useState<ReferenceGemstone[]>([]);
   const [newReference, setNewReference] = useState(createEmptyReferenceForm);
