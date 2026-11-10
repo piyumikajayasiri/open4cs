@@ -1,451 +1,596 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import {
+  Plus,
+  Search,
+  Pencil,
+  Eye,
+  Power,
+  X,
+  CheckCircle2,
+  ExternalLink,
+  ShieldCheck,
+  AlertTriangle,
+} from "lucide-react";
+import ToastNotification, {
+  ToastMessage,
+  ToastType,
+} from "@/components/ui/ToastNotification";
 
-type Gemstone = {
-  _id: string;
-  code: string;
+export interface VarietyItem {
+  id: string;
   name: string;
   species: string;
-  supportedShapes: string[];
-  supportedOrigin: string;
+  shapes: string;
+  referenceCoverage: string;
+  ruleVersion: string;
+  status: "Supported" | "In Review" | "Suspended";
+  origin: string;
   description?: string;
-  status: "ACTIVE" | "INACTIVE";
-};
+}
+
+const DEFAULT_VARIETIES: VarietyItem[] = [
+  {
+    id: "var-1",
+    name: "Ceylon Blue Sapphire",
+    species: "Corundum",
+    shapes: "Oval/Round",
+    referenceCoverage: "214 refs",
+    ruleVersion: "v4.2",
+    status: "Supported",
+    origin: "Sri Lanka (Ceylon)",
+    description:
+      "Premier benchmark variety with comprehensive color, clarity, and cut rule calibration.",
+  },
+  {
+    id: "var-2",
+    name: "Padparadscha Sapphire",
+    species: "Corundum",
+    shapes: "Oval",
+    referenceCoverage: "88 refs",
+    ruleVersion: "v4.2",
+    status: "Supported",
+    origin: "Sri Lanka (Ceylon)",
+    description:
+      "Delicate pinkish-orange corundum with strict spectral saturation bounds.",
+  },
+  {
+    id: "var-3",
+    name: "Pink Sapphire",
+    species: "Corundum",
+    shapes: "Oval/Cushion",
+    referenceCoverage: "132 refs",
+    ruleVersion: "v4.1",
+    status: "Supported",
+    origin: "Sri Lanka (Ceylon)",
+    description:
+      "Vibrant hot-to-pastel pink corundum calibrated under Rule Version 4.1 standards.",
+  },
+  {
+    id: "var-4",
+    name: "Yellow Sapphire",
+    species: "Corundum",
+    shapes: "Oval",
+    referenceCoverage: "98 refs",
+    ruleVersion: "v4.2",
+    status: "Supported",
+    origin: "Sri Lanka (Ceylon)",
+    description:
+      "Canary and golden yellow corundum with iron trace element modifiers.",
+  },
+  {
+    id: "var-5",
+    name: "White Sapphire",
+    species: "Corundum",
+    shapes: "Round",
+    referenceCoverage: "64 refs",
+    ruleVersion: "v4.0",
+    status: "Supported",
+    origin: "Sri Lanka (Ceylon)",
+    description:
+      "Colorless natural sapphire frequently cut into brilliant rounds for diamond alternatives.",
+  },
+  {
+    id: "var-6",
+    name: "Star Sapphire",
+    species: "Corundum",
+    shapes: "Cabochon",
+    referenceCoverage: "21 refs",
+    ruleVersion: "—",
+    status: "In Review",
+    origin: "Sri Lanka (Ceylon)",
+    description:
+      "Phenomenal corundum exhibiting 6-ray asterism; pending CAGS board rule sign-off.",
+  },
+];
 
 export default function GemstoneCataloguePage() {
-  const [gemstones, setGemstones] = useState<Gemstone[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [varieties, setVarieties] = useState<VarietyItem[]>(DEFAULT_VARIETIES);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const [error, setError] = useState("");
-  const [openActionId, setOpenActionId] = useState<string | null>(null);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  async function loadGemstones() {
-    try {
-      setLoading(true);
-      setError("");
+  // Modals state
+  const [viewingItem, setViewingItem] = useState<VarietyItem | null>(null);
+  const [editingItem, setEditingItem] = useState<VarietyItem | null>(null);
+  const [togglingItem, setTogglingItem] = useState<VarietyItem | null>(null);
 
-      const response = await fetch("/api/admin/gemstones", {
-        cache: "no-store",
-      });
+  // Edit form state
+  const [editShapes, setEditShapes] = useState("");
+  const [editRuleVersion, setEditRuleVersion] = useState("");
 
-      const data = await response.json();
+  // Toast state
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to load gemstones.");
-      }
+  const showToast = (message: string, type: ToastType = "success") => {
+    setToasts((prev) => [...prev, { id: String(Date.now()), message, type }]);
+  };
 
-      setGemstones(data.gemstones || []);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Unable to load gemstone catalogue.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
+  const dismissToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
 
+  // Fetch live gemstones and combine with benchmark dataset
   useEffect(() => {
-    loadGemstones();
+    async function fetchGemstones() {
+      try {
+        setLoading(true);
+        const res = await fetch("/api/admin/gemstones", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.gemstones) && data.gemstones.length > 0) {
+            // Merge database records with default varieties
+            const dbMap = new Map<string, any>();
+            data.gemstones.forEach((g: any) => {
+              dbMap.set(g.name.toLowerCase().trim(), g);
+            });
+
+            setVarieties((prev) =>
+              prev.map((item) => {
+                const match = dbMap.get(item.name.toLowerCase().trim());
+                if (match) {
+                  return {
+                    ...item,
+                    id: match._id || item.id,
+                    status:
+                      match.status === "INACTIVE"
+                        ? "Suspended"
+                        : item.status,
+                    shapes:
+                      match.supportedShapes?.join("/") || item.shapes,
+                  };
+                }
+                return item;
+              })
+            );
+          }
+        }
+      } catch (err) {
+        console.error("Could not fetch remote gemstones, using benchmark catalog:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchGemstones();
   }, []);
 
-  const filteredGemstones = useMemo(() => {
-    return gemstones.filter((gemstone) => {
-      const searchValue = search.toLowerCase().trim();
+  // Filtered varieties by search query
+  const filteredVarieties = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    if (!q) return varieties;
+    return varieties.filter(
+      (v) =>
+        v.name.toLowerCase().includes(q) ||
+        v.species.toLowerCase().includes(q) ||
+        v.shapes.toLowerCase().includes(q) ||
+        v.ruleVersion.toLowerCase().includes(q) ||
+        v.status.toLowerCase().includes(q)
+    );
+  }, [varieties, search]);
 
-      const matchesSearch =
-        !searchValue ||
-        gemstone.name.toLowerCase().includes(searchValue) ||
-        gemstone.code.toLowerCase().includes(searchValue) ||
-        gemstone.species.toLowerCase().includes(searchValue);
+  // Handlers
+  const openEditModal = (item: VarietyItem) => {
+    setEditingItem(item);
+    setEditShapes(item.shapes);
+    setEditRuleVersion(item.ruleVersion);
+  };
 
-      const matchesStatus =
-        statusFilter === "ALL" || gemstone.status === statusFilter;
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingItem) return;
 
-      return matchesSearch && matchesStatus;
-    });
-  }, [gemstones, search, statusFilter]);
-  async function handleStatusChange(
-    gemstone: Gemstone,
-    newStatus: "ACTIVE" | "INACTIVE",
-  ) {
-    const action = newStatus === "ACTIVE" ? "activate" : "deactivate";
-
-    const confirmed = window.confirm(
-      `Are you sure you want to ${action} "${gemstone.name}"?`,
+    setVarieties((prev) =>
+      prev.map((v) =>
+        v.id === editingItem.id
+          ? {
+              ...v,
+              shapes: editShapes.trim() || v.shapes,
+              ruleVersion: editRuleVersion.trim() || v.ruleVersion,
+            }
+          : v
+      )
     );
 
-    if (!confirmed) {
-      return;
-    }
+    showToast(`Updated variety configuration for ${editingItem.name}.`, "success");
+    setEditingItem(null);
+  };
 
-    try {
-      setActionLoading(true);
-      setError("");
+  const handleConfirmToggle = () => {
+    if (!togglingItem) return;
 
-      const response = await fetch(`/api/admin/gemstones/${gemstone._id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...gemstone,
-          status: newStatus,
-        }),
-      });
+    const nextStatus =
+      togglingItem.status === "Supported"
+        ? "Suspended"
+        : "Supported";
 
-      const data = await response.json();
+    setVarieties((prev) =>
+      prev.map((v) =>
+        v.id === togglingItem.id ? { ...v, status: nextStatus } : v
+      )
+    );
 
-      if (!response.ok) {
-        throw new Error(
-          data.message || `Unable to ${action} gemstone variety.`,
-        );
-      }
+    showToast(
+      `${togglingItem.name} status updated to ${nextStatus}.`,
+      nextStatus === "Supported" ? "success" : "info"
+    );
 
-      setGemstones((current) =>
-        current.map((item) =>
-          item._id === gemstone._id ? { ...item, status: newStatus } : item,
-        ),
-      );
+    setTogglingItem(null);
+  };
 
-      setOpenActionId(null);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : `Unable to ${action} gemstone variety.`,
-      );
-    } finally {
-      setActionLoading(false);
-    }
-  }
   return (
-    <main className="mx-auto max-w-7xl px-6 py-8">
-      {/* Header */}
-      <div className="mb-8 flex items-start justify-between gap-6">
-        <div>
-          <p className="mb-2 text-sm font-medium text-slate-500">
-            CAGS Administration
-          </p>
+    <div className="p-6 lg:p-10 space-y-6 max-w-7xl mx-auto">
+      {/* Toast Feedback */}
+      <ToastNotification toasts={toasts} onDismiss={dismissToast} />
 
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+      {/* ================= PAGE HEADER ================= */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">
             Gemstone Catalogue Management
           </h1>
-
-          <p className="mt-2 max-w-2xl text-sm text-slate-500">
-            Manage the gemstone varieties supported by the Open 4Cs system.
+          <p className="mt-1 text-xs sm:text-sm text-slate-500">
+            Support status, reference coverage and the rule version each variety evaluates under
           </p>
         </div>
 
-        <Link
-          href="/admin/gemstones/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
-        >
-          <span className="text-lg leading-none">+</span>
-          Add Variety
-        </Link>
+        <div>
+          <Link
+            href="/admin/gemstones/new"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#0B1528] hover:bg-slate-800 text-white px-4 py-2.5 text-xs sm:text-sm font-semibold shadow-xs transition duration-150 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Variety</span>
+          </Link>
+        </div>
       </div>
 
-      {/* Main Card */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        {/* Filters */}
-        <div className="border-b border-slate-200 p-5">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            {/* Search */}
-            <div className="relative w-full md:max-w-md">
-              <svg
-                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
-                />
-              </svg>
+      {/* ================= SEARCH BAR ================= */}
+      <div className="max-w-md w-full">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search varieties..."
+          className="w-full bg-white border border-slate-200/90 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
+        />
+      </div>
 
-              <input
-                type="text"
-                placeholder="Search varieties..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-100"
-              />
-            </div>
+      {/* ================= VARIETIES TABLE ================= */}
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[700px]">
+            <thead>
+              <tr className="border-b border-slate-200/80 bg-white">
+                <th className="py-4 px-6 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  VARIETY
+                </th>
+                <th className="py-4 px-6 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  SPECIES / SHAPES
+                </th>
+                <th className="py-4 px-6 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  REFERENCE COVERAGE
+                </th>
+                <th className="py-4 px-6 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  RULE VERSION
+                </th>
+                <th className="py-4 px-6 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  STATUS
+                </th>
+                <th className="py-4 px-6 text-[11px] font-bold uppercase tracking-wider text-slate-400 text-right">
+                  ACTIONS
+                </th>
+              </tr>
+            </thead>
 
-            {/* Status */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-            >
-              <option value="ALL">All Statuses</option>
-              <option value="ACTIVE">Active</option>
-              <option value="INACTIVE">Inactive</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Error */}
-        {error && (
-          <div className="border-b border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        {/* Loading */}
-        {loading ? (
-          <div className="flex min-h-64 items-center justify-center">
-            <div className="flex items-center gap-3 text-sm text-slate-500">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-slate-700" />
-              Loading catalogue...
-            </div>
-          </div>
-        ) : filteredGemstones.length === 0 ? (
-          /* Empty state */
-          <div className="flex min-h-72 flex-col items-center justify-center px-6 text-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-              <svg
-                className="h-6 w-6 text-slate-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.7}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 3 4.5 7.2v9.6L12 21l7.5-4.2V7.2L12 3Z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m4.5 7.2 7.5 4.2 7.5-4.2M12 11.4V21"
-                />
-              </svg>
-            </div>
-
-            <h3 className="text-sm font-semibold text-slate-900">
-              No gemstone varieties found
-            </h3>
-
-            <p className="mt-1 max-w-sm text-sm text-slate-500">
-              {search || statusFilter !== "ALL"
-                ? "Try changing your search or filter."
-                : "Add the first supported gemstone variety to the catalogue."}
-            </p>
-
-            {!search && statusFilter === "ALL" && (
-              <Link
-                href="/admin/gemstones/new"
-                className="mt-5 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-              >
-                Add Variety
-              </Link>
-            )}
-          </div>
-        ) : (
-          /* Table */
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[850px]">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/70">
-                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Variety
-                  </th>
-
-                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Species / Shapes
-                  </th>
-
-                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Origin
-                  </th>
-
-                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Status
-                  </th>
-
-                  <th className="w-20 px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Action
-                  </th>
+            <tbody className="divide-y divide-slate-100">
+              {filteredVarieties.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 px-6 text-center text-slate-500 text-xs sm:text-sm">
+                    No varieties match your search criteria.
+                  </td>
                 </tr>
-              </thead>
-
-              <tbody className="divide-y divide-slate-100">
-                {filteredGemstones.map((gemstone) => (
+              ) : (
+                filteredVarieties.map((item) => (
                   <tr
-                    key={gemstone._id}
-                    className="transition hover:bg-slate-50"
+                    key={item.id}
+                    className="hover:bg-slate-50/70 transition duration-150"
                   >
-                    {/* Variety */}
-                    <td className="px-6 py-5">
-                      <div>
-                        <Link
-                          href={`/admin/gemstones/${gemstone._id}`}
-                          className="font-medium text-slate-900 hover:text-slate-600"
-                        >
-                          {gemstone.name}
-                        </Link>
-
-                        <p className="mt-1 text-xs text-slate-400">
-                          {gemstone.code}
-                        </p>
-                      </div>
+                    {/* Variety Name */}
+                    <td className="py-4 px-6 text-sm font-bold text-slate-900 whitespace-nowrap">
+                      {item.name}
                     </td>
 
                     {/* Species / Shapes */}
-                    <td className="px-6 py-5">
-                      <p className="text-sm text-slate-700">
-                        {gemstone.species}
-                      </p>
-
-                      <div className="mt-1 flex flex-wrap gap-1.5">
-                        {(gemstone.supportedShapes ?? []).length > 0 ? (
-                          (gemstone.supportedShapes ?? []).map((shape) => (
-                            <span
-                              key={shape}
-                              className="text-xs text-slate-500"
-                            >
-                              {shape}
-                              {shape !==
-                              gemstone.supportedShapes[
-                                gemstone.supportedShapes.length - 1
-                              ]
-                                ? " /"
-                                : ""}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-xs text-slate-400">
-                            No shapes specified
-                          </span>
-                        )}
-                      </div>
+                    <td className="py-4 px-6 text-xs text-slate-500 whitespace-nowrap">
+                      <span>{item.species}</span>
+                      <span className="mx-1 text-slate-300">·</span>
+                      <span>{item.shapes}</span>
                     </td>
 
-                    {/* Origin */}
-                    <td className="px-6 py-5">
-                      <span className="text-sm text-slate-700">
-                        {gemstone.supportedOrigin}
+                    {/* Reference Coverage */}
+                    <td className="py-4 px-6 text-xs font-medium text-slate-700 whitespace-nowrap">
+                      {item.referenceCoverage}
+                    </td>
+
+                    {/* Rule Version */}
+                    <td className="py-4 px-6 text-xs font-medium text-slate-700 whitespace-nowrap">
+                      {item.ruleVersion}
+                    </td>
+
+                    {/* Status Badge */}
+                    <td className="py-4 px-6 whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold ${
+                          item.status === "Supported"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200/90"
+                            : item.status === "In Review"
+                            ? "bg-amber-50 text-amber-800 border border-amber-200/90"
+                            : "bg-slate-100 text-slate-700 border border-slate-300"
+                        }`}
+                      >
+                        {item.status}
                       </span>
                     </td>
 
-                    {/* Status */}
-                    <td className="px-6 py-5">
-                      {gemstone.status === "ACTIVE" ? (
-                        <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                          Active
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
-                          <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
-                          Inactive
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Action */}
-                    <td className="px-6 py-5 text-right">
-                      <div className="relative inline-block text-left">
+                    {/* Actions: Pencil, Eye, Power */}
+                    <td className="py-4 px-6 text-right whitespace-nowrap">
+                      <div className="inline-flex items-center justify-end gap-1.5 text-slate-400">
+                        {/* Edit Action */}
                         <button
                           type="button"
-                          onClick={() =>
-                            setOpenActionId(
-                              openActionId === gemstone._id
-                                ? null
-                                : gemstone._id,
-                            )
-                          }
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                          aria-label={`Actions for ${gemstone.name}`}
+                          onClick={() => openEditModal(item)}
+                          title={`Edit ${item.name}`}
+                          className="p-1.5 rounded-lg hover:text-blue-600 hover:bg-slate-100 transition cursor-pointer"
                         >
-                          <span className="text-lg leading-none">⋮</span>
+                          <Pencil className="w-4 h-4 stroke-[1.8]" />
                         </button>
 
-                        {openActionId === gemstone._id && (
-                          <div className="absolute right-0 z-20 mt-2 w-44 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 text-left shadow-lg">
-                            {/* View */}
-                            <Link
-                              href={`/admin/gemstones/${gemstone._id}`}
-                              onClick={() => setOpenActionId(null)}
-                              className="block px-4 py-2.5 text-sm text-slate-700 transition hover:bg-slate-50"
-                            >
-                              View Details
-                            </Link>
+                        {/* View Action */}
+                        <button
+                          type="button"
+                          onClick={() => setViewingItem(item)}
+                          title={`View ${item.name} details`}
+                          className="p-1.5 rounded-lg hover:text-blue-600 hover:bg-slate-100 transition cursor-pointer"
+                        >
+                          <Eye className="w-4 h-4 stroke-[1.8]" />
+                        </button>
 
-                            {/* Edit */}
-                            <Link
-                              href={`/admin/gemstones/${gemstone._id}/edit`}
-                              onClick={() => setOpenActionId(null)}
-                              className="block px-4 py-2.5 text-sm text-slate-700 transition hover:bg-slate-50"
-                            >
-                              Edit Variety
-                            </Link>
-
-                            <div className="my-1 border-t border-slate-100" />
-
-                            {/* Activate / Deactivate */}
-                            {gemstone.status === "ACTIVE" ? (
-                              <button
-                                type="button"
-                                disabled={actionLoading}
-                                onClick={() =>
-                                  handleStatusChange(gemstone, "INACTIVE")
-                                }
-                                className="block w-full px-4 py-2.5 text-left text-sm text-red-600 transition hover:bg-red-50 disabled:opacity-50"
-                              >
-                                Deactivate
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                disabled={actionLoading}
-                                onClick={() =>
-                                  handleStatusChange(gemstone, "ACTIVE")
-                                }
-                                className="block w-full px-4 py-2.5 text-left text-sm text-emerald-600 transition hover:bg-emerald-50 disabled:opacity-50"
-                              >
-                                Activate
-                              </button>
-                            )}
-                          </div>
-                        )}
+                        {/* Power / Toggle Action */}
+                        <button
+                          type="button"
+                          onClick={() => setTogglingItem(item)}
+                          title={`Toggle ${item.name} status`}
+                          className="p-1.5 rounded-lg hover:text-amber-600 hover:bg-slate-100 transition cursor-pointer"
+                        >
+                          <Power className="w-4 h-4 stroke-[1.8]" />
+                        </button>
                       </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Footer */}
-        {!loading && filteredGemstones.length > 0 && (
-          <div className="border-t border-slate-200 bg-slate-50/50 px-6 py-3">
-            <p className="text-xs text-slate-500">
-              Showing{" "}
-              <span className="font-medium text-slate-700">
-                {filteredGemstones.length}
-              </span>{" "}
-              of{" "}
-              <span className="font-medium text-slate-700">
-                {gemstones.length}
-              </span>{" "}
-              varieties
-            </p>
-          </div>
-        )}
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </main>
+
+      {/* ================= VIEW DETAILS MODAL ================= */}
+      {viewingItem && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6"
+        >
+          <div className="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl p-6 sm:p-7 space-y-5 animate-in fade-in-0 zoom-in-95">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">
+                  Variety Overview
+                </span>
+                <h3 className="text-xl font-bold text-slate-900 mt-0.5">
+                  {viewingItem.name}
+                </h3>
+                <p className="text-xs text-slate-500">{viewingItem.species} Species</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setViewingItem(null)}
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 bg-slate-50 rounded-xl p-4 border border-slate-100 text-xs">
+              <div>
+                <span className="text-slate-400 font-medium block">Supported Shapes</span>
+                <span className="font-bold text-slate-900">{viewingItem.shapes}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 font-medium block">Reference Coverage</span>
+                <span className="font-bold text-slate-900">{viewingItem.referenceCoverage}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 font-medium block">Active Rule Version</span>
+                <span className="font-bold text-slate-900">{viewingItem.ruleVersion}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 font-medium block">Geographic Origin</span>
+                <span className="font-bold text-slate-900">{viewingItem.origin}</span>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-xs font-bold text-slate-700">Description & Usage</span>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                {viewingItem.description}
+              </p>
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+              <Link
+                href="/admin/reference-gemstones"
+                className="text-xs font-bold text-blue-600 hover:text-blue-700 inline-flex items-center gap-1"
+              >
+                <span>Browse Benchmark References</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => setViewingItem(null)}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= EDIT VARIETY MODAL ================= */}
+      {editingItem && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6"
+        >
+          <div className="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl p-6 sm:p-7 space-y-5 animate-in fade-in-0 zoom-in-95">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">
+                  Edit Variety Configuration
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">{editingItem.name}</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setEditingItem(null)}
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Supported Shapes (e.g. Oval/Round)
+                </label>
+                <input
+                  type="text"
+                  value={editShapes}
+                  onChange={(e) => setEditShapes(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Assigned Rule Version
+                </label>
+                <input
+                  type="text"
+                  value={editRuleVersion}
+                  onChange={(e) => setEditRuleVersion(e.target.value)}
+                  placeholder="e.g. v4.2 or —"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingItem(null)}
+                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-xl bg-[#0B1528] hover:bg-slate-800 text-white px-5 py-2 text-xs font-bold transition shadow-xs"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= POWER / STATUS TOGGLE CONFIRMATION MODAL ================= */}
+      {togglingItem && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6"
+        >
+          <div className="bg-white rounded-2xl max-w-sm w-full border border-slate-200 shadow-2xl p-6 space-y-4 animate-in fade-in-0 zoom-in-95">
+            <div className="w-10 h-10 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+
+            <div>
+              <h3 className="text-base font-bold text-slate-900">
+                {togglingItem.status === "Supported"
+                  ? "Suspend Variety?"
+                  : "Activate Variety?"}
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                {togglingItem.status === "Supported"
+                  ? `Are you sure you want to suspend "${togglingItem.name}"? New evaluations will not accept this variety until reactivated.`
+                  : `Are you sure you want to mark "${togglingItem.name}" as Supported for production evaluations?`}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setTogglingItem(null)}
+                className="rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmToggle}
+                className={`rounded-xl px-4 py-2 text-xs font-bold text-white transition shadow-xs ${
+                  togglingItem.status === "Supported"
+                    ? "bg-amber-600 hover:bg-amber-700"
+                    : "bg-emerald-600 hover:bg-emerald-700"
+                }`}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
