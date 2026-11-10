@@ -46,7 +46,8 @@ export default function Header() {
     pathname?.startsWith("/history") ||
     pathname?.startsWith("/compare") ||
     pathname?.startsWith("/catalogue") ||
-    pathname?.startsWith("/settings")
+    pathname?.startsWith("/settings") ||
+    pathname?.startsWith("/learn")
   ) {
     return null;
   }
