@@ -32,6 +32,29 @@ const UserSchema = new Schema(
       required: true,
     },
 
+    organization: {
+      type: String,
+      default: "Perera Gems · Beruwala",
+      trim: true,
+    },
+
+    preferredLanguage: {
+      type: String,
+      default: "English",
+    },
+
+    reportCurrency: {
+      type: String,
+      default: "LKR — Sri Lankan Rupee",
+    },
+
+    notifications: {
+      evaluationComplete: { type: Boolean, default: true },
+      referenceDataUpdates: { type: Boolean, default: true },
+      ruleVersionChanges: { type: Boolean, default: true },
+      weeklyMarketDigest: { type: Boolean, default: false },
+    },
+
     role: {
       type: String,
       enum: ["USER", "CAGS_ADMIN"],
