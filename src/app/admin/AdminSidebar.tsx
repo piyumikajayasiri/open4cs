@@ -11,6 +11,7 @@ import {
   Database,
   FileClock,
   Gem,
+  Globe,
   History,
   LayoutDashboard,
   LogOut,
@@ -38,7 +39,7 @@ const navigation = [
   {
     label: "Gemstone Catalogue",
     href: "/admin/gemstones",
-    icon: Gem,
+    icon: Globe,
   },
   {
     label: "4C Evaluation Rules",
