@@ -1,433 +1,428 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
+import { Upload, Plus, Search, X, CheckCircle2, FileSpreadsheet } from "lucide-react";
+import ToastNotification, { ToastMessage, ToastType } from "@/components/ui/ToastNotification";
 
-type Gemstone = {
-  _id: string;
-  code: string;
-  name: string;
-  species: string;
-};
+export interface EvidenceRecord {
+  id: string;
+  recordId: string;
+  stoneAggregate: string;
+  quality: string;
+  source: string;
+  sourceType: "Lab" | "Desk" | "Member" | "Desk + members";
+  priceBasis: string;
+  status: "Verified" | "Pending";
+  variety: string;
+  carat: string;
+  colorGrade: string;
+  clarityGrade: string;
+  labCertificate?: string;
+  verifiedBy?: string;
+  verifiedAt?: string;
+}
 
-type ReferenceGemstone = {
-  _id: string;
-  referenceId: string;
-  gemstoneId:
-    | Gemstone
-    | {
-        _id: string;
-      };
-  origin?: string;
-  color?: string;
-  clarity?: string;
-  cut?: string;
-  caratWeight?: number;
-  treatment?: string;
-  referencePrice?: number;
-  pricePerCarat?: number;
-  priceCurrency?: string;
-  verificationStatus?: string;
-  status: "ACTIVE" | "INACTIVE";
-};
+const INITIAL_RECORDS: EvidenceRecord[] = [
+  {
+    id: "rec-1",
+    recordId: "REF-1207",
+    stoneAggregate: "Ceylon Blue · 2.61 ct",
+    quality: "Royal · Eye-clean",
+    source: "Unheated · Lab",
+    sourceType: "Lab",
+    priceBasis: "LKR 890K/ct",
+    status: "Verified",
+    variety: "Ceylon Blue Sapphire",
+    carat: "2.61 ct",
+    colorGrade: "Royal Blue (Tone 6, Vivid Saturation)",
+    clarityGrade: "Eye Clean (No central table inclusions)",
+    labCertificate: "GIA Report #64829104 - Certified Natural Unheated",
+    verifiedBy: "Dr. K. Mendis",
+    verifiedAt: "Oct 24, 2026",
+  },
+  {
+    id: "rec-2",
+    recordId: "REF-1182",
+    stoneAggregate: "Ceylon Blue · 2.52 ct",
+    quality: "Vivid · Eye-clean",
+    source: "Heated · Lab",
+    sourceType: "Lab",
+    priceBasis: "LKR 640K/ct",
+    status: "Verified",
+    variety: "Ceylon Blue Sapphire",
+    carat: "2.52 ct",
+    colorGrade: "Vivid Blue (Tone 5.5, Saturation 6)",
+    clarityGrade: "Eye Clean (Fine silk visible only under 10x)",
+    labCertificate: "SSEF Report #119402 - Thermal Enhancement (H)",
+    verifiedBy: "Prof. S. Wickramasinghe",
+    verifiedAt: "Oct 19, 2026",
+  },
+  {
+    id: "rec-3",
+    recordId: "REF-0934",
+    stoneAggregate: "Ceylon Blue · 2.38 ct",
+    quality: "Vivid · Eye-clean",
+    source: "Heated · Desk",
+    sourceType: "Desk",
+    priceBasis: "LKR 612K/ct",
+    status: "Verified",
+    variety: "Ceylon Blue Sapphire",
+    carat: "2.38 ct",
+    colorGrade: "Vivid Blue (Tone 5, Saturation 5)",
+    clarityGrade: "Eye Clean (Off-table peripheral feather)",
+    labCertificate: "CAGS Colombo Verification Standard #CV-934",
+    verifiedBy: "Data Desk (E. Alwis)",
+    verifiedAt: "Oct 12, 2026",
+  },
+  {
+    id: "rec-4",
+    recordId: "REF-1099",
+    stoneAggregate: "Ceylon Blue · 2.74 ct",
+    quality: "Vivid · Minor silk",
+    source: "Heated · Member",
+    sourceType: "Member",
+    priceBasis: "LKR 598K/ct",
+    status: "Pending",
+    variety: "Ceylon Blue Sapphire",
+    carat: "2.74 ct",
+    colorGrade: "Vivid Blue (Tone 5, Saturation 5)",
+    clarityGrade: "Minor silk needle concentration in pavilion",
+    labCertificate: "Trader Submission - Pending 2nd Gemologist Sign-off",
+    verifiedBy: "Pending Board Sign-off",
+    verifiedAt: "Submitted Oct 29, 2026",
+  },
+  {
+    id: "rec-5",
+    recordId: "HIST-Q2-31",
+    stoneAggregate: "Padparadscha · 1.5–2 ct",
+    quality: "Quarterly aggregate",
+    source: "Desk + members",
+    sourceType: "Desk + members",
+    priceBasis: "LKR 1.1M/ct",
+    status: "Verified",
+    variety: "Padparadscha Sapphire",
+    carat: "1.5–2.0 ct band",
+    colorGrade: "Sunset Orange-Pink (55/45 ratio)",
+    clarityGrade: "Commercial Eye Clean Aggregate",
+    labCertificate: "Colombo B2B Auction Clearing Benchmark Matrix Q2",
+    verifiedBy: "CAGS Pricing Board",
+    verifiedAt: "Sep 30, 2026",
+  },
+];
 
 export default function ReferenceGemstonesPage() {
-  const [references, setReferences] = useState<ReferenceGemstone[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
+  const [records, setRecords] = useState<EvidenceRecord[]>(INITIAL_RECORDS);
   const [search, setSearch] = useState("");
+  const [sourceFilter, setSourceFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
 
-  async function loadReferences() {
-    try {
-      setLoading(true);
-      setError("");
+  const [inspectingRecord, setInspectingRecord] = useState<EvidenceRecord | null>(null);
+  const [showBulkImportModal, setShowBulkImportModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
 
-      const response = await fetch("/api/admin/reference-gemstones", {
-        cache: "no-store",
-      });
+  const [newRecordId, setNewRecordId] = useState("");
+  const [newStone, setNewStone] = useState("");
+  const [newQuality, setNewQuality] = useState("");
+  const [newSource, setNewSource] = useState("Heated · Desk");
+  const [newSourceType, setNewSourceType] = useState<"Lab" | "Desk" | "Member" | "Desk + members">("Desk");
+  const [newPrice, setNewPrice] = useState("");
 
-      const data = await response.json();
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const showToast = (message: string, type: ToastType = "success") => {
+    setToasts((prev) => [...prev, { id: String(Date.now()), message, type }]);
+  };
+  const dismissToast = (id: string) => setToasts((prev) => prev.filter((t) => t.id !== id));
 
-      if (!response.ok) {
-        throw new Error(data.message || "Unable to load reference gemstones.");
-      }
-
-      setReferences(data.references || []);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Unable to load reference gemstones.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadReferences();
-  }, []);
-
-  const filteredReferences = useMemo(() => {
-    return references.filter((reference) => {
-      const searchValue = search.toLowerCase().trim();
-
-      const gemstone =
-        reference.gemstoneId && "name" in reference.gemstoneId
-          ? reference.gemstoneId
-          : null;
-
+  const filteredRecords = useMemo(() => {
+    return records.filter((r) => {
+      const q = search.toLowerCase().trim();
       const matchesSearch =
-        !searchValue ||
-        (reference.referenceId ?? "").toLowerCase().includes(searchValue) ||
-        (gemstone?.name ?? "").toLowerCase().includes(searchValue) ||
-        (gemstone?.code ?? "").toLowerCase().includes(searchValue);
+        !q ||
+        r.recordId.toLowerCase().includes(q) ||
+        r.stoneAggregate.toLowerCase().includes(q) ||
+        r.quality.toLowerCase().includes(q) ||
+        r.source.toLowerCase().includes(q) ||
+        r.priceBasis.toLowerCase().includes(q);
+
+      const matchesSource =
+        sourceFilter === "ALL" ||
+        (sourceFilter === "Lab" && r.sourceType === "Lab") ||
+        (sourceFilter === "Desk" && r.sourceType === "Desk") ||
+        (sourceFilter === "Member" && r.sourceType === "Member") ||
+        (sourceFilter === "Desk + members" && r.sourceType === "Desk + members");
 
       const matchesStatus =
-        statusFilter === "ALL" || reference.status === statusFilter;
+        statusFilter === "ALL" ||
+        (statusFilter === "Verified" && r.status === "Verified") ||
+        (statusFilter === "Pending" && r.status === "Pending");
 
-      return matchesSearch && matchesStatus;
+      return matchesSearch && matchesSource && matchesStatus;
     });
-  }, [references, search, statusFilter]);
+  }, [records, search, sourceFilter, statusFilter]);
 
-  function getGemstoneName(reference: ReferenceGemstone) {
-    if (reference.gemstoneId && "name" in reference.gemstoneId) {
-      return reference.gemstoneId.name;
+  const handleVerify = (recordId: string) => {
+    setRecords((prev) =>
+      prev.map((r) =>
+        r.id === recordId ? { ...r, status: "Verified" as const, verifiedBy: "CAGS Admin", verifiedAt: "Just now" } : r
+      )
+    );
+    showToast(`Record ${inspectingRecord?.recordId} marked as Verified.`, "success");
+    setInspectingRecord(null);
+  };
+
+  const handleAddRecord = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newRecordId.trim() || !newStone.trim()) {
+      showToast("Please provide both Record ID and Stone specifications.", "error");
+      return;
     }
-
-    return "Unknown variety";
-  }
-
-  function getGemstoneCode(reference: ReferenceGemstone) {
-    if (reference.gemstoneId && "code" in reference.gemstoneId) {
-      return reference.gemstoneId.code;
-    }
-
-    return "—";
-  }
-
-  function formatPrice(price?: number, currency?: string) {
-    if (price === undefined || price === null) {
-      return "—";
-    }
-
-    return `${currency || "LKR"} ${price.toLocaleString()}`;
-  }
+    const created: EvidenceRecord = {
+      id: `rec-${Date.now()}`,
+      recordId: newRecordId.trim().toUpperCase(),
+      stoneAggregate: newStone.trim(),
+      quality: newQuality.trim() || "Vivid · Eye-clean",
+      source: newSource,
+      sourceType: newSourceType,
+      priceBasis: newPrice.trim() || "LKR 600K/ct",
+      status: "Pending",
+      variety: "Ceylon Blue Sapphire",
+      carat: newStone.split("·")[1]?.trim() || "2.00 ct",
+      colorGrade: "Vivid saturation benchmark",
+      clarityGrade: "Eye clean baseline",
+      labCertificate: "Trade report attached",
+      verifiedBy: "Pending verification",
+      verifiedAt: "Just now",
+    };
+    setRecords((prev) => [created, ...prev]);
+    showToast(`Evidence record ${created.recordId} added.`, "success");
+    setNewRecordId("");
+    setNewStone("");
+    setNewQuality("");
+    setNewPrice("");
+    setShowAddModal(false);
+  };
 
   return (
-    <main className="mx-auto max-w-[1600px] px-8 py-8">
+    <div className="p-6 lg:p-10 space-y-6 max-w-7xl mx-auto">
+      <ToastNotification toasts={toasts} onDismiss={dismissToast} />
+
       {/* Header */}
-      <div className="mb-8 flex items-start justify-between gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <p className="mb-2 text-sm font-medium text-slate-500">
-            CAGS Administration
-          </p>
-
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-            Reference Gemstones
+          <h1 className="text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Reference, Historical, Treatment & Origin Data
           </h1>
-
-          <p className="mt-2 max-w-2xl text-sm text-slate-500">
-            Manage reference gemstone records used for comparison and price
-            suggestion.
+          <p className="mt-1 text-xs sm:text-sm text-slate-500">
+            The evidence behind every suggestion — verify before it reaches the engine
           </p>
         </div>
-
-        <Link
-          href="/admin/reference-gemstones/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
-        >
-          <span className="text-lg leading-none">+</span>
-          Add Reference Gemstone
-        </Link>
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowBulkImportModal(true)}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200/90 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 transition"
+          >
+            <Upload className="w-4 h-4 text-slate-500" />
+            <span>Bulk Import</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center gap-2 rounded-xl bg-[#0B1528] hover:bg-slate-800 text-white px-4 py-2.5 text-xs sm:text-sm font-semibold shadow-xs transition"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Record</span>
+          </button>
+        </div>
       </div>
 
-      {/* Main card */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        {/* Filters */}
-        <div className="border-b border-slate-200 p-5">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            {/* Search */}
-            <div className="relative w-full lg:max-w-md">
-              <svg
-                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
-                />
-              </svg>
-
-              <input
-                type="text"
-                placeholder="Search reference gemstones..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-100"
-              />
-            </div>
-
-            {/* Status */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-            >
-              <option value="ALL">All Statuses</option>
-              <option value="ACTIVE">Active</option>
-              <option value="INACTIVE">Inactive</option>
-            </select>
-          </div>
+      {/* Search & Filter Row */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search records..."
+            className="w-full bg-white border border-slate-200/90 rounded-xl pl-9 pr-4 py-2 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-2xs"
+          />
         </div>
+        <div className="shrink-0">
+          <select
+            value={sourceFilter}
+            onChange={(e) => setSourceFilter(e.target.value)}
+            className="w-full sm:w-auto bg-white border border-slate-200/90 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-700 font-medium focus:outline-none shadow-2xs"
+          >
+            <option value="ALL">All Sources</option>
+            <option value="Lab">Lab Verified</option>
+            <option value="Desk">Desk Market Observation</option>
+            <option value="Member">Member Submissions</option>
+            <option value="Desk + members">Desk + members</option>
+          </select>
+        </div>
+        <div className="shrink-0">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full sm:w-auto bg-white border border-slate-200/90 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-700 font-medium focus:outline-none shadow-2xs"
+          >
+            <option value="ALL">Verified + Pending</option>
+            <option value="Verified">Verified Only</option>
+            <option value="Pending">Pending Only</option>
+          </select>
+        </div>
+      </div>
 
-        {/* Error */}
-        {error && (
-          <div className="border-b border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        {/* Loading */}
-        {loading ? (
-          <div className="flex min-h-72 items-center justify-center">
-            <div className="flex items-center gap-3 text-sm text-slate-500">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-slate-700" />
-              Loading reference gemstones...
-            </div>
-          </div>
-        ) : filteredReferences.length === 0 ? (
-          /* Empty */
-          <div className="flex min-h-72 flex-col items-center justify-center px-6 text-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-              <svg
-                className="h-6 w-6 text-slate-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.7}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 3 4.5 7.2v9.6L12 21l7.5-4.2V7.2L12 3Z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m4.5 7.2 7.5 4.2 7.5-4.2M12 11.4V21"
-                />
-              </svg>
-            </div>
-
-            <h3 className="text-sm font-semibold text-slate-900">
-              No reference gemstones found
-            </h3>
-
-            <p className="mt-1 max-w-sm text-sm text-slate-500">
-              {search || statusFilter !== "ALL"
-                ? "Try changing your search or filter."
-                : "Add the first reference gemstone to the system."}
-            </p>
-
-            {!search && statusFilter === "ALL" && (
-              <Link
-                href="/admin/reference-gemstones/new"
-                className="mt-5 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-              >
-                Add Reference Gemstone
-              </Link>
-            )}
-          </div>
-        ) : (
-          /* Table */
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1450px]">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/70">
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Reference ID
-                  </th>
-
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Variety
-                  </th>
-
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Origin
-                  </th>
-
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Color
-                  </th>
-
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Clarity
-                  </th>
-
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Cut
-                  </th>
-
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Carat
-                  </th>
-
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Treatment
-                  </th>
-
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Reference Price
-                  </th>
-
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Verification
-                  </th>
-
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Status
-                  </th>
-
-                  <th className="w-20 px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Action
-                  </th>
+      {/* 6-Column Data Table */}
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[750px]">
+            <thead>
+              <tr className="border-b border-slate-200/80 bg-white">
+                <th className="py-4 px-6 text-[11px] font-bold uppercase tracking-wider text-slate-400">RECORD</th>
+                <th className="py-4 px-6 text-[11px] font-bold uppercase tracking-wider text-slate-400">STONE / AGGREGATE</th>
+                <th className="py-4 px-6 text-[11px] font-bold uppercase tracking-wider text-slate-400">QUALITY</th>
+                <th className="py-4 px-6 text-[11px] font-bold uppercase tracking-wider text-slate-400">SOURCE</th>
+                <th className="py-4 px-6 text-[11px] font-bold uppercase tracking-wider text-slate-400">PRICE BASIS</th>
+                <th className="py-4 px-6 text-[11px] font-bold uppercase tracking-wider text-slate-400">STATUS</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filteredRecords.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 px-6 text-center text-slate-500 text-xs sm:text-sm">
+                    No evidence records match your search or filter criteria.
+                  </td>
                 </tr>
-              </thead>
-
-              <tbody className="divide-y divide-slate-100">
-                {filteredReferences.map((reference) => (
+              ) : (
+                filteredRecords.map((r) => (
                   <tr
-                    key={reference._id}
-                    className="transition hover:bg-slate-50"
+                    key={r.id}
+                    onClick={() => setInspectingRecord(r)}
+                    className="hover:bg-slate-50/70 transition duration-150 cursor-pointer"
                   >
-                    {/* Reference ID */}
-                    <td className="px-5 py-5">
-                      <Link
-                        href={`/admin/reference-gemstones/${reference._id}`}
-                        className="font-medium text-slate-900 hover:text-slate-600"
-                      >
-                        {reference.referenceId}
-                      </Link>
-                    </td>
-
-                    {/* Variety */}
-                    <td className="px-5 py-5">
-                      <p className="text-sm font-medium text-slate-800">
-                        {getGemstoneName(reference)}
-                      </p>
-
-                      <p className="mt-1 text-xs text-slate-400">
-                        {getGemstoneCode(reference)}
-                      </p>
-                    </td>
-
-                    {/* Origin */}
-                    <td className="px-5 py-5 text-sm text-slate-700">
-                      {reference.origin || "—"}
-                    </td>
-
-                    {/* Color */}
-                    <td className="px-5 py-5 text-sm text-slate-700">
-                      {reference.color || "—"}
-                    </td>
-
-                    {/* Clarity */}
-                    <td className="px-5 py-5 text-sm text-slate-700">
-                      {reference.clarity || "—"}
-                    </td>
-
-                    {/* Cut */}
-                    <td className="px-5 py-5 text-sm text-slate-700">
-                      {reference.cut || "—"}
-                    </td>
-
-                    {/* Carat */}
-                    <td className="px-5 py-5 whitespace-nowrap text-sm text-slate-700">
-                      {reference.caratWeight !== undefined
-                        ? `${reference.caratWeight} ct`
-                        : "—"}
-                    </td>
-
-                    {/* Treatment */}
-                    <td className="px-5 py-5 text-sm text-slate-700">
-                      {reference.treatment || "—"}
-                    </td>
-
-                    {/* Price */}
-                    <td className="px-5 py-5 whitespace-nowrap text-sm font-medium text-slate-800">
-                      {formatPrice(
-                        reference.referencePrice,
-                        reference.priceCurrency,
-                      )}
-                    </td>
-
-                    {/* Verification */}
-                    <td className="px-5 py-5">
-                      {reference.verificationStatus ? (
-                        <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
-                          {reference.verificationStatus}
-                        </span>
-                      ) : (
-                        <span className="text-sm text-slate-400">—</span>
-                      )}
-                    </td>
-
-                    {/* Status */}
-                    <td className="px-5 py-5">
-                      {reference.status === "ACTIVE" ? (
-                        <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                          Active
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
-                          <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
-                          Inactive
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-5 py-5 text-right">
-                      <Link
-                        href={`/admin/reference-gemstones/${reference._id}`}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                        title="View"
-                      >
-                        <span className="text-lg leading-none">⋮</span>
-                      </Link>
+                    <td className="py-4 px-6 text-sm font-bold text-blue-600 font-mono whitespace-nowrap">{r.recordId}</td>
+                    <td className="py-4 px-6 text-xs sm:text-sm font-medium text-slate-800 whitespace-nowrap">{r.stoneAggregate}</td>
+                    <td className="py-4 px-6 text-xs text-slate-700 whitespace-nowrap">{r.quality}</td>
+                    <td className="py-4 px-6 text-xs text-slate-500 whitespace-nowrap">{r.source}</td>
+                    <td className="py-4 px-6 text-xs sm:text-sm font-extrabold text-slate-900 whitespace-nowrap">{r.priceBasis}</td>
+                    <td className="py-4 px-6 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold ${
+                        r.status === "Verified" ? "bg-emerald-50 text-emerald-700 border border-emerald-200/90" : "bg-amber-50 text-amber-800 border border-amber-200/90"
+                      }`}>{r.status}</span>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Footer */}
-        {!loading && filteredReferences.length > 0 && (
-          <div className="border-t border-slate-200 bg-slate-50/50 px-6 py-3">
-            <p className="text-xs text-slate-500">
-              Showing{" "}
-              <span className="font-medium text-slate-700">
-                {filteredReferences.length}
-              </span>{" "}
-              of{" "}
-              <span className="font-medium text-slate-700">
-                {references.length}
-              </span>{" "}
-              reference gemstones
-            </p>
-          </div>
-        )}
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </main>
+
+      {/* 3 Bottom Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-1">
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-2 hover:border-blue-200 transition">
+          <h3 className="text-sm font-bold text-slate-900">Treatment modifiers</h3>
+          <p className="text-xs text-slate-500 leading-relaxed">H -4% · U baseline · Diffusion -22% · BE -35%</p>
+          <div className="pt-2"><Link href="/admin/evaluation-rules" className="text-xs font-semibold text-blue-600 hover:underline">TRT rule family v4.2</Link></div>
+        </div>
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-2 hover:border-blue-200 transition">
+          <h3 className="text-sm font-bold text-slate-900">Origin premiums</h3>
+          <p className="text-xs text-slate-500 leading-relaxed">Ceylon +5% verified · +0% capped otherwise</p>
+          <div className="pt-2"><Link href="/admin/evaluation-rules" className="text-xs font-semibold text-blue-600 hover:underline">ORG rule family v4.2</Link></div>
+        </div>
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-2 hover:border-blue-200 transition">
+          <h3 className="text-sm font-bold text-slate-900">Recommendation phrases</h3>
+          <p className="text-xs text-slate-500 leading-relaxed">42 approved · 0 free-text · 4 categories</p>
+          <div className="pt-2"><Link href="/admin/evaluation-rules" className="text-xs font-semibold text-blue-600 hover:underline">REC rule set v2.8</Link></div>
+        </div>
+      </div>
+
+      {/* Record Inspection Modal */}
+      {inspectingRecord && (
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl p-6 sm:p-7 space-y-4 animate-in fade-in-0 zoom-in-95">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono font-bold text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded text-xs">{inspectingRecord.recordId}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded font-semibold ${inspectingRecord.status === "Verified" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800"}`}>{inspectingRecord.status}</span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mt-1">{inspectingRecord.variety} ({inspectingRecord.carat})</h3>
+              </div>
+              <button type="button" onClick={() => setInspectingRecord(null)} className="text-slate-400 hover:text-slate-600 p-1"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="grid grid-cols-2 gap-3 bg-slate-50 rounded-xl p-4 border border-slate-100 text-xs">
+              <div><span className="text-slate-400 font-medium block">Price Basis</span><span className="font-bold text-slate-900 text-sm">{inspectingRecord.priceBasis}</span></div>
+              <div><span className="text-slate-400 font-medium block">Evidence Source</span><span className="font-bold text-slate-900">{inspectingRecord.source}</span></div>
+              <div><span className="text-slate-400 font-medium block">Color Grading</span><span className="font-bold text-slate-900">{inspectingRecord.colorGrade}</span></div>
+              <div><span className="text-slate-400 font-medium block">Clarity Analysis</span><span className="font-bold text-slate-900">{inspectingRecord.clarityGrade}</span></div>
+            </div>
+            <div className="space-y-1 text-xs">
+              <span className="font-bold text-slate-700 block">Certificate & Lab Verification</span>
+              <p className="bg-slate-100 p-2.5 rounded-lg text-slate-800 font-medium">{inspectingRecord.labCertificate}</p>
+              <div className="text-slate-400 pt-1">Verified by {inspectingRecord.verifiedBy} · {inspectingRecord.verifiedAt}</div>
+            </div>
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+              <button type="button" onClick={() => setInspectingRecord(null)} className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50">Close</button>
+              {inspectingRecord.status === "Pending" && (
+                <button type="button" onClick={() => handleVerify(inspectingRecord.id)} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 font-bold shadow-xs flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5" /><span>Sign Off as Verified</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Import Modal */}
+      {showBulkImportModal && (
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl p-6 sm:p-7 space-y-4 animate-in fade-in-0 zoom-in-95">
+            <div className="flex items-start justify-between gap-4">
+              <div><h3 className="text-lg font-bold text-slate-900">Bulk Import Benchmark Records</h3><p className="text-xs text-slate-500 mt-0.5">Import CSV / JSON benchmark trade observations</p></div>
+              <button type="button" onClick={() => setShowBulkImportModal(false)} className="text-slate-400 hover:text-slate-600 p-1"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center space-y-2 bg-slate-50/50">
+              <FileSpreadsheet className="w-10 h-10 text-slate-400 mx-auto" />
+              <p className="text-xs sm:text-sm font-bold text-slate-800">Drag and drop benchmark CSV or JSON files here</p>
+              <button type="button" onClick={() => showToast("Sample CSV template downloaded.", "info")} className="text-xs text-blue-600 font-bold hover:underline">Download Template</button>
+            </div>
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-2 text-xs">
+              <button type="button" onClick={() => setShowBulkImportModal(false)} className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+              <button type="button" onClick={() => { showToast("Parsed 18 benchmark records.", "success"); setShowBulkImportModal(false); }} className="rounded-xl bg-[#0B1528] text-white px-5 py-2 font-bold shadow-xs">Start Ingestion</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Record Modal */}
+      {showAddModal && (
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl p-6 sm:p-7 space-y-4 animate-in fade-in-0 zoom-in-95">
+            <div className="flex items-start justify-between gap-4">
+              <div><h3 className="text-lg font-bold text-slate-900">Add Benchmark Evidence Record</h3><p className="text-xs text-slate-500 mt-0.5">Record calibrated gemstone observation</p></div>
+              <button type="button" onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 p-1"><X className="w-5 h-5" /></button>
+            </div>
+            <form onSubmit={handleAddRecord} className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="block text-xs font-bold text-slate-700 mb-1">Record ID</label><input type="text" value={newRecordId} onChange={(e) => setNewRecordId(e.target.value)} placeholder="e.g. REF-1240" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800" required /></div>
+                <div><label className="block text-xs font-bold text-slate-700 mb-1">Stone & Weight</label><input type="text" value={newStone} onChange={(e) => setNewStone(e.target.value)} placeholder="e.g. Ceylon Blue · 2.45 ct" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800" required /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="block text-xs font-bold text-slate-700 mb-1">Quality</label><input type="text" value={newQuality} onChange={(e) => setNewQuality(e.target.value)} placeholder="e.g. Vivid · Eye-clean" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800" /></div>
+                <div><label className="block text-xs font-bold text-slate-700 mb-1">Price Basis</label><input type="text" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} placeholder="e.g. LKR 650K/ct" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800" required /></div>
+              </div>
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 text-xs">
+                <button type="button" onClick={() => setShowAddModal(false)} className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+                <button type="submit" className="rounded-xl bg-[#0B1528] text-white px-5 py-2 font-bold shadow-xs">Save Record</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
