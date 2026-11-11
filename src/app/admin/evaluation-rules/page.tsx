@@ -486,7 +486,7 @@ export default function EvaluationRulesPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Category</label>
-                  <select value={newCategory} onChange={(e) => setNewCategory(e.target.value as any)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800">
+                  <select value={newCategory} onChange={(e) => setNewCategory(e.target.value as "Color" | "Clarity" | "Cut" | "Pricing")} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800">
                     <option value="Color">Color</option>
                     <option value="Clarity">Clarity</option>
                     <option value="Cut">Cut</option>

@@ -71,8 +71,7 @@ export async function POST(request: NextRequest) {
       } else if (
         v.includes("blue sapphire") ||
         v.includes("ceylon blue") ||
-        v === "blue" ||
-        v === "sapphire"
+        v === "blue"
       ) {
         data.variety = "Blue Sapphire";
       }

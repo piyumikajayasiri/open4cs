@@ -26,10 +26,10 @@ function getRuleScore(
   value: string,
   rules: Record<string, number>
 ): number | null {
-  const normalizedValue = value.trim().toLowerCase();
+  const normalizedValue = value.trim().toLowerCase().replace(/[\s\-_]+/g, "");
 
   const matchedKey = Object.keys(rules).find(
-    (key) => key.toLowerCase() === normalizedValue
+    (key) => key.toLowerCase().replace(/[\s\-_]+/g, "") === normalizedValue
   );
 
   return matchedKey ? rules[matchedKey] : null;

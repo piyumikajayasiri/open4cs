@@ -550,7 +550,7 @@ export default function RuleVersionsPage() {
                   <label className="block text-xs font-bold text-slate-700 mb-1">User Category</label>
                   <select
                     value={inviteCategory}
-                    onChange={(e) => setInviteCategory(e.target.value as any)}
+                    onChange={(e) => setInviteCategory(e.target.value as "Student" | "Trader" | "Gemologist" | "Professional")}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800"
                   >
                     <option value="Student">Student</option>

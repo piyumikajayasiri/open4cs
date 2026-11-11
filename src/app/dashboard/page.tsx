@@ -15,7 +15,7 @@ type UserProfile = {
 
 type EvaluationItem = {
   _id: string;
-  gemstoneId?: any;
+  gemstoneId?: { variety?: string; caratWeight?: number; [key: string]: unknown } | null;
   ruleVersion?: string;
   status?: string;
   createdAt?: string;
@@ -324,7 +324,7 @@ export default function DashboardPage() {
               </button>
             </div>
             <EvaluationComparison
-              evaluations={(evaluations as any[]).map((e) => ({
+              evaluations={evaluations.map((e) => ({
                 _id: e._id,
                 variety: typeof e.gemstoneId === "object" ? e.gemstoneId?.variety || "Corundum" : "Ceylon Blue Sapphire",
                 caratWeight: `${typeof e.gemstoneId === "object" ? e.gemstoneId?.caratWeight || 1.5 : 1.5} ct`,

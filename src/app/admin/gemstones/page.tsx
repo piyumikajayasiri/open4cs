@@ -141,9 +141,12 @@ export default function GemstoneCataloguePage() {
           const data = await res.json();
           if (Array.isArray(data.gemstones) && data.gemstones.length > 0) {
             // Merge database records with default varieties
-            const dbMap = new Map<string, any>();
-            data.gemstones.forEach((g: any) => {
-              dbMap.set(g.name.toLowerCase().trim(), g);
+            const dbMap = new Map<string, Record<string, unknown>>();
+            data.gemstones.forEach((g: Record<string, unknown>) => {
+              const gName = typeof g.name === "string" ? g.name : "";
+              if (gName) {
+                dbMap.set(gName.toLowerCase().trim(), g);
+              }
             });
 
             setVarieties((prev) =>
@@ -152,13 +155,13 @@ export default function GemstoneCataloguePage() {
                 if (match) {
                   return {
                     ...item,
-                    id: match._id || item.id,
+                    id: String(match._id || item.id),
                     status:
                       match.status === "INACTIVE"
                         ? "Suspended"
                         : item.status,
                     shapes:
-                      match.supportedShapes?.join("/") || item.shapes,
+                      Array.isArray(match.supportedShapes) ? match.supportedShapes.join("/") : item.shapes,
                   };
                 }
                 return item;
