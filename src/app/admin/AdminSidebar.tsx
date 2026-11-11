@@ -11,6 +11,7 @@ import {
   Database,
   FileClock,
   Gem,
+  GitFork,
   Globe,
   History,
   LayoutDashboard,
@@ -81,7 +82,7 @@ const navigation = [
   {
     label: "Rule Versions",
     href: "/admin/rule-versions",
-    icon: FileClock,
+    icon: GitFork,
   },
   {
     label: "Audit History",
