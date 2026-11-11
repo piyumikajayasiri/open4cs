@@ -239,7 +239,7 @@ export function EvaluationDraftProvider({ children }: { children: ReactNode }) {
         return { success: false, error: errMsg };
       }
 
-      const evaluationId = evalData.evaluation?._id || gemData.gemstone?._id;
+      const evaluationId = evalData.evaluationId || evalData.evaluation?._id || evalData.data?._id;
 
       // Evaluation complete — safely clear draft session storage
       try {
