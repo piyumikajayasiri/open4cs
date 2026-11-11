@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import mongoose from "mongoose";
+import { getCurrentUser } from "@/lib/auth/currentUser";
 import { connectDB } from "@/lib/mongodb";
 import Gemstone from "@/models/Gemstone";
 import ReferenceGemstone from "@/models/ReferenceGemstone";
 
 async function checkAdmin() {
-  const session = await auth();
+  const user = await getCurrentUser();
 
-  if (!session?.user) {
+  if (!user) {
     return {
       authorized: false,
       status: 401,
@@ -15,16 +16,17 @@ async function checkAdmin() {
     };
   }
 
-  if (session.user.role !== "ADMIN") {
+  if (user.role !== "CAGS_ADMIN") {
     return {
       authorized: false,
       status: 403,
-      message: "Admin access required.",
+      message: "CAGS Admin access required.",
     };
   }
 
   return {
     authorized: true,
+    user,
   };
 }
 
@@ -46,10 +48,6 @@ export async function GET() {
     await connectDB();
 
     const references = await ReferenceGemstone.find()
-      .populate({
-        path: "gemstoneId",
-        select: "code name species supportedOrigin",
-      })
       .sort({ createdAt: -1 })
       .lean();
 
@@ -91,46 +89,29 @@ export async function POST(request: NextRequest) {
       referenceId,
       gemstoneId,
       origin,
-      originVerification,
       color,
       clarity,
       cut,
       caratWeight,
       treatment,
-      treatmentVerification,
       referencePrice,
-      pricePerCarat,
       priceCurrency,
+      currency,
       verificationStatus,
       source,
-      notes,
-      status,
     } = body;
 
-    if (!referenceId || !gemstoneId) {
+    if (!referenceId) {
       return NextResponse.json(
         {
           success: false,
-          message: "Reference ID and gemstone variety are required.",
+          message: "Reference ID is required.",
         },
         { status: 400 },
       );
     }
 
     await connectDB();
-
-    // Check gemstone exists
-    const gemstone = await Gemstone.findById(gemstoneId);
-
-    if (!gemstone) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Selected gemstone variety was not found.",
-        },
-        { status: 404 },
-      );
-    }
 
     // Check duplicate reference ID
     const normalizedReferenceId = String(referenceId).trim().toUpperCase();
@@ -178,81 +159,60 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (
-      pricePerCarat !== undefined &&
-      pricePerCarat !== null &&
-      (Number.isNaN(Number(pricePerCarat)) || Number(pricePerCarat) < 0)
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Price per carat must be a valid positive number.",
-        },
-        { status: 400 },
-      );
+    let varietyName = body.variety || "Blue Sapphire";
+    if (gemstoneId && mongoose.Types.ObjectId.isValid(gemstoneId)) {
+      const gemstone = await Gemstone.findById(gemstoneId);
+      if (gemstone?.name) {
+        varietyName = gemstone.name;
+      }
     }
-
-    const finalStatus = status === "INACTIVE" ? "INACTIVE" : "ACTIVE";
 
     const reference = await ReferenceGemstone.create({
       referenceId: normalizedReferenceId,
-      gemstoneId,
-
-      origin: origin ? String(origin).trim() : undefined,
-      originVerification: originVerification
-        ? String(originVerification).trim()
-        : undefined,
-
-      color: color ? String(color).trim() : undefined,
-      clarity: clarity ? String(clarity).trim() : undefined,
-      cut: cut ? String(cut).trim() : undefined,
-
-      caratWeight:
-        caratWeight !== undefined && caratWeight !== null && caratWeight !== ""
-          ? Number(caratWeight)
-          : undefined,
-
-      treatment: treatment ? String(treatment).trim() : undefined,
-
-      treatmentVerification: treatmentVerification
-        ? String(treatmentVerification).trim()
-        : undefined,
-
-      referencePrice:
-        referencePrice !== undefined &&
-        referencePrice !== null &&
-        referencePrice !== ""
-          ? Number(referencePrice)
-          : undefined,
-
-      pricePerCarat:
-        pricePerCarat !== undefined &&
-        pricePerCarat !== null &&
-        pricePerCarat !== ""
-          ? Number(pricePerCarat)
-          : undefined,
-
-      priceCurrency: priceCurrency
-        ? String(priceCurrency).trim().toUpperCase()
-        : undefined,
-
-      verificationStatus: verificationStatus
-        ? String(verificationStatus).trim()
-        : undefined,
-
-      source: source ? String(source).trim() : undefined,
-
-      notes: notes ? String(notes).trim() : undefined,
-
-      status: finalStatus,
+      variety: varietyName,
+      caratWeight: Number(caratWeight) || 2.0,
+      color: typeof color === "object" && color !== null ? color : {
+        hue: typeof color === "string" ? color : "Royal Blue",
+        tone: "6",
+        saturation: "Vivid",
+        distribution: "Even",
+        zoning: "None",
+      },
+      clarity: typeof clarity === "object" && clarity !== null ? clarity : {
+        nakedEye: typeof clarity === "string" ? clarity : "Clean",
+        loupe10x: "Very Slight",
+        inclusionType: "Minor silk",
+        inclusionLocation: "Off-table",
+        severity: "Minor",
+      },
+      cut: typeof cut === "object" && cut !== null ? cut : {
+        length: 8.0,
+        width: 6.5,
+        depth: 4.0,
+        symmetry: "Good",
+        polish: "Good",
+        windowing: "None",
+        extinction: "None",
+        bulging: "None",
+      },
+      treatment: typeof treatment === "object" && treatment !== null ? treatment : {
+        status: typeof treatment === "string" ? treatment : "Untreated",
+      },
+      origin: typeof origin === "object" && origin !== null ? origin : {
+        value: typeof origin === "string" ? origin : "Sri Lanka",
+        reliability: "High",
+      },
+      referencePrice: Number(referencePrice) || 600000,
+      currency: (priceCurrency || currency || "LKR").toUpperCase(),
+      source: source ? String(source).trim() : "Desk",
+      sourceType: body.sourceType || "Desk",
+      verificationStatus: verificationStatus || "Verified",
+      labCertificate: body.labCertificate || "",
+      verifiedBy: body.verifiedBy || "CAGS Admin",
+      verifiedAt: body.verifiedAt || new Date().toISOString(),
     });
 
-    const populatedReference = await ReferenceGemstone.findById(reference._id)
-      .populate({
-        path: "gemstoneId",
-        select: "code name species supportedOrigin",
-      })
-      .lean();
+    const populatedReference = await ReferenceGemstone.findById(reference._id).lean();
 
     return NextResponse.json(
       {

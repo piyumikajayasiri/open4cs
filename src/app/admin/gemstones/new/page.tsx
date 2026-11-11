@@ -64,18 +64,24 @@ export default function NewGemstonePage() {
     try {
       setLoading(true);
 
-      const response = await fetch("/api/admin/gemstones", {
+      const response = await fetch("/api/admin/gemstone-varieties", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          name: form.name,
+          species: form.species,
+          description: form.description,
+          supportedShapes: form.supportedShapes,
+          isActive: form.status === "ACTIVE",
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to create gemstone.");
+        throw new Error(data.error || data.message || "Failed to create gemstone variety.");
       }
 
       router.push("/admin/gemstones");

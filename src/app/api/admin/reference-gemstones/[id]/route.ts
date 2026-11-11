@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 
-import { auth } from "@/auth";
+import { getCurrentUser } from "@/lib/auth/currentUser";
 import { connectDB } from "@/lib/mongodb";
 import ReferenceGemstone from "@/models/ReferenceGemstone";
 import Gemstone from "@/models/Gemstone";
 
 async function requireAdmin() {
-  const session = await auth();
+  const user = await getCurrentUser();
 
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (!user || user.role !== "CAGS_ADMIN") {
     return null;
   }
 
-  return session;
+  return user;
 }
 
 export async function GET(
@@ -297,6 +297,55 @@ export async function DELETE(
         success: false,
         message: "Failed to deactivate reference gemstone",
       },
+      { status: 500 },
+    );
+  }
+}
+
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const admin = await requireAdmin();
+    if (!admin) {
+      return NextResponse.json(
+        { success: false, message: "CAGS Admin access required." },
+        { status: 403 },
+      );
+    }
+
+    const { id } = await params;
+    await connectDB();
+
+    const body = await request.json();
+    const query = mongoose.Types.ObjectId.isValid(id)
+      ? { _id: id }
+      : { referenceId: id.toUpperCase() };
+
+    const updated = await ReferenceGemstone.findOneAndUpdate(
+      query,
+      { $set: body },
+      { new: true }
+    ).lean();
+
+    if (!updated) {
+      return NextResponse.json(
+        { success: false, message: "Reference record not found." },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Reference record updated.",
+      reference: updated,
+    });
+  } catch (err) {
+    console.error("Patch reference error:", err);
+    return NextResponse.json(
+      { success: false, message: "Failed to update reference record." },
       { status: 500 },
     );
   }

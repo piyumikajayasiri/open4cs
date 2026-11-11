@@ -2,6 +2,13 @@ import mongoose, { Schema } from "mongoose";
 
 const ReferenceGemstoneSchema = new Schema(
   {
+    referenceId: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+    },
+
     variety: {
       type: String,
       required: true,
@@ -119,7 +126,38 @@ const ReferenceGemstoneSchema = new Schema(
     currency: {
       type: String,
       required: true,
-      default: "USD",
+      default: "LKR",
+    },
+
+    source: {
+      type: String,
+      default: "Desk",
+    },
+
+    sourceType: {
+      type: String,
+      default: "Desk",
+    },
+
+    verificationStatus: {
+      type: String,
+      enum: ["Verified", "Pending"],
+      default: "Verified",
+    },
+
+    labCertificate: {
+      type: String,
+      default: "",
+    },
+
+    verifiedBy: {
+      type: String,
+      default: "",
+    },
+
+    verifiedAt: {
+      type: String,
+      default: "",
     },
   },
   {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Upload, Plus, Search, X, CheckCircle2, FileSpreadsheet } from "lucide-react";
 import ToastNotification, { ToastMessage, ToastType } from "@/components/ui/ToastNotification";
@@ -134,6 +134,67 @@ export default function ReferenceGemstonesPage() {
   };
   const dismissToast = (id: string) => setToasts((prev) => prev.filter((t) => t.id !== id));
 
+  useEffect(() => {
+    async function loadReferences() {
+      try {
+        const res = await fetch("/api/admin/reference-gemstones", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.references) && data.references.length > 0) {
+            const mapped: EvidenceRecord[] = data.references.map((r: Record<string, unknown>, idx: number) => {
+              const refId = String(r.referenceId || `REF-${1000 + idx}`);
+              const caratWeight = Number(r.caratWeight) || 2.0;
+              const refPrice = Number(r.referencePrice) || 600000;
+              const pricePerCt = Math.round((refPrice / caratWeight) / 1000);
+              const priceBasis = pricePerCt >= 1000
+                ? `LKR ${(pricePerCt / 1000).toFixed(1)}M/ct`
+                : `LKR ${pricePerCt}K/ct`;
+
+              const variety = String(r.variety || "Ceylon Blue Sapphire");
+              const varietyShort = variety.replace("Sapphire", "").trim() || "Ceylon Blue";
+              const colorObj = typeof r.color === "object" && r.color !== null ? (r.color as Record<string, unknown>) : {};
+              const clarityObj = typeof r.clarity === "object" && r.clarity !== null ? (r.clarity as Record<string, unknown>) : {};
+              const treatmentObj = typeof r.treatment === "object" && r.treatment !== null ? (r.treatment as Record<string, unknown>) : {};
+
+              const hue = String(colorObj.hue || "Vivid");
+              const nakedEye = String(clarityObj.nakedEye || "Eye-clean");
+              const quality = `${hue.split(" ")[0]} · ${nakedEye}`;
+              const trt = treatmentObj.status === "Untreated" ? "Unheated" : "Heated";
+              const sType = (r.sourceType as EvidenceRecord["sourceType"]) || "Desk";
+              const source = `${trt} · ${sType}`;
+
+              return {
+                id: String(r._id || refId),
+                recordId: refId,
+                stoneAggregate: `${varietyShort} · ${caratWeight} ct`,
+                quality,
+                source,
+                sourceType: sType,
+                priceBasis,
+                status: r.verificationStatus === "Pending" ? "Pending" : "Verified",
+                variety,
+                carat: `${caratWeight} ct`,
+                colorGrade: `${hue} (Tone ${colorObj.tone || "6"}, Saturation ${colorObj.saturation || "Vivid"})`,
+                clarityGrade: `${nakedEye} (${clarityObj.inclusionType || "benchmark clarity"})`,
+                labCertificate: typeof r.labCertificate === "string" && r.labCertificate ? r.labCertificate : "CAGS Benchmark Evidence Standard",
+                verifiedBy: typeof r.verifiedBy === "string" && r.verifiedBy ? r.verifiedBy : "CAGS Pricing Board",
+                verifiedAt: typeof r.verifiedAt === "string" && r.verifiedAt ? r.verifiedAt : "Verified in force",
+              };
+            });
+
+            if (mapped.length > 0) {
+              setRecords(mapped);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Could not fetch remote reference records:", err);
+      }
+    }
+
+    loadReferences();
+  }, []);
+
   const filteredRecords = useMemo(() => {
     return records.filter((r) => {
       const q = search.toLowerCase().trim();
@@ -161,25 +222,48 @@ export default function ReferenceGemstonesPage() {
     });
   }, [records, search, sourceFilter, statusFilter]);
 
-  const handleVerify = (recordId: string) => {
-    setRecords((prev) =>
-      prev.map((r) =>
-        r.id === recordId ? { ...r, status: "Verified" as const, verifiedBy: "CAGS Admin", verifiedAt: "Just now" } : r
-      )
-    );
-    showToast(`Record ${inspectingRecord?.recordId} marked as Verified.`, "success");
-    setInspectingRecord(null);
+  const handleVerify = async (recordId: string) => {
+    try {
+      const target = records.find((r) => r.id === recordId);
+      const queryId = target?.id || recordId;
+
+      await fetch(`/api/admin/reference-gemstones/${queryId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          verificationStatus: "Verified",
+          verifiedBy: "Dr. K. Mendis",
+          verifiedAt: "Just now",
+        }),
+      });
+
+      setRecords((prev) =>
+        prev.map((r) =>
+          r.id === recordId ? { ...r, status: "Verified" as const, verifiedBy: "Dr. K. Mendis", verifiedAt: "Just now" } : r
+        )
+      );
+      showToast(`Record ${inspectingRecord?.recordId || recordId} marked as Verified and enabled for pricing comparison.`, "success");
+    } catch {
+      showToast("Updated local state; persistence failed.", "info");
+    } finally {
+      setInspectingRecord(null);
+    }
   };
 
-  const handleAddRecord = (e: React.FormEvent) => {
+  const handleAddRecord = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newRecordId.trim() || !newStone.trim()) {
       showToast("Please provide both Record ID and Stone specifications.", "error");
       return;
     }
+
+    const cleanRefId = newRecordId.trim().toUpperCase();
+    const caratVal = parseFloat(newStone.split("·")[1]?.replace(/[^\d.]/g, "") || "2.0") || 2.0;
+    const priceVal = parseFloat(newPrice.replace(/[^\d.]/g, "") || "600") * 1000 * caratVal;
+
     const created: EvidenceRecord = {
       id: `rec-${Date.now()}`,
-      recordId: newRecordId.trim().toUpperCase(),
+      recordId: cleanRefId,
       stoneAggregate: newStone.trim(),
       quality: newQuality.trim() || "Vivid · Eye-clean",
       source: newSource,
@@ -187,20 +271,46 @@ export default function ReferenceGemstonesPage() {
       priceBasis: newPrice.trim() || "LKR 600K/ct",
       status: "Pending",
       variety: "Ceylon Blue Sapphire",
-      carat: newStone.split("·")[1]?.trim() || "2.00 ct",
+      carat: `${caratVal} ct`,
       colorGrade: "Vivid saturation benchmark",
       clarityGrade: "Eye clean baseline",
-      labCertificate: "Trade report attached",
+      labCertificate: "Trade submission report attached",
       verifiedBy: "Pending verification",
       verifiedAt: "Just now",
     };
-    setRecords((prev) => [created, ...prev]);
-    showToast(`Evidence record ${created.recordId} added.`, "success");
-    setNewRecordId("");
-    setNewStone("");
-    setNewQuality("");
-    setNewPrice("");
-    setShowAddModal(false);
+
+    try {
+      const res = await fetch("/api/admin/reference-gemstones", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          referenceId: cleanRefId,
+          variety: "Blue Sapphire",
+          caratWeight: caratVal,
+          referencePrice: priceVal,
+          currency: "LKR",
+          source: newSource,
+          sourceType: newSourceType,
+          verificationStatus: "Pending",
+        }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to persist reference record.");
+      }
+
+      setRecords((prev) => [created, ...prev]);
+      showToast(`Evidence record ${created.recordId} added to database.`, "success");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Failed to add reference record.", "error");
+    } finally {
+      setNewRecordId("");
+      setNewStone("");
+      setNewQuality("");
+      setNewPrice("");
+      setShowAddModal(false);
+    }
   };
 
   return (

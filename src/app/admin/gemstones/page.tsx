@@ -136,16 +136,15 @@ export default function GemstoneCataloguePage() {
     async function fetchGemstones() {
       try {
         setLoading(true);
-        const res = await fetch("/api/admin/gemstones", { cache: "no-store" });
+        const res = await fetch("/api/admin/gemstone-varieties", { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
-          if (Array.isArray(data.gemstones) && data.gemstones.length > 0) {
-            // Merge database records with default varieties
+          if (Array.isArray(data.gemstoneVarieties) && data.gemstoneVarieties.length > 0) {
             const dbMap = new Map<string, Record<string, unknown>>();
-            data.gemstones.forEach((g: Record<string, unknown>) => {
-              const gName = typeof g.name === "string" ? g.name : "";
-              if (gName) {
-                dbMap.set(gName.toLowerCase().trim(), g);
+            data.gemstoneVarieties.forEach((v: Record<string, unknown>) => {
+              const vName = typeof v.name === "string" ? v.name.toLowerCase().trim() : "";
+              if (vName) {
+                dbMap.set(vName, v);
               }
             });
 
@@ -153,15 +152,22 @@ export default function GemstoneCataloguePage() {
               prev.map((item) => {
                 const match = dbMap.get(item.name.toLowerCase().trim());
                 if (match) {
+                  const shapes = Array.isArray(match.supportedShapes)
+                    ? match.supportedShapes.join("/")
+                    : item.shapes;
+                  const ruleVersion = typeof match.ruleVersion === "string" && match.ruleVersion
+                    ? match.ruleVersion
+                    : item.ruleVersion;
+                  const status = match.isActive === false
+                    ? "Suspended"
+                    : item.status;
                   return {
                     ...item,
                     id: String(match._id || item.id),
-                    status:
-                      match.status === "INACTIVE"
-                        ? "Suspended"
-                        : item.status,
-                    shapes:
-                      Array.isArray(match.supportedShapes) ? match.supportedShapes.join("/") : item.shapes,
+                    shapes,
+                    ruleVersion,
+                    status,
+                    description: typeof match.description === "string" ? match.description : item.description,
                   };
                 }
                 return item;
@@ -170,7 +176,7 @@ export default function GemstoneCataloguePage() {
           }
         }
       } catch (err) {
-        console.error("Could not fetch remote gemstones, using benchmark catalog:", err);
+        console.error("Could not fetch remote gemstone varieties:", err);
       } finally {
         setLoading(false);
       }
@@ -200,27 +206,48 @@ export default function GemstoneCataloguePage() {
     setEditRuleVersion(item.ruleVersion);
   };
 
-  const handleSaveEdit = (e: React.FormEvent) => {
+  const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingItem) return;
 
-    setVarieties((prev) =>
-      prev.map((v) =>
-        v.id === editingItem.id
-          ? {
-              ...v,
-              shapes: editShapes.trim() || v.shapes,
-              ruleVersion: editRuleVersion.trim() || v.ruleVersion,
-            }
-          : v
-      )
-    );
+    try {
+      if (!editingItem.id.startsWith("var-")) {
+        const res = await fetch(`/api/admin/gemstone-varieties/${editingItem.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            shapes: editShapes.trim() || editingItem.shapes,
+            ruleVersion: editRuleVersion.trim() || editingItem.ruleVersion,
+          }),
+        });
 
-    showToast(`Updated variety configuration for ${editingItem.name}.`, "success");
-    setEditingItem(null);
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Failed to update variety configuration.");
+        }
+      }
+
+      setVarieties((prev) =>
+        prev.map((v) =>
+          v.id === editingItem.id
+            ? {
+                ...v,
+                shapes: editShapes.trim() || v.shapes,
+                ruleVersion: editRuleVersion.trim() || v.ruleVersion,
+              }
+            : v
+        )
+      );
+
+      showToast(`Updated variety configuration for ${editingItem.name}.`, "success");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Failed to update variety.", "error");
+    } finally {
+      setEditingItem(null);
+    }
   };
 
-  const handleConfirmToggle = () => {
+  const handleConfirmToggle = async () => {
     if (!togglingItem) return;
 
     const nextStatus =
@@ -228,18 +255,37 @@ export default function GemstoneCataloguePage() {
         ? "Suspended"
         : "Supported";
 
-    setVarieties((prev) =>
-      prev.map((v) =>
-        v.id === togglingItem.id ? { ...v, status: nextStatus } : v
-      )
-    );
+    try {
+      if (!togglingItem.id.startsWith("var-")) {
+        const res = await fetch(`/api/admin/gemstone-varieties/${togglingItem.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            isActive: nextStatus === "Supported",
+          }),
+        });
 
-    showToast(
-      `${togglingItem.name} status updated to ${nextStatus}.`,
-      nextStatus === "Supported" ? "success" : "info"
-    );
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Failed to toggle variety status.");
+        }
+      }
 
-    setTogglingItem(null);
+      setVarieties((prev) =>
+        prev.map((v) =>
+          v.id === togglingItem.id ? { ...v, status: nextStatus } : v
+        )
+      );
+
+      showToast(
+        `${togglingItem.name} status updated to ${nextStatus}.`,
+        nextStatus === "Supported" ? "success" : "info"
+      );
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Failed to toggle variety status.", "error");
+    } finally {
+      setTogglingItem(null);
+    }
   };
 
   return (
