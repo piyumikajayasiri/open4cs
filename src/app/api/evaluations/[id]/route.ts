@@ -54,6 +54,18 @@ export async function GET(
       );
     }
 
+    // Ownership & Privacy Enforcement: Users can only view their own evaluations unless CAGS_ADMIN
+    const evaluationUserId = (evaluation as { userId?: mongoose.Types.ObjectId | string }).userId?.toString();
+    const isOwner = evaluationUserId === session.userId;
+    const isCagsAdmin = session.role === "CAGS_ADMIN";
+
+    if (!isOwner && !isCagsAdmin) {
+      return NextResponse.json(
+        { error: "Access denied. You do not have permission to view this evaluation." },
+        { status: 403 }
+      );
+    }
+
     return NextResponse.json({ success: true, evaluation });
   } catch (error) {
     console.error("Failed to load evaluation:", error);

@@ -63,10 +63,21 @@ export async function POST(request: NextRequest) {
 
     // Engine tolerance normalizer for display names from UI
     if (data.variety) {
-      const v = data.variety.toLowerCase();
-      if (v.includes("padparadscha")) data.variety = "Padparadscha";
-      else if (v.includes("ruby")) data.variety = "Ruby";
-      else if (v.includes("sapphire")) data.variety = "Blue Sapphire";
+      const v = data.variety.toLowerCase().trim();
+      if (v.includes("padparadscha")) {
+        data.variety = "Padparadscha";
+      } else if (v.includes("ruby")) {
+        data.variety = "Ruby";
+      } else if (
+        v.includes("blue sapphire") ||
+        v.includes("ceylon blue") ||
+        v === "blue" ||
+        v === "sapphire"
+      ) {
+        data.variety = "Blue Sapphire";
+      }
+      // Distinct varieties like Yellow Sapphire, Pink Sapphire, White Sapphire, and Star Sapphire
+      // are preserved as-is so they are not silently re-classified under Blue Sapphire rules.
     }
 
     if (data.treatment?.status) {
@@ -125,7 +136,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "Unsupported gemstone variety.",
+          message: `${data.variety} is not currently supported for automated 4C evaluation. Currently supported varieties: ${ENGINE_SUPPORTED_VARIETIES.join(", ")}.`,
         },
         { status: 400 }
       );

@@ -110,11 +110,12 @@ export default function SettingsPage() {
       if (res.ok) {
         showToast("Settings saved successfully! Your profile, category, and preferences have been updated.", "success");
       } else {
-        // Fallback friendly notification
-        showToast("Preferences updated and saved to local session.", "success");
+        const errData = await res.json().catch(() => null);
+        const errMsg = errData?.message || errData?.error || "Failed to save settings. Please try again.";
+        showToast(errMsg, "error");
       }
     } catch {
-      showToast("Settings saved successfully.", "success");
+      showToast("Network error saving settings. Please check your connection.", "error");
     } finally {
       setIsSaving(false);
     }

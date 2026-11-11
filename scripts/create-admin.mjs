@@ -18,8 +18,20 @@ const userSchema = new mongoose.Schema(
       unique: true,
     },
     passwordHash: String,
-    category: String,
-    role: String,
+    category: {
+      type: String,
+      enum: ["Student", "Trader", "Gemologist", "Professional"],
+      default: "Professional",
+    },
+    role: {
+      type: String,
+      enum: ["USER", "CAGS_ADMIN"],
+      default: "CAGS_ADMIN",
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
     status: String,
   },
   { timestamps: true },
@@ -35,7 +47,11 @@ const password = "ChangeMe123!";
 const existing = await User.findOne({ email });
 
 if (existing) {
-  console.log("Admin already exists.");
+  existing.role = "CAGS_ADMIN";
+  existing.category = "Professional";
+  existing.isActive = true;
+  await existing.save();
+  console.log("Admin account already existed; synchronized role to CAGS_ADMIN and category to Professional.");
 } else {
   const passwordHash = await bcrypt.hash(password, 12);
 
@@ -43,14 +59,16 @@ if (existing) {
     name: "CAGS Administrator",
     email,
     passwordHash,
-    category: "PROFESSIONAL",
-    role: "ADMIN",
-    status: "ACTIVE",
+    category: "Professional",
+    role: "CAGS_ADMIN",
+    isActive: true,
   });
 
-  console.log("Admin created successfully.");
+  console.log("CAGS Admin created successfully.");
   console.log("Email:", email);
   console.log("Password:", password);
+  console.log("Role: CAGS_ADMIN");
+  console.log("Category: Professional");
 }
 
 await mongoose.disconnect();
