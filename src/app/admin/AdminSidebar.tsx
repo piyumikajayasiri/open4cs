@@ -19,6 +19,8 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
+  Star,
+  Layers,
   Users,
 } from "lucide-react";
 
@@ -39,7 +41,7 @@ const navigation = [
   {
     label: "Gemstone Catalogue",
     href: "/admin/gemstones",
-    icon: Globe,
+    icon: Gem,
   },
   {
     label: "4C Evaluation Rules",
@@ -49,12 +51,12 @@ const navigation = [
   {
     label: "Pricing Matrix",
     href: "/admin/pricing",
-    icon: BarChart3,
+    icon: Layers,
   },
   {
     label: "Reference Gemstones",
     href: "/admin/reference-gemstones",
-    icon: Sparkles,
+    icon: Star,
   },
   {
     label: "Historical Pricing",
