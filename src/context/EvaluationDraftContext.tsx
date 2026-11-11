@@ -4,7 +4,6 @@ import React, {
   createContext,
   useContext,
   useState,
-  useEffect,
   useCallback,
   ReactNode,
 } from "react";
@@ -65,39 +64,39 @@ export interface EvaluationDraft {
 }
 
 export const initialDraftState: EvaluationDraft = {
-  variety: "Ceylon Blue Sapphire",
-  stoneId: "CEY-2026-0847",
-  caratWeight: "2.45",
+  variety: "Blue Sapphire",
+  stoneId: "",
+  caratWeight: "",
   shape: "Oval",
-  hue: "Blue",
-  tone: "Medium",
+  hue: "Royal Blue",
+  tone: "6",
   saturation: "Vivid",
   distribution: "Even",
   zoning: "None",
   nakedEye: "Clean",
   loupe10x: "Very Slight",
-  inclusionType: "Fine silk needles",
-  inclusionLocation: "Near edge — low impact",
+  inclusionType: "",
+  inclusionLocation: "",
   severity: "Minor",
-  length: "8.42",
-  width: "6.31",
-  depth: "4.55",
+  length: "",
+  width: "",
+  depth: "",
   symmetry: "Good",
-  polish: "Excellent",
+  polish: "Good",
   windowing: "None",
-  extinction: "Minimal",
+  extinction: "None",
   bulging: "None",
-  treatmentStatus: "Heated (H) — mild",
-  treatmentType: "Laboratory Verified",
-  originValue: "Sri Lanka (Ceylon)",
-  originReliability: "Seller Provided",
-  recutPotential: "Low / None",
-  otherCharacteristics: "No surface-reaching fissures",
-  attachedDocument: "GIC-Colombo Report (Verified)",
+  treatmentStatus: "Heated",
+  treatmentType: "Unverified",
+  originValue: "Sri Lanka",
+  originReliability: "Unverified",
+  recutPotential: "",
+  otherCharacteristics: "",
+  attachedDocument: "",
   informationReliability: {
-    measurements: "Measured",
-    treatment: "Laboratory Verified",
-    origin: "Seller Provided",
+    measurements: "Unverified",
+    treatment: "Unverified",
+    origin: "Unverified",
   },
 };
 
@@ -117,22 +116,23 @@ const EvaluationDraftContext = createContext<EvaluationDraftContextType | undefi
 const DRAFT_STORAGE_KEY = "open4cs_evaluation_draft_v1";
 
 export function EvaluationDraftProvider({ children }: { children: ReactNode }) {
-  const [draft, setDraft] = useState<EvaluationDraft>(initialDraftState);
+  // Lazy state initialization from sessionStorage avoiding setState in effect
+  const [draft, setDraft] = useState<EvaluationDraft>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = sessionStorage.getItem(DRAFT_STORAGE_KEY);
+        if (saved) {
+          return { ...initialDraftState, ...JSON.parse(saved) };
+        }
+      } catch {
+        // sessionStorage unavailable
+      }
+    }
+    return initialDraftState;
+  });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  // Hydrate from sessionStorage once on client mount
-  useEffect(() => {
-    try {
-      const saved = sessionStorage.getItem(DRAFT_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setDraft((prev) => ({ ...prev, ...parsed }));
-      }
-    } catch {
-      // sessionStorage unavailable or parse error; use defaults
-    }
-  }, []);
 
   // Update draft in state and sync with sessionStorage
   const updateDraft = useCallback((updates: Partial<EvaluationDraft>) => {
@@ -158,17 +158,35 @@ export function EvaluationDraftProvider({ children }: { children: ReactNode }) {
     setSubmitError(null);
   }, []);
 
-  // Full submission calling existing backend APIs
+  // Full submission calling existing backend APIs with strict validation
   const submitEvaluation = useCallback(async () => {
     setIsSubmitting(true);
     setSubmitError(null);
 
+    const caratWeight = Number(draft.caratWeight);
+    if (!caratWeight || caratWeight <= 0) {
+      setIsSubmitting(false);
+      const errMsg = "A valid positive carat weight is required.";
+      setSubmitError(errMsg);
+      return { success: false, error: errMsg };
+    }
+
+    const length = Number(draft.length);
+    const width = Number(draft.width);
+    const depth = Number(draft.depth);
+    if (!length || length <= 0 || !width || width <= 0 || !depth || depth <= 0) {
+      setIsSubmitting(false);
+      const errMsg = "Valid positive length, width, and depth measurements are required.";
+      setSubmitError(errMsg);
+      return { success: false, error: errMsg };
+    }
+
     const payload = {
-      variety: draft.variety || "Ceylon Blue Sapphire",
-      caratWeight: Number(draft.caratWeight) > 0 ? Number(draft.caratWeight) : 2.45,
+      variety: draft.variety || "Blue Sapphire",
+      caratWeight,
       color: {
-        hue: draft.hue || "Blue",
-        tone: draft.tone || "Medium",
+        hue: draft.hue || "Royal Blue",
+        tone: draft.tone || "6",
         saturation: draft.saturation || "Vivid",
         distribution: draft.distribution || "Even",
         zoning: draft.zoning || "None",
@@ -176,32 +194,32 @@ export function EvaluationDraftProvider({ children }: { children: ReactNode }) {
       clarity: {
         nakedEye: draft.nakedEye || "Clean",
         loupe10x: draft.loupe10x || "Very Slight",
-        inclusionType: draft.inclusionType || "Fine silk needles",
-        inclusionLocation: draft.inclusionLocation || "Near edge — low impact",
+        inclusionType: draft.inclusionType || "",
+        inclusionLocation: draft.inclusionLocation || "",
         severity: draft.severity || "Minor",
       },
       cut: {
-        length: Number(draft.length) > 0 ? Number(draft.length) : 8.42,
-        width: Number(draft.width) > 0 ? Number(draft.width) : 6.31,
-        depth: Number(draft.depth) > 0 ? Number(draft.depth) : 4.55,
+        length,
+        width,
+        depth,
         symmetry: draft.symmetry || "Good",
-        polish: draft.polish || "Excellent",
+        polish: draft.polish || "Good",
         windowing: draft.windowing || "None",
-        extinction: draft.extinction || "Minimal",
+        extinction: draft.extinction || "None",
         bulging: draft.bulging || "None",
       },
       treatment: {
-        status: draft.treatmentStatus || "Heated (H) — mild",
-        type: draft.treatmentType || "Laboratory Verified",
+        status: draft.treatmentStatus || "Heated",
+        type: draft.treatmentType || "Unverified",
       },
       origin: {
-        value: draft.originValue || "Sri Lanka (Ceylon)",
-        reliability: draft.originReliability || "Seller Provided",
+        value: draft.originValue || "Sri Lanka",
+        reliability: draft.originReliability || "Unverified",
       },
       informationReliability: {
-        measurements: draft.informationReliability?.measurements || "Measured",
-        treatment: draft.informationReliability?.treatment || "Laboratory Verified",
-        origin: draft.informationReliability?.origin || "Seller Provided",
+        measurements: draft.informationReliability?.measurements || "Unverified",
+        treatment: draft.informationReliability?.treatment || "Unverified",
+        origin: draft.informationReliability?.origin || "Unverified",
       },
     };
 

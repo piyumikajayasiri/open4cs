@@ -47,17 +47,40 @@ export const COLOR_RULES = {
     medium: 100,
     dark: 70,
     veryDark: 50,
+    // Numeric 1–9 tone scale from CAGS grading guides
+    "1": 40,
+    "2": 50,
+    "3": 65,
+    "4": 85,
+    "5": 100,
+    "6": 100,
+    "7": 80,
+    "8": 65,
+    "9": 50,
+    tone1: 40,
+    tone2: 50,
+    tone3: 65,
+    tone4: 85,
+    tone5: 100,
+    tone6: 100,
+    tone7: 80,
+    tone8: 65,
+    tone9: 50,
   },
 
   saturation: {
     weak: 40,
+    greyish: 40,
+    slightlyGreyish: 55,
     moderate: 70,
+    medium: 70,
     strong: 90,
     vivid: 100,
   },
 
   distribution: {
     uneven: 60,
+    slightlyUneven: 80,
     mostlyEven: 80,
     even: 100,
   },
@@ -65,26 +88,37 @@ export const COLOR_RULES = {
   zoning: {
     severe: 50,
     moderate: 70,
+    noticeable: 70,
     slight: 85,
     none: 100,
+    noneVisible: 100,
   },
 } as const;
 
 export const COLOR_HUE_RULES = {
   "Blue Sapphire": {
     blue: 100,
+    royalBlue: 100,
+    cornflowerBlue: 100,
+    vividBlue: 100,
     violetBlue: 90,
+    violetishBlue: 90,
+    steelBlue: 80,
     greenishBlue: 75,
+    tealBlue: 75,
   },
 
   Padparadscha: {
     pinkishOrange: 100,
     orangishPink: 100,
     orangePink: 95,
+    sunsetOrange: 90,
+    salmonPink: 85,
   },
 
   Ruby: {
     red: 100,
+    pigeonBloodRed: 100,
     purplishRed: 90,
     orangishRed: 80,
   },
@@ -132,6 +166,7 @@ export const CLARITY_FACTOR_WEIGHTS = {
 export const CUT_RULES = {
   symmetry: {
     excellent: 100,
+    veryGood: 95,
     good: 85,
     fair: 65,
     poor: 40,
@@ -139,6 +174,7 @@ export const CUT_RULES = {
 
   polish: {
     excellent: 100,
+    veryGood: 95,
     good: 85,
     fair: 65,
     poor: 40,
@@ -153,6 +189,7 @@ export const CUT_RULES = {
 
   extinction: {
     none: 100,
+    minimal: 100,
     slight: 85,
     moderate: 60,
     severe: 35,
@@ -246,4 +283,3 @@ export const REFERENCE_COMPARISON_RULES = {
 export const PRICE_SUGGESTION_RULES = {
   rangePercentage: 0.1,
 } as const;
-

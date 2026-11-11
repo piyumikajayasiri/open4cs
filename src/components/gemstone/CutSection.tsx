@@ -328,7 +328,7 @@ export default function CutSection({
               </label>
               <ShadcnSelect
                 id="cut-extinction"
-                value={extinction || "Minimal"}
+                value={extinction || "None"}
                 onValueChange={onExtinctionChange}
                 options={["Minimal", "None", "Slight", "Moderate", "Severe"]}
               />

@@ -175,8 +175,9 @@ export async function POST(request: Request) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
-    if (error?.code === 11000) {
+  } catch (error: unknown) {
+    const isDuplicate = typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === 11000;
+    if (isDuplicate) {
       return NextResponse.json(
         { error: "A rule version with this version identifier already exists." },
         { status: 409 }

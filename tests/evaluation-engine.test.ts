@@ -59,21 +59,53 @@ test("4. Production Cut factor weights sum precisely to 1.00 (100%)", () => {
   assert.equal(Number(sum.toFixed(4)), 1.0);
 });
 
-test("5. evaluateColor calculates score using production engine", () => {
+test("5. evaluateColor handles UI values: Royal Blue, Tone 6, Vivid Saturation", () => {
   const result = evaluateColor({
     variety: "Blue Sapphire",
-    hue: "Blue",
-    tone: "Medium",
+    hue: "Royal Blue",
+    tone: "6",
     saturation: "Vivid",
     distribution: "Even",
-    zoning: "None",
+    zoning: "None visible",
   });
 
   assert.equal(result.status, "COMPLETED");
   assert.equal(result.score, 100);
 });
 
-test("6. evaluateCut calculates score and ratios using production engine", () => {
+test("6. evaluateColor handles UI values: Cornflower Blue and all numeric tones 1-9", () => {
+  const tones = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+  for (const t of tones) {
+    const result = evaluateColor({
+      variety: "Blue Sapphire",
+      hue: "Cornflower Blue",
+      tone: t,
+      saturation: "Strong",
+      distribution: "Mostly Even",
+      zoning: "None",
+    });
+    assert.equal(result.status, "COMPLETED", `Tone ${t} should evaluate as COMPLETED`);
+    assert.ok(typeof result.score === "number" && result.score > 0);
+  }
+});
+
+test("7. evaluateColor handles all UI saturation scales: Greyish to Vivid", () => {
+  const saturations = ["Greyish", "Slightly Greyish", "Medium", "Strong", "Vivid"];
+  for (const s of saturations) {
+    const result = evaluateColor({
+      variety: "Blue Sapphire",
+      hue: "Blue",
+      tone: "Medium",
+      saturation: s,
+      distribution: "Even",
+      zoning: "None",
+    });
+    assert.equal(result.status, "COMPLETED", `Saturation ${s} should evaluate as COMPLETED`);
+    assert.ok(typeof result.score === "number" && result.score > 0);
+  }
+});
+
+test("8. evaluateCut handles UI value: Minimal extinction", () => {
   const result = evaluateCut({
     length: 8.5,
     width: 6.8,
@@ -81,7 +113,7 @@ test("6. evaluateCut calculates score and ratios using production engine", () =>
     symmetry: "Good",
     polish: "Good",
     windowing: "None",
-    extinction: "Slight",
+    extinction: "Minimal",
     bulging: "None",
   });
 
@@ -91,7 +123,7 @@ test("6. evaluateCut calculates score and ratios using production engine", () =>
   assert.ok(typeof result.score === "number" && result.score > 0);
 });
 
-test("7. evaluateClarity handles eye-clean and 10x loupe observation using production engine", () => {
+test("9. evaluateClarity handles eye-clean and 10x loupe observation using production engine", () => {
   const result = evaluateClarity({
     nakedEye: "Clean",
     loupe10x: "Very Slight",
@@ -104,7 +136,7 @@ test("7. evaluateClarity handles eye-clean and 10x loupe observation using produ
   assert.ok(typeof result.score === "number" && result.score >= 90);
 });
 
-test("8. evaluateCarat calculates proportions and weight score using production engine", () => {
+test("10. evaluateCarat calculates proportions and weight score using production engine", () => {
   const result = evaluateCarat({
     caratWeight: 2.5,
     length: 8.5,
@@ -116,7 +148,7 @@ test("8. evaluateCarat calculates proportions and weight score using production 
   assert.ok(typeof result.score === "number");
 });
 
-test("9. evaluateTreatment applies production adjustment factors", () => {
+test("11. evaluateTreatment applies production adjustment factors", () => {
   const heatedResult = evaluateTreatment({
     status: "Heated",
     type: "Thermal",
@@ -132,7 +164,7 @@ test("9. evaluateTreatment applies production adjustment factors", () => {
   assert.equal(untreatedResult.adjustmentFactor, TREATMENT_RULES.status.untreated);
 });
 
-test("10. evaluateOrigin applies production origin multipliers", () => {
+test("12. evaluateOrigin applies production origin multipliers", () => {
   const ceylonResult = evaluateOrigin({
     value: "Sri Lanka",
     reliability: "High",
@@ -142,7 +174,7 @@ test("10. evaluateOrigin applies production origin multipliers", () => {
   assert.equal(ceylonResult.reliabilityFactor, ORIGIN_RULES.reliability.high);
 });
 
-test("11. calculatePriceSuggestion applies treatment & origin factors with +/- 10% range", () => {
+test("13. calculatePriceSuggestion applies treatment & origin factors with +/- 10% range", () => {
   const referencePrice = 100000;
   const treatmentFactor = 0.9;
   const originFactor = 1.0;
@@ -161,16 +193,16 @@ test("11. calculatePriceSuggestion applies treatment & origin factors with +/- 1
   assert.equal(PRICE_SUGGESTION_RULES.rangePercentage, 0.1);
 });
 
-test("12. evaluateGemstone runs full end-to-end composite evaluation on production engine", () => {
+test("14. evaluateGemstone runs full end-to-end composite evaluation with UI inputs", () => {
   const fullResult = evaluateGemstone({
     variety: "Blue Sapphire",
     caratWeight: 2.5,
     color: {
-      hue: "Blue",
-      tone: "Medium",
+      hue: "Royal Blue",
+      tone: "6",
       saturation: "Vivid",
       distribution: "Even",
-      zoning: "None",
+      zoning: "None visible",
     },
     clarity: {
       nakedEye: "Clean",
@@ -186,7 +218,7 @@ test("12. evaluateGemstone runs full end-to-end composite evaluation on producti
       symmetry: "Good",
       polish: "Good",
       windowing: "None",
-      extinction: "Slight",
+      extinction: "Minimal",
       bulging: "None",
     },
     treatment: {
@@ -211,7 +243,7 @@ test("12. evaluateGemstone runs full end-to-end composite evaluation on producti
   assert.ok(Array.isArray(fullResult.recommendations.recommendations));
 });
 
-test("13. Engine supported varieties are strictly guarded", () => {
+test("15. Engine supported varieties are strictly guarded", () => {
   assert.deepEqual(Array.from(ENGINE_SUPPORTED_VARIETIES), [
     "Blue Sapphire",
     "Padparadscha",
