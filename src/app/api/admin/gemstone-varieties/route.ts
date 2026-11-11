@@ -63,6 +63,13 @@ export async function POST(request: Request) {
 
     const rawName = typeof data.name === "string" ? data.name.trim() : "";
     const description = typeof data.description === "string" ? data.description.trim() : "";
+    const species = typeof data.species === "string" && data.species.trim() ? data.species.trim() : "Corundum";
+    const ruleVersion = typeof data.ruleVersion === "string" && data.ruleVersion.trim() ? data.ruleVersion.trim() : "v4.2";
+    const supportedShapes = Array.isArray(data.supportedShapes)
+      ? data.supportedShapes
+      : typeof data.shapes === "string"
+      ? data.shapes.split("/").map((s: string) => s.trim()).filter(Boolean)
+      : ["Oval", "Round"];
 
     if (!rawName) {
       return NextResponse.json(
@@ -71,24 +78,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const canonicalName = ENGINE_SUPPORTED_VARIETIES.find(
-      (supportedName) => supportedName.toLowerCase() === rawName.toLowerCase()
+    const isEngineSupported = ENGINE_SUPPORTED_VARIETIES.some(
+      (supportedName) => supportedName.toLowerCase() === rawName.toLowerCase() ||
+        rawName.toLowerCase().includes(supportedName.toLowerCase())
     );
-
-    if (!canonicalName) {
-      return NextResponse.json(
-        {
-          error:
-            "This gemstone variety is not supported by the current evaluation rules.",
-        },
-        { status: 400 }
-      );
-    }
 
     await connectToDatabase();
 
     const existing = await GemstoneVariety.findOne({
-      name: { $regex: `^${canonicalName}$`, $options: "i" },
+      name: { $regex: `^${rawName}$`, $options: "i" },
     });
 
     if (existing) {
@@ -99,10 +97,14 @@ export async function POST(request: Request) {
     }
 
     const gemstoneVariety = await GemstoneVariety.create({
-      name: canonicalName,
+      name: rawName,
       description,
-      isActive: true,
-      engineSupported: true,
+      species,
+      supportedShapes,
+      ruleVersion,
+      isActive: data.isActive !== undefined ? Boolean(data.isActive) : true,
+      engineSupported: data.engineSupported !== undefined ? Boolean(data.engineSupported) : isEngineSupported,
+      referenceCount: typeof data.referenceCount === "number" ? data.referenceCount : 0,
     });
 
     return NextResponse.json(

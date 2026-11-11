@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { getCurrentUser } from "@/lib/auth/currentUser";
 import AdminShell from "./AdminShell";
 
 export default async function AdminLayout({
@@ -6,13 +6,13 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  const user = await getCurrentUser();
 
   return (
     <AdminShell
       user={{
-        name: session?.user?.name || "CAGS Admin",
-        email: session?.user?.email || "admin@cags.lk",
+        name: user?.name || "CAGS Admin",
+        email: user?.email || "admin@cags.lk",
       }}
     >
       {children}

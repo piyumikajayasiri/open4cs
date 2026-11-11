@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
-import { auth } from "@/auth";
+import { getCurrentUser } from "@/lib/auth/currentUser";
 import { connectDB } from "@/lib/mongodb";
 import Gemstone from "@/models/Gemstone";
 
 async function checkAdmin() {
-  const session = await auth();
+  const user = await getCurrentUser();
 
-  if (!session?.user) {
+  if (!user) {
     return {
       authorized: false,
       status: 401,
@@ -15,16 +15,17 @@ async function checkAdmin() {
     };
   }
 
-  if (session.user.role !== "ADMIN") {
+  if (user.role !== "CAGS_ADMIN") {
     return {
       authorized: false,
       status: 403,
-      message: "Admin access required.",
+      message: "CAGS Admin access required.",
     };
   }
 
   return {
     authorized: true,
+    user,
   };
 }
 
