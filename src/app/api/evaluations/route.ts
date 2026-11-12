@@ -14,6 +14,9 @@ import {
   ENGINE_SUPPORTED_TREATMENTS,
   ENGINE_SUPPORTED_ORIGINS,
   ENGINE_SUPPORTED_ORIGIN_RELIABILITIES,
+  COLOR_HUE_RULES,
+  TREATMENT_RULES,
+  ORIGIN_RULES,
 } from "@/lib/evaluation/rules";
 import Evaluation from "@/models/Evaluation";
 import GemstoneVariety from "@/models/GemstoneVariety";
@@ -140,6 +143,37 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       );
+    }
+
+    if (!data.color || !data.color.hue) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Gemstone color hue is required.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const varietyHueRules =
+      COLOR_HUE_RULES[data.variety as keyof typeof COLOR_HUE_RULES];
+    if (varietyHueRules) {
+      const normalizedHue = data.color.hue
+        .trim()
+        .toLowerCase()
+        .replace(/[\s\-_]+/g, "");
+      const isHueSupported = Object.keys(varietyHueRules).some(
+        (key) => key.toLowerCase().replace(/[\s\-_]+/g, "") === normalizedHue
+      );
+      if (!isHueSupported) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Hue "${data.color.hue}" is not supported for variety "${data.variety}". Supported hues: ${Object.keys(varietyHueRules).join(", ")}.`,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     await connectToDatabase();
@@ -333,6 +367,19 @@ export async function POST(request: NextRequest) {
         ? bestReferenceMatch
         : null;
 
+    // Relative treatment and origin adjustment calculations (preventing double-counting)
+    const candidateTreatmentStatus = data.treatment?.status?.toLowerCase() || "unknown";
+    const refTreatmentStatus = suitableReferenceMatch?.treatment?.status?.toLowerCase() || candidateTreatmentStatus;
+    const candidateTreatmentWeight = TREATMENT_RULES.status[candidateTreatmentStatus as keyof typeof TREATMENT_RULES.status] ?? 1.0;
+    const refTreatmentWeight = TREATMENT_RULES.status[refTreatmentStatus as keyof typeof TREATMENT_RULES.status] ?? 1.0;
+    const relativeTreatmentMultiplier = refTreatmentWeight > 0 ? (candidateTreatmentWeight / refTreatmentWeight) : 1.0;
+
+    const candidateOriginValue = (data.origin?.value || "unknown").toLowerCase().replace(/\s+/g, "");
+    const refOriginValue = (suitableReferenceMatch?.origin?.value || data.origin?.value || "unknown").toLowerCase().replace(/\s+/g, "");
+    const candidateOriginWeight = ORIGIN_RULES.value[candidateOriginValue as keyof typeof ORIGIN_RULES.value] ?? 1.0;
+    const refOriginWeight = ORIGIN_RULES.value[refOriginValue as keyof typeof ORIGIN_RULES.value] ?? 1.0;
+    const relativeOriginMultiplier = refOriginWeight > 0 ? (candidateOriginWeight / refOriginWeight) : 1.0;
+
     const priceSuggestion =
       calculatePriceSuggestion(
         suitableReferenceMatch
@@ -340,7 +387,12 @@ export async function POST(request: NextRequest) {
           : null,
         suitableReferenceMatch?.currency ?? null,
         evaluation.treatment.adjustmentFactor,
-        evaluation.origin.adjustmentFactor
+        evaluation.origin.adjustmentFactor,
+        {
+          referenceCount: suitableComparableReferences.length,
+          relativeTreatmentMultiplier,
+          relativeOriginMultiplier,
+        }
       );
 
     const referenceDataSufficiency = {
@@ -361,6 +413,7 @@ export async function POST(request: NextRequest) {
       referenceDataSufficiency,
       bestReferenceMatch,
       priceSuggestion,
+      photoUrl: data.photoUrl || "",
     });
 
     return NextResponse.json(

@@ -6,6 +6,8 @@ export type ReferenceGemstoneComparison = {
   caratWeight: number;
   referencePrice: number;
   currency: string;
+  treatment?: { status: string };
+  origin?: { value: string; reliability?: string };
 
   similarity: {
     color: number | null;
@@ -315,6 +317,8 @@ export type ReferenceForComparison = {
   caratWeight: number;
   referencePrice: number;
   currency: string;
+  treatment?: { status: string };
+  origin?: { value: string; reliability?: string };
   color: ColorComparisonInput;
   clarity: ClarityComparisonInput;
   cut: CutComparisonInput;
@@ -364,6 +368,8 @@ export function compareWithReference(
     caratWeight: reference.caratWeight,
     referencePrice: reference.referencePrice,
     currency: reference.currency,
+    treatment: reference.treatment,
+    origin: reference.origin,
 
     similarity: {
       color: colorSimilarity,

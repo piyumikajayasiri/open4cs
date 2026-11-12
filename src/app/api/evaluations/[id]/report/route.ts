@@ -128,6 +128,7 @@ export async function GET(
         treatment: gemstoneDoc.treatment || {},
         origin: gemstoneDoc.origin || {},
         informationReliability: gemstoneDoc.informationReliability || {},
+        photoUrl: (gemstoneDoc as { photoUrl?: string }).photoUrl || evaluation.photoUrl || "",
       },
 
       scores: {

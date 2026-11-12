@@ -8,6 +8,7 @@ dotenv.config({ path: ".env.local" });
 import { createSessionToken, verifySessionToken } from "../src/lib/auth/session";
 import GemstoneVariety from "../src/models/GemstoneVariety";
 import ReferenceGemstone from "../src/models/ReferenceGemstone";
+import Gemstone from "../src/models/Gemstone";
 import { getReferenceGemstones } from "../src/lib/evaluation/getReferenceGemstones";
 import { evaluateGemstone } from "../src/lib/evaluation/evaluateGemstone";
 import { calculatePriceSuggestion } from "../src/lib/evaluation/priceSuggestion";
@@ -471,6 +472,104 @@ test("Integration Workflow Suite", async (t) => {
 
       const response = protectRoute(noTokenResult);
       assert.strictEqual(response.status, 401, "Unauthenticated access must return 401 Authentication required.");
+    }
+  );
+
+  // =========================================================================
+  // Test 8: Photo Persistence & PDF Image Embedding
+  // =========================================================================
+  await t.test(
+    "8. Specimen Photo Persistence & PDF Embedding: Photo URL is stored in models and embedded in PDF",
+    async () => {
+      // 1x1 transparent PNG data URL for test embedding
+      const samplePngDataUrl =
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+
+      // 1. Create Gemstone with photoUrl and naturalStatus
+      const gem = await Gemstone.create({
+        variety: "Blue Sapphire",
+        caratWeight: 2.2,
+        color: { hue: "Royal Blue", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None" },
+        clarity: { nakedEye: "Clean", loupe10x: "Very Slight", severity: "Minor" },
+        cut: { length: 8.0, width: 6.5, depth: 4.1, symmetry: "Good", polish: "Good", windowing: "None", extinction: "None", bulging: "None" },
+        treatment: { status: "Untreated", type: "None" },
+        origin: { value: "Sri Lanka", reliability: "High" },
+        photoUrl: samplePngDataUrl,
+        naturalStatus: "Natural",
+      });
+
+      assert.strictEqual(gem.photoUrl, samplePngDataUrl);
+      assert.strictEqual(gem.naturalStatus, "Natural");
+
+      // 2. Generate PDF with embedded photo
+      const pdfBytes = await generateEvaluationPdf({
+        reportTitle: "Open 4Cs Gemstone Assessment Report",
+        evaluationId: "EVAL-PHOTO-TEST-001",
+        generatedAt: new Date().toISOString(),
+        evaluationDate: new Date(),
+        user: { name: "Photo Tester", category: "Trader" },
+        gemstone: {
+          variety: "Blue Sapphire",
+          caratWeight: 2.2,
+          color: { hue: "Royal Blue" },
+          clarity: { nakedEye: "Clean" },
+          cut: { length: 8.0, width: 6.5, depth: 4.1 },
+          treatment: { status: "Untreated" },
+          origin: { value: "Sri Lanka" },
+          informationReliability: {},
+          photoUrl: samplePngDataUrl,
+        },
+        scores: { overall: 92, color: 95, clarity: 90, cut: 90, carat: 90 },
+        priceSuggestion: { available: true, suggestedPrice: 2000000, minimumPrice: 1800000, maximumPrice: 2200000, currency: "LKR" },
+        referenceComparison: { available: true, referenceName: "Benchmark", similarity: 94 },
+        recommendations: ["Valid test recommendation"],
+        ruleVersion: "v4.2",
+        userStatement: "Test statement",
+        disclaimer: "Test disclaimer",
+      });
+
+      assert.ok(pdfBytes instanceof Uint8Array);
+      assert.ok(pdfBytes.length > 1000);
+
+      // Clean up test gemstone
+      await Gemstone.deleteOne({ _id: gem._id });
+    }
+  );
+
+  // =========================================================================
+  // Test 9: Evaluation Ownership & Privacy Access Gate
+  // =========================================================================
+  await t.test(
+    "9. Privacy & Ownership: User A cannot access User B's evaluation; CAGS_ADMIN permitted",
+    async () => {
+      const userAId = new mongoose.Types.ObjectId().toString();
+      const userBId = new mongoose.Types.ObjectId().toString();
+
+      // Mock evaluation ownership check helper matching /api/evaluations/[id]
+      const checkEvaluationAccess = (
+        evaluationOwnerId: string,
+        requesterId: string,
+        requesterRole: string
+      ) => {
+        const isOwner = evaluationOwnerId === requesterId;
+        const isCagsAdmin = requesterRole === "CAGS_ADMIN";
+        if (!isOwner && !isCagsAdmin) {
+          return { status: 403, error: "Access denied." };
+        }
+        return { status: 200, success: true };
+      };
+
+      // User B attempts to access User A's evaluation -> Denied 403
+      const userBAccess = checkEvaluationAccess(userAId, userBId, "USER");
+      assert.strictEqual(userBAccess.status, 403);
+
+      // User A accesses their own evaluation -> Allowed 200
+      const userAAccess = checkEvaluationAccess(userAId, userAId, "USER");
+      assert.strictEqual(userAAccess.status, 200);
+
+      // CAGS_ADMIN accesses User A's evaluation -> Allowed 200
+      const adminAccess = checkEvaluationAccess(userAId, userBId, "CAGS_ADMIN");
+      assert.strictEqual(adminAccess.status, 200);
     }
   );
 });

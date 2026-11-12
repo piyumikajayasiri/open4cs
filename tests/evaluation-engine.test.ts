@@ -331,3 +331,59 @@ test("18. Missing or 0 dimensions correctly returns PENDING status in Cut & Cara
   assert.equal(pendingCarat.status, "UNAVAILABLE");
   assert.equal(pendingCarat.score, null);
 });
+
+test("19. Relative pricing eliminates double-counting between candidate and reference", () => {
+  // If candidate is Heated and reference is Heated, relative factor is 1.0 (no double-discounting)
+  const refPrice = 1500000;
+  const result = calculatePriceSuggestion(refPrice, "LKR", 0.9, 1.0, {
+    referenceCount: 3,
+    relativeTreatmentMultiplier: 1.0, // Heated / Heated = 1.0
+    relativeOriginMultiplier: 1.0,
+  });
+
+  assert.equal(result.status, "COMPLETED");
+  assert.equal(result.suggestedPrice, 1500000);
+  assert.equal(result.relativeMultipliers?.treatment, 1.0);
+  assert.equal(result.relativeMultipliers?.origin, 1.0);
+});
+
+test("20. Pricing engine requires at least 3 verified references for data sufficiency", () => {
+  // Only 2 references available
+  const result = calculatePriceSuggestion(1500000, "LKR", 1.0, 1.0, {
+    referenceCount: 2,
+  });
+
+  assert.equal(result.status, "UNAVAILABLE");
+  assert.ok(result.reason.includes("At least 3 verified market references are required"));
+  assert.equal(result.suggestedPrice, null);
+});
+
+test("21. Multi-currency regional model outputs both LKR and USD (1 USD = 300 LKR)", () => {
+  const resultLkr = calculatePriceSuggestion(300000, "LKR", 1.0, 1.0, {
+    referenceCount: 3,
+  });
+
+  assert.equal(resultLkr.status, "COMPLETED");
+  assert.equal(resultLkr.priceLkr, 300000);
+  assert.equal(resultLkr.priceUsd, 1000); // 300,000 / 300 = 1,000 USD
+  assert.equal(resultLkr.priceRangeLkr?.minimum, 270000);
+  assert.equal(resultLkr.priceRangeLkr?.maximum, 330000);
+  assert.equal(resultLkr.priceRangeUsd?.minimum, 900);
+  assert.equal(resultLkr.priceRangeUsd?.maximum, 1100);
+});
+
+test("22. evaluateColor strictly rejects cross-variety hues", () => {
+  // Attempting to evaluate Blue Sapphire with a Ruby hue (Pigeon Blood Red)
+  const crossVarietyColor = evaluateColor({
+    variety: "Blue Sapphire",
+    hue: "Pigeon Blood Red",
+    tone: "6",
+    saturation: "Vivid",
+    distribution: "Even",
+    zoning: "None",
+  });
+
+  assert.equal(crossVarietyColor.status, "UNAVAILABLE");
+  assert.ok(crossVarietyColor.reason.includes("unsupported"));
+  assert.equal(crossVarietyColor.score, null);
+});
