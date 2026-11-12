@@ -9,7 +9,6 @@ import {
   Layers,
   X,
   Clock,
-  Sparkles,
 } from "lucide-react";
 import ToastNotification, {
   ToastMessage,
@@ -128,7 +127,6 @@ export default function RuleVersionsPage() {
   // Load real users
   const fetchUsers = async () => {
     try {
-      setLoadingUsers(true);
       const res = await fetch("/api/admin/users");
       const data = await res.json();
       if (data.success && Array.isArray(data.users)) {
@@ -166,7 +164,6 @@ export default function RuleVersionsPage() {
   // Load real audit logs
   const fetchAudit = async () => {
     try {
-      setLoadingAudit(true);
       const res = await fetch("/api/admin/audit?limit=4");
       const data = await res.json();
       if (data.success && Array.isArray(data.logs)) {
@@ -212,8 +209,16 @@ export default function RuleVersionsPage() {
   };
 
   useEffect(() => {
-    fetchUsers();
-    fetchAudit();
+    let isMounted = true;
+    const load = async () => {
+      if (isMounted) {
+        await Promise.all([fetchUsers(), fetchAudit()]);
+      }
+    };
+    load();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleInviteUser = async (e: React.FormEvent) => {

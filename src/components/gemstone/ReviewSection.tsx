@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CheckCircle2, AlertTriangle, Edit3, ShieldAlert, Sparkles, Scale, Check } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Edit3, ShieldAlert, Sparkles, Check } from "lucide-react";
 
 type ReviewSectionProps = {
   variety: string;

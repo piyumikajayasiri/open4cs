@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   HelpCircle,
   Scale,
-  Gem,
   Scissors,
   Palette,
   Eye,

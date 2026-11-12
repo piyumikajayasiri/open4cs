@@ -1,4 +1,4 @@
-import { PDFDocument, PDFPage, StandardFonts, rgb } from "pdf-lib";
+import { PDFDocument, PDFPage, PDFFont, RGB, StandardFonts, rgb } from "pdf-lib";
 
 export type ReportData = {
   reportTitle: string;
@@ -271,7 +271,7 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
 
     // Right Column: Reported Characteristics Table
     const rightX = margin + colWidth + colGap;
-    let rightY = y;
+    const rightY = y;
 
     page1.drawRectangle({
       x: rightX,
@@ -795,8 +795,8 @@ function drawWrappedText(
   startY: number,
   maxWidth: number,
   fontSize: number,
-  font: any,
-  color: any,
+  font: PDFFont,
+  color: RGB,
   lineHeight: number
 ) {
   const words = text.split(/\s+/);

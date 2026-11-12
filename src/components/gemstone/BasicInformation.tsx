@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import Image from "next/image";
-import { Gem, ShieldCheck, AlertCircle, Camera, Check, UploadCloud, X } from "lucide-react";
+import { ShieldCheck, AlertCircle, Check, UploadCloud, X } from "lucide-react";
 
 export interface GemstoneCardItem {
   id: string;
