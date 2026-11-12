@@ -43,6 +43,11 @@ const EvaluationSchema = new Schema(
       type: Schema.Types.Mixed,
       default: null,
     },
+
+    photoUrl: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

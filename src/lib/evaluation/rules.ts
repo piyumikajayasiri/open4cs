@@ -277,9 +277,10 @@ export const ORIGIN_RULES = {
 
 export const REFERENCE_COMPARISON_RULES = {
   minimumSimilarityForPricing: 70,
-  minimumReferencesForSimilarity: 2,
+  minimumReferencesForSimilarity: 3,
 };
 
 export const PRICE_SUGGESTION_RULES = {
   rangePercentage: 0.1,
+  exchangeRateLkrPerUsd: 300,
 } as const;

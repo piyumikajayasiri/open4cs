@@ -56,6 +56,8 @@ export interface IGemstone extends Document {
     treatment?: string;
     origin?: string;
   };
+  photoUrl?: string;
+  naturalStatus?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -156,6 +158,8 @@ const gemstoneSchema = new Schema<IGemstone>(
         default: "Unverified",
       },
     },
+    photoUrl: { type: String, default: "" },
+    naturalStatus: { type: String, default: "Natural" },
   },
   {
     timestamps: true,

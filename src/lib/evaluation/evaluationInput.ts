@@ -7,6 +7,7 @@ export type InformationReliability =
 
 export type EvaluationInput = {
   gemstoneId?: string;
+  photoUrl?: string;
   variety: string;
   caratWeight: number;
 

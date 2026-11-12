@@ -46,6 +46,9 @@ export async function compareReferenceGemstones(
         extinction: reference.cut.extinction,
         bulging: reference.cut.bulging,
       },
+
+      treatment: reference.treatment ? { status: reference.treatment.status } : undefined,
+      origin: reference.origin ? { value: reference.origin.value, reliability: reference.origin.reliability } : undefined,
     }));
 
   return compareWithReferences(

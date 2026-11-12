@@ -20,6 +20,7 @@ export type ReportData = {
     treatment: unknown;
     origin: unknown;
     informationReliability: Record<string, unknown>;
+    photoUrl?: string;
   };
 
   scores: {
@@ -192,30 +193,69 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
       color: textSubtle,
     });
 
-    // Stylized jewel icon placeholder
-    page1.drawRectangle({
-      x: leftX + colWidth / 2 - 30,
-      y: leftY - 95,
-      width: 60,
-      height: 50,
-      color: rgb(0.92, 0.95, 0.99),
-      borderColor: primaryBlue,
-      borderWidth: 1,
-    });
-    page1.drawText("FACETED", {
-      x: leftX + colWidth / 2 - 18,
-      y: leftY - 68,
-      size: 7,
-      font: boldFont,
-      color: primaryBlue,
-    });
-    page1.drawText("CORUNDUM", {
-      x: leftX + colWidth / 2 - 24,
-      y: leftY - 78,
-      size: 7,
-      font: boldFont,
-      color: primaryBlue,
-    });
+    let imageEmbedded = false;
+    if (report.gemstone.photoUrl && typeof report.gemstone.photoUrl === "string") {
+      try {
+        const rawPhoto = report.gemstone.photoUrl.trim();
+        let imageBytes: Uint8Array | null = null;
+        let isPng = false;
+
+        if (rawPhoto.startsWith("data:image/png;base64,")) {
+          imageBytes = Buffer.from(rawPhoto.replace(/^data:image\/png;base64,/, ""), "base64");
+          isPng = true;
+        } else if (rawPhoto.startsWith("data:image/jpeg;base64,") || rawPhoto.startsWith("data:image/jpg;base64,")) {
+          imageBytes = Buffer.from(rawPhoto.replace(/^data:image\/(jpeg|jpg);base64,/, ""), "base64");
+          isPng = false;
+        }
+
+        if (imageBytes && imageBytes.length > 0) {
+          const embeddedImage = isPng
+            ? await pdf.embedPng(imageBytes)
+            : await pdf.embedJpg(imageBytes);
+
+          const maxImgW = colWidth - 24;
+          const maxImgH = 88;
+          const imgDims = embeddedImage.scaleToFit(maxImgW, maxImgH);
+
+          page1.drawImage(embeddedImage, {
+            x: leftX + (colWidth - imgDims.width) / 2,
+            y: leftY - 28 - imgDims.height,
+            width: imgDims.width,
+            height: imgDims.height,
+          });
+          imageEmbedded = true;
+        }
+      } catch {
+        // Fallback to vector icon if base64 decoding fails
+      }
+    }
+
+    if (!imageEmbedded) {
+      // Stylized jewel icon placeholder
+      page1.drawRectangle({
+        x: leftX + colWidth / 2 - 30,
+        y: leftY - 95,
+        width: 60,
+        height: 50,
+        color: rgb(0.92, 0.95, 0.99),
+        borderColor: primaryBlue,
+        borderWidth: 1,
+      });
+      page1.drawText("FACETED", {
+        x: leftX + colWidth / 2 - 18,
+        y: leftY - 68,
+        size: 7,
+        font: boldFont,
+        color: primaryBlue,
+      });
+      page1.drawText("CORUNDUM", {
+        x: leftX + colWidth / 2 - 24,
+        y: leftY - 78,
+        size: 7,
+        font: boldFont,
+        color: primaryBlue,
+      });
+    }
 
     page1.drawText("Visual reference only. Not an optical spectroscopy scan.", {
       x: leftX + 16,
@@ -550,7 +590,7 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
 
     y -= 76;
 
-    // Indicative B2B Price Suggestion & Market Comparables
+    // Indicative Wholesale Clearing Benchmark (Sri Lanka Region)
     page2.drawRectangle({
       x: margin,
       y: y - 90,
@@ -561,7 +601,7 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
       borderWidth: 1,
     });
 
-    page2.drawText("INDICATIVE B2B MARKET PRICE SUGGESTION", {
+    page2.drawText("INDICATIVE WHOLESALE CLEARING BENCHMARK (SRI LANKA REGION)", {
       x: margin + 16,
       y: y - 18,
       size: 8.5,
@@ -579,28 +619,37 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
       const minPrice = report.priceSuggestion.minimumPrice || sugPrice * 0.9;
       const maxPrice = report.priceSuggestion.maximumPrice || sugPrice * 1.1;
 
-      page2.drawText(`${curr} ${formatMoneyNum(sugPrice)}`, {
+      // Sri Lanka regional currency model: Primary LKR with USD equivalent (1 USD ~ 300 LKR)
+      const lkrPrice = curr === "USD" ? sugPrice * 300 : sugPrice;
+      const usdPrice = curr === "USD" ? sugPrice : Math.round(sugPrice / 300);
+      const minLkr = curr === "USD" ? minPrice * 300 : minPrice;
+      const maxLkr = curr === "USD" ? maxPrice * 300 : maxPrice;
+      const minUsd = curr === "USD" ? minPrice : Math.round(minPrice / 300);
+      const maxUsd = curr === "USD" ? maxPrice : Math.round(maxPrice / 300);
+
+      page2.drawText(`LKR ${formatMoneyNum(lkrPrice)}  (~ $${formatMoneyNum(usdPrice)} USD)`, {
         x: margin + 16,
         y: y - 48,
-        size: 20,
+        size: 16,
         font: boldFont,
         color: emeraldDark,
       });
 
-      page2.drawText(`Estimated Trading Range: ${curr} ${formatMoneyNum(minPrice)} – ${curr} ${formatMoneyNum(maxPrice)}`, {
+      page2.drawText(`Estimated Trading Range: LKR ${formatMoneyNum(minLkr)} – ${formatMoneyNum(maxLkr)} (~ $${formatMoneyNum(minUsd)} – $${formatMoneyNum(maxUsd)} USD)`, {
         x: margin + 16,
         y: y - 68,
-        size: 8.5,
+        size: 8,
         font: boldFont,
         color: textDark,
       });
 
       // Price per carat
-      const perCt = report.gemstone.caratWeight > 0 ? sugPrice / report.gemstone.caratWeight : 0;
-      page2.drawText(`Indicated Per-Carat Rate: ${curr} ${formatMoneyNum(perCt)} / ct`, {
+      const perCtLkr = report.gemstone.caratWeight > 0 ? lkrPrice / report.gemstone.caratWeight : 0;
+      const perCtUsd = report.gemstone.caratWeight > 0 ? usdPrice / report.gemstone.caratWeight : 0;
+      page2.drawText(`Wholesale clearing per ct: LKR ${formatMoneyNum(perCtLkr)} (~ $${formatMoneyNum(perCtUsd)} USD/ct) · Ratnapura/Beruwala dealer clearing`, {
         x: margin + 16,
         y: y - 80,
-        size: 7.5,
+        size: 7,
         font: regularFont,
         color: textMuted,
       });
@@ -640,7 +689,7 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
       });
 
       page2.drawText(
-        "Open 4Cs requires verified active comparables to project price suggestions. No speculative price is generated.",
+        "Open 4Cs requires at least 3 verified active trade comparables to project price suggestions. No speculative price is generated.",
         {
           x: margin + 16,
           y: y - 66,
@@ -731,8 +780,7 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
       color: darkNavy,
     });
 
-    const verifyUrl = `https://open4cs.lk/evaluations/${report.evaluationId}`;
-    page2.drawText(`Verification URL: ${verifyUrl}`, {
+    page2.drawText(`Verification Destination: /evaluations/${report.evaluationId}`, {
       x: margin + 74,
       y: y - 34,
       size: 7.5,
@@ -740,7 +788,7 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
       color: primaryBlue,
     });
 
-    page2.drawText("Deterministic Engine Stamp: Open 4Cs Rule Core v4.2 · Immutable SHA-256 Record", {
+    page2.drawText(`Deterministic Engine Stamp: Open 4Cs Rule Core ${report.ruleVersion || "v4.2"} · Immutable Record`, {
       x: margin + 74,
       y: y - 48,
       size: 7,
@@ -748,7 +796,7 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
       color: textMuted,
     });
 
-    page2.drawText("Certified Algorithmic Audit: CAGS Scientific & Pricing Board Ratified", {
+    page2.drawText("Open 4Cs Academic Research & Assessment Methodology", {
       x: margin + 74,
       y: y - 60,
       size: 7,
@@ -772,7 +820,7 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
       color: textMuted,
     });
 
-    page2.drawText("Commercial Research & Valuation Tool · CAGS Ratified v4.2", {
+    page2.drawText(`Commercial Research & Valuation Tool · Open 4Cs Rule ${report.ruleVersion || "v4.2"}`, {
       x: margin + contentWidth - 230,
       y: 28,
       size: 7.5,

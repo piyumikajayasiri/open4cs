@@ -82,6 +82,9 @@ export async function POST(request: Request) {
           data.informationReliability?.origin ??
           "Unverified",
       },
+
+      photoUrl: data.photoUrl || "",
+      naturalStatus: data.naturalStatus || "Natural",
     });
 
     return NextResponse.json(
