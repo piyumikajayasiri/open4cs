@@ -170,6 +170,70 @@ const ReferenceGemstoneSchema = new Schema(
       type: String,
       default: "",
     },
+
+    dataClassification: {
+      type: String,
+      enum: ["Real", "Demo"],
+      default: "Demo",
+      required: true,
+    },
+
+    sourceEvidence: {
+      type: String,
+      default: "",
+    },
+
+    observationDate: {
+      type: String,
+      default: "",
+    },
+
+    transactionContext: {
+      type: String,
+      enum: ["Completed Sale", "Asking Price", "Dealer Estimate"],
+      default: "Dealer Estimate",
+    },
+
+    marketContext: {
+      type: String,
+      enum: ["Wholesale", "Retail", "Auction"],
+      default: "Wholesale",
+    },
+
+    originalCurrency: {
+      type: String,
+      default: "LKR",
+    },
+
+    originalPrice: {
+      type: Number,
+      default: null,
+    },
+
+    originalCaratWeight: {
+      type: Number,
+      default: null,
+    },
+
+    treatmentEvidence: {
+      type: String,
+      default: "",
+    },
+
+    originEvidence: {
+      type: String,
+      default: "",
+    },
+
+    reviewer: {
+      type: String,
+      default: "",
+    },
+
+    reviewDate: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

@@ -144,7 +144,15 @@ export async function GET(
         suggestedPrice: isPriceAvailable ? priceSuggestion.suggestedPrice : null,
         minimumPrice: isPriceAvailable ? minPrice : null,
         maximumPrice: isPriceAvailable ? maxPrice : null,
-        currency: isPriceAvailable ? priceSuggestion.currency || "USD" : null,
+        currency: isPriceAvailable ? priceSuggestion.currency || "LKR" : null,
+        priceLkr: priceSuggestion?.priceLkr ?? null,
+        priceUsd: priceSuggestion?.priceUsd ?? null,
+        priceRangeLkr: priceSuggestion?.priceRangeLkr ?? null,
+        priceRangeUsd: priceSuggestion?.priceRangeUsd ?? null,
+        exchangeRate: evaluation.exchangeRate || priceSuggestion?.exchangeRate || null,
+        isRealMarketData: priceSuggestion?.marketLevel?.includes("Verified Commercial") || false,
+        marketLevel: priceSuggestion?.marketLevel || "",
+        reason: priceSuggestion?.reason || "",
       },
 
       referenceComparison: {

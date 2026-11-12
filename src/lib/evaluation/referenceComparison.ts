@@ -8,6 +8,11 @@ export type ReferenceGemstoneComparison = {
   currency: string;
   treatment?: { status: string };
   origin?: { value: string; reliability?: string };
+  dataClassification?: "Real" | "Demo";
+  transactionContext?: "Completed Sale" | "Asking Price" | "Dealer Estimate";
+  marketContext?: "Wholesale" | "Retail" | "Auction";
+  sourceEvidence?: string;
+  observationDate?: string;
 
   similarity: {
     color: number | null;
@@ -319,6 +324,11 @@ export type ReferenceForComparison = {
   currency: string;
   treatment?: { status: string };
   origin?: { value: string; reliability?: string };
+  dataClassification?: "Real" | "Demo";
+  transactionContext?: "Completed Sale" | "Asking Price" | "Dealer Estimate";
+  marketContext?: "Wholesale" | "Retail" | "Auction";
+  sourceEvidence?: string;
+  observationDate?: string;
   color: ColorComparisonInput;
   clarity: ClarityComparisonInput;
   cut: CutComparisonInput;
@@ -370,6 +380,11 @@ export function compareWithReference(
     currency: reference.currency,
     treatment: reference.treatment,
     origin: reference.origin,
+    dataClassification: reference.dataClassification,
+    transactionContext: reference.transactionContext,
+    marketContext: reference.marketContext,
+    sourceEvidence: reference.sourceEvidence,
+    observationDate: reference.observationDate,
 
     similarity: {
       color: colorSimilarity,

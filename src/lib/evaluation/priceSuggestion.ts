@@ -1,4 +1,5 @@
 import { PRICE_SUGGESTION_RULES } from "./rules";
+import type { ExchangeRateRecord } from "../currency/exchangeRate";
 
 export type PriceSuggestionResult = {
   status: "COMPLETED" | "UNAVAILABLE";
@@ -18,11 +19,11 @@ export type PriceSuggestionResult = {
   priceRangeLkr?: {
     minimum: number | null;
     maximum: number | null;
-  };
+  } | null;
   priceRangeUsd?: {
     minimum: number | null;
     maximum: number | null;
-  };
+  } | null;
 
   adjustmentFactors: {
     treatment: number | null;
@@ -33,6 +34,15 @@ export type PriceSuggestionResult = {
     treatment: number | null;
     origin: number | null;
   };
+
+  exchangeRate?: {
+    rate: number;
+    source: string;
+    asOfDate: string;
+    isAvailable: boolean;
+  } | null;
+
+  provisionalAssumptions?: string[];
 };
 
 export function calculatePriceSuggestion(
@@ -44,13 +54,16 @@ export function calculatePriceSuggestion(
     referenceCount?: number;
     relativeTreatmentMultiplier?: number;
     relativeOriginMultiplier?: number;
+    exchangeRate?: ExchangeRateRecord | null;
+    isRealMarketData?: boolean;
+    dataClassification?: "Real" | "Demo";
   }
 ): PriceSuggestionResult {
   const minReferences = 3;
   if (options?.referenceCount !== undefined && options.referenceCount < minReferences) {
     return {
       status: "UNAVAILABLE",
-      reason: `Insufficient verified market data: At least ${minReferences} verified market references are required (found ${options.referenceCount}).`,
+      reason: `Insufficient verified market data: At least ${minReferences} verified market references are required (found ${options.referenceCount}). Demo records are excluded from real commercial valuation.`,
       currency,
       referencePrice,
       suggestedPrice: null,
@@ -62,6 +75,7 @@ export function calculatePriceSuggestion(
         treatment: treatmentFactor,
         origin: originFactor,
       },
+      exchangeRate: null,
     };
   }
 
@@ -86,10 +100,11 @@ export function calculatePriceSuggestion(
         treatment: treatmentFactor,
         origin: originFactor,
       },
+      exchangeRate: null,
     };
   }
 
-  // Use relative multipliers if provided, otherwise fallback to factors
+  // Use relative multipliers if provided to eliminate double-counting
   const effectiveTreatmentMultiplier =
     options?.relativeTreatmentMultiplier ?? treatmentFactor;
   const effectiveOriginMultiplier =
@@ -108,43 +123,60 @@ export function calculatePriceSuggestion(
     suggestedPrice *
     (1 + PRICE_SUGGESTION_RULES.rangePercentage);
 
-  const exchangeRate = PRICE_SUGGESTION_RULES.exchangeRateLkrPerUsd;
+  const priceLkr = Math.round(suggestedPrice);
+  const priceRangeLkr = {
+    minimum: Math.round(minimumPrice),
+    maximum: Math.round(maximumPrice),
+  };
 
-  let priceLkr: number;
-  let priceUsd: number;
-  let priceRangeLkr: { minimum: number; maximum: number };
-  let priceRangeUsd: { minimum: number; maximum: number };
+  // Explicit, dated currency handling: Only compute USD if a valid, dated exchange rate is provided
+  let priceUsd: number | null = null;
+  let priceRangeUsd: { minimum: number; maximum: number } | null = null;
+  let exchangeRateInfo: PriceSuggestionResult["exchangeRate"] = null;
 
-  if (currency?.toUpperCase() === "USD") {
-    priceUsd = Math.round(suggestedPrice);
-    priceLkr = Math.round(suggestedPrice * exchangeRate);
+  if (
+    options?.exchangeRate &&
+    options.exchangeRate.isAvailable &&
+    typeof options.exchangeRate.rate === "number" &&
+    options.exchangeRate.rate > 0
+  ) {
+    const rate = options.exchangeRate.rate;
+    priceUsd = Math.round(priceLkr / rate);
     priceRangeUsd = {
-      minimum: Math.round(minimumPrice),
-      maximum: Math.round(maximumPrice),
+      minimum: Math.round(minimumPrice / rate),
+      maximum: Math.round(maximumPrice / rate),
     };
-    priceRangeLkr = {
-      minimum: Math.round(minimumPrice * exchangeRate),
-      maximum: Math.round(maximumPrice * exchangeRate),
+    exchangeRateInfo = {
+      rate: options.exchangeRate.rate,
+      source: options.exchangeRate.source,
+      asOfDate: options.exchangeRate.asOfDate,
+      isAvailable: true,
     };
-  } else {
-    // Default LKR
-    priceLkr = Math.round(suggestedPrice);
-    priceUsd = Math.round(suggestedPrice / exchangeRate);
-    priceRangeLkr = {
-      minimum: Math.round(minimumPrice),
-      maximum: Math.round(maximumPrice),
-    };
-    priceRangeUsd = {
-      minimum: Math.round(minimumPrice / exchangeRate),
-      maximum: Math.round(maximumPrice / exchangeRate),
-    };
+  }
+
+  const isDemo = options?.dataClassification === "Demo" || options?.isRealMarketData === false;
+  const marketLevel = isDemo
+    ? "Indicative Research Benchmark (Demonstration / Academic Data)"
+    : "Indicative Wholesale Market Range (Verified Commercial References)";
+
+  const provisionalAssumptions: string[] = [];
+  if (Math.abs(effectiveTreatmentMultiplier - 1.0) > 0.001) {
+    provisionalAssumptions.push(
+      `Relative treatment factor ${effectiveTreatmentMultiplier.toFixed(2)} applied as a provisional Open 4Cs modelling assumption; heat premiums vary widely by saturation and rough clarity.`
+    );
+  }
+  if (Math.abs(effectiveOriginMultiplier - 1.0) > 0.001) {
+    provisionalAssumptions.push(
+      `Relative origin factor ${effectiveOriginMultiplier.toFixed(2)} applied as a provisional Open 4Cs modelling assumption; origin premiums vary across dealer networks.`
+    );
   }
 
   return {
     status: "COMPLETED",
-    reason:
-      "Prototype Sri Lanka wholesale clearing benchmark suggested from verified trade references with relative treatment and origin adjustment.",
-    marketLevel: "Wholesale Clearing Benchmark (Sri Lanka Dealer / B2B Trade)",
+    reason: isDemo
+      ? "Provisional benchmark calculated from pedagogical demonstration references. For academic evaluation purposes only."
+      : "Indicative market price range suggested from verified commercial trade references with relative treatment and origin adjustment.",
+    marketLevel,
     currency: currency || "LKR",
     referencePrice,
     suggestedPrice: Number(suggestedPrice.toFixed(2)),
@@ -164,5 +196,7 @@ export function calculatePriceSuggestion(
       treatment: Number(effectiveTreatmentMultiplier.toFixed(3)),
       origin: Number(effectiveOriginMultiplier.toFixed(3)),
     },
+    exchangeRate: exchangeRateInfo,
+    provisionalAssumptions: provisionalAssumptions.length > 0 ? provisionalAssumptions : undefined,
   };
 }

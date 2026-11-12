@@ -282,5 +282,4 @@ export const REFERENCE_COMPARISON_RULES = {
 
 export const PRICE_SUGGESTION_RULES = {
   rangePercentage: 0.1,
-  exchangeRateLkrPerUsd: 300,
 } as const;

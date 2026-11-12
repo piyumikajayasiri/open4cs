@@ -9,6 +9,7 @@ export type EvaluationInput = {
   gemstoneId?: string;
   photoUrl?: string;
   variety: string;
+  naturalStatus?: string;
   caratWeight: number;
 
   color: {

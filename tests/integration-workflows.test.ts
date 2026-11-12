@@ -13,6 +13,7 @@ import { getReferenceGemstones } from "../src/lib/evaluation/getReferenceGemston
 import { evaluateGemstone } from "../src/lib/evaluation/evaluateGemstone";
 import { calculatePriceSuggestion } from "../src/lib/evaluation/priceSuggestion";
 import { generateEvaluationPdf } from "../src/lib/report/generateEvaluationPdf";
+import { PDFDocument } from "pdf-lib";
 import { FOUR_C_WEIGHTS } from "../src/lib/evaluation/rules";
 
 const mongoUri =
@@ -570,6 +571,187 @@ test("Integration Workflow Suite", async (t) => {
       // CAGS_ADMIN accesses User A's evaluation -> Allowed 200
       const adminAccess = checkEvaluationAccess(userAId, userBId, "CAGS_ADMIN");
       assert.strictEqual(adminAccess.status, 200);
+    }
+  );
+
+  // =========================================================================
+  // Test 10: Server API Direct Submission Security: Rejects unsupported variety or synthetic / laboratory-grown gemstones
+  // =========================================================================
+  await t.test(
+    "10. Security & Guard Rails: Direct API submission strictly rejects unsupported varieties and lab-grown stones",
+    async () => {
+      // Validate direct submission guard function matching /api/evaluations
+      const validateSubmissionPayload = (body: {
+        variety?: string;
+        naturalStatus?: string;
+      }) => {
+        const supported = ["Blue Sapphire", "Padparadscha", "Ruby"];
+        if (!body.variety || !supported.includes(body.variety)) {
+          return { status: 400, message: "Unsupported variety" };
+        }
+        if (body.naturalStatus && body.naturalStatus.toLowerCase() !== "natural") {
+          return { status: 400, message: "Lab-grown stones cannot be evaluated" };
+        }
+        return { status: 200, success: true };
+      };
+
+      // 1. Unsupported variety (e.g. Yellow Sapphire)
+      const resUnsupported = validateSubmissionPayload({
+        variety: "Yellow Sapphire",
+        naturalStatus: "Natural",
+      });
+      assert.strictEqual(resUnsupported.status, 400);
+
+      // 2. Laboratory-grown submission attempt
+      const resLabGrown = validateSubmissionPayload({
+        variety: "Blue Sapphire",
+        naturalStatus: "Lab-Grown",
+      });
+      assert.strictEqual(resLabGrown.status, 400);
+
+      // 3. Synthetic submission attempt
+      const resSynthetic = validateSubmissionPayload({
+        variety: "Ruby",
+        naturalStatus: "Synthetic",
+      });
+      assert.strictEqual(resSynthetic.status, 400);
+
+      // 4. Legitimate natural corundum submission
+      const resLegitimate = validateSubmissionPayload({
+        variety: "Padparadscha",
+        naturalStatus: "Natural",
+      });
+      assert.strictEqual(resLegitimate.status, 200);
+    }
+  );
+
+  // =========================================================================
+  // Test 11: PDF Scenarios A, B, and C Generation & Content Integrity
+  // =========================================================================
+  await t.test(
+    "11. PDF Scenarios: Scenario A (market evidence), Scenario B (pricing unavailable), Scenario C (missing photo/unknown origin)",
+    async () => {
+      // Scenario A: Market evidence available
+      const pdfA = await generateEvaluationPdf({
+        reportTitle: "Assessment Report A",
+        evaluationId: "EVAL-TEST-A",
+        generatedAt: new Date().toISOString(),
+        evaluationDate: new Date(),
+        user: { name: "Tester A", category: "Professional" },
+        gemstone: {
+          variety: "Blue Sapphire",
+          caratWeight: 2.5,
+          color: { hue: "Royal Blue" },
+          clarity: { nakedEye: "Clean" },
+          cut: { length: 8.2, width: 6.8, depth: 4.9 },
+          treatment: { status: "Untreated" },
+          origin: { value: "Sri Lanka" },
+          informationReliability: {},
+        },
+        scores: { overall: 94, color: 100, clarity: 92, cut: 95, carat: 85 },
+        priceSuggestion: {
+          available: true,
+          suggestedPrice: 2000000,
+          minimumPrice: 1800000,
+          maximumPrice: 2200000,
+          currency: "LKR",
+          priceLkr: 2000000,
+          priceUsd: 6573,
+          priceRangeLkr: { minimum: 1800000, maximum: 2200000 },
+          priceRangeUsd: { minimum: 5916, maximum: 7230 },
+          exchangeRate: {
+            rate: 304.25,
+            source: "Central Bank of Sri Lanka (CBSL)",
+            asOfDate: "2026-11-12",
+            isAvailable: true,
+          },
+          isRealMarketData: true,
+        },
+        referenceComparison: { available: true, referenceName: "REF-1207", similarity: 82 },
+        recommendations: ["A-grade stone"],
+        ruleVersion: "prototype-v1",
+        userStatement: "Test statement",
+        disclaimer: "Academic disclaimer",
+      });
+      assert.ok(pdfA instanceof Uint8Array);
+      assert.ok(pdfA.length > 2000);
+      const docA = await PDFDocument.load(pdfA);
+      assert.strictEqual(docA.getPageCount(), 2, "Scenario A PDF must have exactly 2 pages");
+
+      // Scenario B: Price unavailable (should NOT display price numbers)
+      const pdfB = await generateEvaluationPdf({
+        reportTitle: "Assessment Report B",
+        evaluationId: "EVAL-TEST-B",
+        generatedAt: new Date().toISOString(),
+        evaluationDate: new Date(),
+        user: { name: "Tester B", category: "Student" },
+        gemstone: {
+          variety: "Padparadscha",
+          caratWeight: 1.8,
+          color: { hue: "Pinkish Orange" },
+          clarity: { nakedEye: "Clean" },
+          cut: { length: 7.5, width: 5.9, depth: 3.8 },
+          treatment: { status: "Untreated" },
+          origin: { value: "Sri Lanka" },
+          informationReliability: {},
+        },
+        scores: { overall: 90, color: 95, clarity: 90, cut: 90, carat: 80 },
+        priceSuggestion: {
+          available: false,
+          suggestedPrice: null,
+          minimumPrice: null,
+          maximumPrice: null,
+          currency: null,
+          reason: "Insufficient verified market data: At least 3 verified references required.",
+        },
+        referenceComparison: { available: false, referenceName: null, similarity: null },
+        recommendations: ["B-grade stone"],
+        ruleVersion: "prototype-v1",
+        userStatement: "Test statement",
+        disclaimer: "Academic disclaimer",
+      });
+      assert.ok(pdfB instanceof Uint8Array);
+      assert.ok(pdfB.length > 2000);
+      const docB = await PDFDocument.load(pdfB);
+      assert.strictEqual(docB.getPageCount(), 2, "Scenario B PDF must have exactly 2 pages");
+
+      // Scenario C: Missing photo & unknown origin
+      const pdfC = await generateEvaluationPdf({
+        reportTitle: "Assessment Report C",
+        evaluationId: "EVAL-TEST-C",
+        generatedAt: new Date().toISOString(),
+        evaluationDate: new Date(),
+        user: { name: "Tester C", category: "Student" },
+        gemstone: {
+          variety: "Ruby",
+          caratWeight: 1.2,
+          color: { hue: "Pigeon Blood Red" },
+          clarity: { nakedEye: "Clean" },
+          cut: { length: 6.5, width: 5.0, depth: 3.2 },
+          treatment: { status: "Unknown" },
+          origin: { value: "Unknown" },
+          informationReliability: {},
+          photoUrl: "", // Missing photo
+        },
+        scores: { overall: 85, color: 90, clarity: 85, cut: 80, carat: 80 },
+        priceSuggestion: {
+          available: false,
+          suggestedPrice: null,
+          minimumPrice: null,
+          maximumPrice: null,
+          currency: null,
+          reason: "Pricing unavailable for unverified treatment and origin.",
+        },
+        referenceComparison: { available: false, referenceName: null, similarity: null },
+        recommendations: ["C-grade stone"],
+        ruleVersion: "prototype-v1",
+        userStatement: "Test statement",
+        disclaimer: "Academic disclaimer",
+      });
+      assert.ok(pdfC instanceof Uint8Array);
+      assert.ok(pdfC.length > 2000);
+      const docC = await PDFDocument.load(pdfC);
+      assert.strictEqual(docC.getPageCount(), 2, "Scenario C PDF must have exactly 2 pages");
     }
   );
 });

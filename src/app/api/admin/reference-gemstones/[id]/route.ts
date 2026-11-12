@@ -169,6 +169,15 @@ export async function PUT(
       "verificationStatus",
       "source",
       "notes",
+      "dataClassification",
+      "sourceEvidence",
+      "observationDate",
+      "transactionContext",
+      "marketContext",
+      "treatmentEvidence",
+      "originEvidence",
+      "reviewer",
+      "reviewDate",
     ] as const;
 
     for (const field of stringFields) {
