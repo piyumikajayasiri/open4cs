@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth/currentUser";
 import { connectDB } from "@/lib/mongodb";
 import ReferenceGemstone from "@/models/ReferenceGemstone";
 import Gemstone from "@/models/Gemstone";
+import AuditLog from "@/models/AuditLog";
 
 async function requireAdmin() {
   const user = await getCurrentUser();

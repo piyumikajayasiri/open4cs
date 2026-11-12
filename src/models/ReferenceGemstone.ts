@@ -134,6 +134,17 @@ const ReferenceGemstoneSchema = new Schema(
       default: "Desk",
     },
 
+    status: {
+      type: String,
+      enum: ["ACTIVE", "INACTIVE"],
+      default: "ACTIVE",
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+
     sourceType: {
       type: String,
       default: "Desk",
@@ -141,8 +152,8 @@ const ReferenceGemstoneSchema = new Schema(
 
     verificationStatus: {
       type: String,
-      enum: ["Verified", "Pending"],
-      default: "Verified",
+      enum: ["Verified", "Pending", "Rejected"],
+      default: "Pending",
     },
 
     labCertificate: {

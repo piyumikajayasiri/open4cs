@@ -229,10 +229,7 @@ const ReferenceGemstone =
     )
   );
 
-// Clean up legacy references without referenceId
-await ReferenceGemstone.deleteMany({
-  $or: [{ referenceId: { $exists: false } }, { referenceId: null }]
-});
+// Non-destructive idempotent benchmark seeding (upsert by referenceId)
 
 // Benchmark Reference Gemstones (Unvalidated sample trade data for testing)
 const referenceGemstones = [
@@ -558,6 +555,116 @@ for (const ref of referenceGemstones) {
   );
 }
 console.log(`Seeded ${referenceGemstones.length} reference gemstones for pricing.`);
+
+// 5. Evaluation Rules Seeding
+const EvaluationRule =
+  mongoose.models.EvaluationRule ||
+  mongoose.model(
+    "EvaluationRule",
+    new mongoose.Schema(
+      {
+        ruleId: { type: String, required: true, unique: true },
+        category: { type: String, required: true },
+        description: { type: String, required: true },
+        effect: { type: String, required: true },
+        effectType: { type: String, default: "positive" },
+        version: { type: String, default: "v4.2" },
+        status: { type: String, default: "Active" },
+        triggerCondition: { type: String, required: true },
+        rationale: { type: String, required: true },
+        author: { type: String, default: "CAGS Pricing Board" },
+        lastUpdated: { type: String, default: "Sep 22, 2026" },
+        sourceUrl: { type: String, default: "https://www.gia.edu/sapphire-quality-factor" },
+      },
+      { timestamps: true }
+    )
+  );
+
+const rulesToSeed = [
+  {
+    ruleId: "COL-03",
+    category: "Color",
+    description: "Vivid saturation + tone 5–6 premium",
+    effect: "+9%",
+    effectType: "positive",
+    version: "v4.2",
+    status: "Active",
+    triggerCondition: "Tone between 5.0 and 6.0 AND Saturation === 'Vivid'",
+    rationale: "Colombo lot data shows a consistent 9% price premium for medium-deep vivid blue corundum without extinction.",
+    lastUpdated: "Sep 22, 2026",
+    author: "Dr. K. Mendis",
+  },
+  {
+    ruleId: "CLA-02",
+    category: "Clarity",
+    description: "Eye-clean with off-table silk",
+    effect: "+3%",
+    effectType: "positive",
+    version: "v4.2",
+    status: "Active",
+    triggerCondition: "Naked eye clarity === 'Eye Clean' AND Rutile silk off-center",
+    rationale: "Microscopic silk outside the central table facet softens dispersion positively without impeding light return.",
+    lastUpdated: "Sep 18, 2026",
+    author: "Prof. S. Wickramasinghe",
+  },
+  {
+    ruleId: "CUT-02",
+    category: "Cut",
+    description: "Depth > 70% penalty",
+    effect: "-2%",
+    effectType: "negative",
+    version: "v4.2",
+    status: "Active",
+    triggerCondition: "Depth percentage > 70.0%",
+    rationale: "Excess pavilion depth traps dead weight that yields no face-up millimeter spread, resulting in trade discount.",
+    lastUpdated: "Sep 14, 2026",
+    author: "Master Cutter N. Perera",
+  },
+  {
+    ruleId: "TRT-01",
+    category: "Pricing",
+    description: "Heated (H) verified modifier",
+    effect: "-4%",
+    effectType: "negative",
+    version: "v4.2",
+    status: "Active",
+    triggerCondition: "Treatment === 'Heated (H)' without diffusion",
+    rationale: "Traditional heat treatment benchmark baseline adjustment relative to prime natural unheated standard.",
+    lastUpdated: "Sep 22, 2026",
+    author: "CAGS Pricing Board",
+  },
+  {
+    ruleId: "ORG-02",
+    category: "Pricing",
+    description: "Ceylon premium capped if unverified",
+    effect: "+0-5%",
+    effectType: "positive",
+    version: "v4.2",
+    status: "Active",
+    triggerCondition: "Origin === 'Sri Lanka' AND Lab Report !== 'Accredited'",
+    rationale: "Unverified trade origin declarations are restricted to conservative baseline ranges to maintain pricing integrity.",
+    lastUpdated: "Aug 30, 2026",
+    author: "CAGS Audit Committee",
+  },
+  {
+    ruleId: "PM-4.3",
+    category: "Pricing",
+    description: "Unheated premium revision",
+    effect: "+18%",
+    effectType: "positive",
+    version: "draft",
+    status: "Pending",
+    triggerCondition: "Treatment === 'Natural Unheated' AND Weight >= 2.00ct",
+    rationale: "Elevates scarcity tier multiplier for verified untreated Ceylon blue sapphires following 2026 Q3 Colombo auction clearance.",
+    lastUpdated: "Oct 28, 2026",
+    author: "Dr. K. Mendis",
+  },
+];
+
+for (const r of rulesToSeed) {
+  await EvaluationRule.findOneAndUpdate({ ruleId: r.ruleId }, r, { upsert: true });
+}
+console.log(`Seeded ${rulesToSeed.length} evaluation rules.`);
 
 console.log("Database seeding completed successfully.");
 await mongoose.disconnect();
