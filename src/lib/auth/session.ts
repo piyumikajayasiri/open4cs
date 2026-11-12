@@ -1,10 +1,31 @@
 import { SignJWT, jwtVerify } from "jose";
 
-const SESSION_SECRET =
-  process.env.SESSION_SECRET ||
-  "open4cs-prototype-secure-jwt-session-secret-key-2026";
+function getSessionSecret(): Uint8Array {
+  const secret = process.env.SESSION_SECRET;
 
-const secretKey = new TextEncoder().encode(SESSION_SECRET);
+  if (process.env.NODE_ENV === "production") {
+    if (!secret || secret.length < 32) {
+      throw new Error(
+        "CRITICAL SECURITY CONFIGURATION ERROR: SESSION_SECRET must be defined in production environment and be at least 32 characters long."
+      );
+    }
+    return new TextEncoder().encode(secret);
+  }
+
+  // Development and test fallback with audit warning
+  if (!secret) {
+    if (process.env.NODE_ENV !== "test") {
+      console.warn(
+        "[SECURITY WARNING]: SESSION_SECRET is not set in .env.local. Using ephemeral development key. Set SESSION_SECRET before deploying."
+      );
+    }
+    return new TextEncoder().encode("open4cs-local-dev-session-secret-key-32chars-min");
+  }
+
+  return new TextEncoder().encode(secret);
+}
+
+const secretKey = getSessionSecret();
 
 export type SessionPayload = {
   userId: string;

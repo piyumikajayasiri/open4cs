@@ -15,13 +15,72 @@ import { generateEvaluationPdf } from "../src/lib/report/generateEvaluationPdf";
 import { FOUR_C_WEIGHTS } from "../src/lib/evaluation/rules";
 
 const mongoUri =
-  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/gemstone_evaluation";
+  process.env.MONGODB_TEST_URI ||
+  (process.env.MONGODB_URI
+    ? process.env.MONGODB_URI.replace(/\/[^/?]+(\?|$)/, "/gemstone_evaluation_test$1")
+    : "mongodb://127.0.0.1:27017/gemstone_evaluation_test");
 
 test("Integration Workflow Suite", async (t) => {
-  // Setup database connection
+  // Setup database connection to isolated test database
   await mongoose.connect(mongoUri);
 
+  // Ensure isolated test fixtures exist
+  await GemstoneVariety.findOneAndUpdate(
+    { name: "Blue Sapphire" },
+    {
+      name: "Blue Sapphire",
+      species: "Corundum",
+      supportedShapes: ["Oval", "Round"],
+      ruleVersion: "v4.2",
+      referenceCount: 214,
+      engineSupported: true,
+      isActive: true,
+    },
+    { upsert: true }
+  );
+
+  await ReferenceGemstone.findOneAndUpdate(
+    { referenceId: "REF-TEST-VERIFIED-1" },
+    {
+      referenceId: "REF-TEST-VERIFIED-1",
+      variety: "Blue Sapphire",
+      caratWeight: 2.5,
+      color: { hue: "Royal Blue", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None visible" },
+      clarity: { nakedEye: "Clean", loupe10x: "Very Slight", severity: "Minor" },
+      cut: { length: 8.5, width: 6.8, depth: 4.25, symmetry: "Good", polish: "Good", windowing: "None", extinction: "None", bulging: "None" },
+      treatment: { status: "Heated" },
+      origin: { value: "Sri Lanka", reliability: "High" },
+      referencePrice: 650000,
+      currency: "LKR",
+      verificationStatus: "Verified",
+      status: "ACTIVE",
+      isActive: true,
+    },
+    { upsert: true }
+  );
+
+  await ReferenceGemstone.findOneAndUpdate(
+    { referenceId: "REF-TEST-VERIFIED-2" },
+    {
+      referenceId: "REF-TEST-VERIFIED-2",
+      variety: "Blue Sapphire",
+      caratWeight: 2.3,
+      color: { hue: "Royal Blue", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None visible" },
+      clarity: { nakedEye: "Clean", loupe10x: "Very Slight", severity: "Minor" },
+      cut: { length: 8.2, width: 6.5, depth: 4.0, symmetry: "Good", polish: "Good", windowing: "None", extinction: "None", bulging: "None" },
+      treatment: { status: "Heated" },
+      origin: { value: "Sri Lanka", reliability: "High" },
+      referencePrice: 580000,
+      currency: "LKR",
+      verificationStatus: "Verified",
+      status: "ACTIVE",
+      isActive: true,
+    },
+    { upsert: true }
+  );
+
   t.after(async () => {
+    await ReferenceGemstone.deleteMany({ referenceId: { $regex: /^TEST-/ } });
     await mongoose.disconnect();
   });
 

@@ -12,8 +12,9 @@ export async function getReferenceGemstones(
         $regex: `^${variety.trim()}$`,
         $options: "i",
       },
-      verificationStatus: { $ne: "Pending" },
+      verificationStatus: "Verified",
       status: { $ne: "INACTIVE" },
+      isActive: { $ne: false },
     }).lean();
 
   return referenceGemstones;

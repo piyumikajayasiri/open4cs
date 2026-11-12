@@ -112,7 +112,8 @@ const INITIAL_RECORDS: EvidenceRecord[] = [
 ];
 
 export default function ReferenceGemstonesPage() {
-  const [records, setRecords] = useState<EvidenceRecord[]>(INITIAL_RECORDS);
+  const [records, setRecords] = useState<EvidenceRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [sourceFilter, setSourceFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");

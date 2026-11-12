@@ -107,7 +107,7 @@ const DEFAULT_VARIETIES: VarietyItem[] = [
 ];
 
 export default function GemstoneCataloguePage() {
-  const [varieties, setVarieties] = useState<VarietyItem[]>(DEFAULT_VARIETIES);
+  const [varieties, setVarieties] = useState<VarietyItem[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
