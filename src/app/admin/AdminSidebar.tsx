@@ -2,24 +2,18 @@
 
 import Link from "next/link";
 import {
-  Activity,
-  BarChart3,
   Beaker,
   BookOpen,
-  Box,
   Clock3,
   Database,
-  FileClock,
   Gem,
   GitFork,
-  Globe,
   History,
   LayoutDashboard,
   LogOut,
   Settings,
   ShieldCheck,
   SlidersHorizontal,
-  Sparkles,
   Star,
   Layers,
   Users,
@@ -110,106 +104,91 @@ export default function AdminSidebar({ pathname, user }: AdminSidebarProps) {
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 
+  const initials =
+    user.name
+      ?.split(" ")
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "AD";
+
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-[#101d3a] text-white">
-      {/* Brand */}
-      <div className="px-5 pt-5">
-        <Link href="/admin" className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-400/40 bg-blue-500/20">
-            <Gem className="h-5 w-5 text-blue-300" />
+    <aside className="w-64 bg-[#07131D] text-slate-200 flex flex-col shrink-0 border-r border-slate-800/80 min-h-screen">
+      {/* Brand Header */}
+      <div className="p-4 border-b border-slate-800/80">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-base">
+            ◈
           </div>
+          <div className="min-w-0">
+            <h1 className="text-sm font-bold text-white tracking-tight truncate">
+              Open 4Cs
+            </h1>
+            <p className="text-[11px] text-slate-400 truncate">CAGS Administration</p>
+          </div>
+        </div>
 
-          <div>
-            <div className="text-sm font-semibold tracking-tight">Open 4Cs</div>
+        <div className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-medium text-emerald-400">
+          <ShieldCheck className="w-3.5 h-3.5" />
+          <span>CAGS Admin Portal</span>
+        </div>
+      </div>
 
-            <div className="text-[11px] text-slate-400">
-              CAGS Administration
+      {/* Navigation Links */}
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+        {navigation.map((item) => {
+          const active = isActive(item.href);
+          const Icon = item.icon;
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition ${
+                active
+                  ? "bg-white text-slate-900 font-bold shadow-xs"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+              }`}
+            >
+              <Icon
+                className={`w-4 h-4 shrink-0 ${
+                  active ? "text-slate-900" : "text-slate-400"
+                }`}
+              />
+              <span className="truncate">{item.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* User Footer Profile */}
+      <div className="p-3 border-t border-slate-800/80">
+        <div className="flex items-center justify-between gap-3 p-2 rounded-xl bg-slate-900/40 border border-slate-800/60">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-full bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center shrink-0">
+              {initials}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-white truncate">
+                {user.name || "CAGS Admin"}
+              </p>
+              <p className="text-[10px] text-slate-400 truncate">
+                {user.email || "admin@cags.lk"}
+              </p>
             </div>
           </div>
-        </Link>
-      </div>
 
-      {/* Portal badge */}
-      <div className="px-4 pt-5">
-        <div className="flex items-center gap-2 rounded-lg border border-blue-400/20 bg-blue-500/15 px-3 py-2">
-          <ShieldCheck className="h-4 w-4 text-blue-300" />
-
-          <span className="text-xs font-medium text-blue-100">
-            CAGS Admin Portal
-          </span>
-        </div>
-      </div>
-
-      {/* Navigation */}
-      <nav className="mt-5 flex-1 overflow-y-auto px-3 pb-4">
-        <div className="space-y-1">
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.href);
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
-                  active
-                    ? "bg-white text-slate-900 shadow-sm"
-                    : "text-slate-300 hover:bg-white/8 hover:text-white"
-                }`}
-              >
-                <Icon
-                  className={`h-[17px] w-[17px] shrink-0 ${
-                    active
-                      ? "text-slate-700"
-                      : "text-slate-400 group-hover:text-slate-200"
-                  }`}
-                  strokeWidth={1.8}
-                />
-
-                <span className="truncate">{item.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
-
-      {/* User footer */}
-      <div className="border-t border-white/10 p-4">
-        <div className="flex items-center gap-3">
-          {/* Avatar */}
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-amber-500/40 bg-amber-500/10 text-xs font-semibold text-amber-300">
-            {getInitials(user.name)}
-          </div>
-
-          {/* User information */}
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-white">
-              {user.name}
-            </p>
-
-            <p className="truncate text-[11px] text-slate-400">{user.email}</p>
-          </div>
-
-          {/* Logout icon */}
-          <button
-            type="button"
-            title="Sign out"
-            className="rounded-md p-1.5 text-slate-400 transition hover:bg-white/10 hover:text-white"
-          >
-            <LogOut className="h-4 w-4" strokeWidth={1.8} />
-          </button>
+          <form action="/api/auth/signout" method="POST">
+            <button
+              type="submit"
+              title="Sign out"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </form>
         </div>
       </div>
     </aside>
   );
-}
-
-function getInitials(name: string) {
-  const parts = name.trim().split(/\s+/);
-
-  if (parts.length === 1) {
-    return parts[0].slice(0, 2).toUpperCase();
-  }
-
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
