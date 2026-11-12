@@ -47,6 +47,7 @@ export default function ColorStepPage() {
           {/* Main Inputs (8 cols) */}
           <div className="lg:col-span-8 space-y-6">
             <ColorSection
+              variety={draft.variety}
               hue={draft.hue}
               tone={draft.tone}
               saturation={draft.saturation}

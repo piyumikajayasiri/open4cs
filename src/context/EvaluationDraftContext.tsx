@@ -142,6 +142,20 @@ export function EvaluationDraftProvider({ children }: { children: ReactNode }) {
   const updateDraft = useCallback((updates: Partial<EvaluationDraft>) => {
     setDraft((prev) => {
       const next = { ...prev, ...updates };
+
+      if (updates.variety && updates.variety !== prev.variety) {
+        if (updates.variety === "Padparadscha") {
+          const padHues = ["Pinkish Orange", "Orangish Pink", "Orange-Pink", "Sunset Orange", "Salmon Pink"];
+          if (!padHues.includes(next.hue)) next.hue = "Pinkish Orange";
+        } else if (updates.variety === "Ruby") {
+          const rubyHues = ["Pigeon Blood Red", "Vivid Red", "Purplish Red", "Orangish Red"];
+          if (!rubyHues.includes(next.hue)) next.hue = "Pigeon Blood Red";
+        } else if (updates.variety === "Blue Sapphire") {
+          const blueHues = ["Royal Blue", "Cornflower Blue", "Vivid Blue", "Violetish Blue", "Steel Blue", "Teal Blue"];
+          if (!blueHues.includes(next.hue)) next.hue = "Royal Blue";
+        }
+      }
+
       try {
         sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(next));
       } catch {
@@ -225,6 +239,8 @@ export function EvaluationDraftProvider({ children }: { children: ReactNode }) {
         treatment: draft.informationReliability?.treatment || "Unverified",
         origin: draft.informationReliability?.origin || "Unverified",
       },
+      photoUrl: draft.photoUrl || "",
+      naturalStatus: draft.naturalStatus || "Natural",
     };
 
     try {
