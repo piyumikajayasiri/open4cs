@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useEvaluationDraft } from "@/context/EvaluationDraftContext";
 import CutSection from "@/components/gemstone/CutSection";
 import CutMeasurementGuide from "@/components/gemstone/CutMeasurementGuide";
+import LiveScoreSidebar from "@/components/gemstone/LiveScoreSidebar";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 export default function CutStepPage() {
   const router = useRouter();
@@ -13,7 +15,7 @@ export default function CutStepPage() {
 
   const handleContinue = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push("/evaluate/additional");
+    router.push("/evaluate/carat");
   };
 
   return (
@@ -22,7 +24,7 @@ export default function CutStepPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-5">
         <div>
           <span className="text-xs font-extrabold uppercase tracking-widest text-blue-600">
-            Step 4 of 6 · Cut Evaluation
+            Step 4 of 7 · Cut Evaluation
           </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
             Evaluate Cut & Proportions
@@ -62,11 +64,15 @@ export default function CutStepPage() {
               onExtinctionChange={(val) => updateDraft({ extinction: val })}
               onBulgingChange={(val) => updateDraft({ bulging: val })}
             />
+
+            <div className="pt-4">
+              <CutMeasurementGuide />
+            </div>
           </div>
 
-          {/* Educational Visual Guide (4 cols) */}
+          {/* Educational Visual Guide & Live Score (4 cols) */}
           <div className="lg:col-span-4 sticky top-20">
-            <CutMeasurementGuide />
+            <LiveScoreSidebar activeStep="cut" />
           </div>
         </div>
 
@@ -76,16 +82,16 @@ export default function CutStepPage() {
             href="/evaluate/clarity"
             className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
           >
-            <span>←</span>
+            <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Clarity</span>
           </Link>
 
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-blue-700 shadow-md shadow-blue-500/20 transition"
+            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-blue-700 shadow-md shadow-blue-500/20 transition cursor-pointer"
           >
-            <span>Continue to Additional Factors</span>
-            <span>→</span>
+            <span>Continue to Carat Evaluation</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </form>

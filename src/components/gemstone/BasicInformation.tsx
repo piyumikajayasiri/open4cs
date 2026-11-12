@@ -1,433 +1,428 @@
 "use client";
 
-import { useState } from "react";
-import { ShadcnSelect } from "@/components/ui/select";
+import React, { useRef } from "react";
+import Image from "next/image";
+import { Gem, ShieldCheck, AlertCircle, Camera, Check, UploadCloud, X } from "lucide-react";
 
-type BasicInformationProps = {
-  variety: string;
-  caratWeight: string;
-  gemstoneCode?: string;
-  originValue?: string;
-  originReliability?: string;
-  treatmentStatus?: string;
-  treatmentType?: string;
-  shape?: string;
-  sellerSource?: string;
-  onVarietyChange: (value: string) => void;
-  onCaratWeightChange: (value: string) => void;
-  onGemstoneCodeChange?: (value: string) => void;
-  onOriginValueChange?: (value: string) => void;
-  onOriginReliabilityChange?: (value: string) => void;
-  onTreatmentStatusChange?: (value: string) => void;
-  onTreatmentTypeChange?: (value: string) => void;
-  onShapeChange?: (value: string) => void;
-  onSellerSourceChange?: (value: string) => void;
-  stepMode?: "gemstone" | "basic";
-};
+export interface GemstoneCardItem {
+  id: string;
+  name: string;
+  species: string;
+  subtext: string;
+  image: string;
+  isSupported: boolean;
+  colorBand: string;
+}
 
-const GEMSTONE_VARIETIES = [
+export const GEMSTONE_VARIETIES: GemstoneCardItem[] = [
   {
-    id: "Ceylon Blue Sapphire",
-    name: "Ceylon Blue Sapphire",
-    subtext: "Best liquidity · 214 reference records",
+    id: "Blue Sapphire",
+    name: "Blue Sapphire",
+    species: "Natural Corundum",
+    subtext: "Royal Blue & Cornflower Blue grading rules in force",
     image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80",
-    bgColor: "bg-blue-900",
+    isSupported: true,
+    colorBand: "bg-blue-900",
   },
   {
-    id: "Padparadscha Sapphire",
-    name: "Padparadscha Sapphire",
-    subtext: "Hue-balance protocol · 86 records",
+    id: "Padparadscha",
+    name: "Padparadscha",
+    species: "Natural Corundum",
+    subtext: "Delicate pinkish-orange to orangey-pink balance",
     image: "https://images.unsplash.com/photo-1615655406736-b37c4fabf923?auto=format&fit=crop&w=800&q=80",
-    bgColor: "bg-rose-900",
+    isSupported: true,
+    colorBand: "bg-rose-900",
   },
   {
-    id: "Pink Sapphire",
-    name: "Pink Sapphire",
-    subtext: "Saturation bands · 132 records",
-    image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    bgColor: "bg-pink-900",
+    id: "Ruby",
+    name: "Ruby",
+    species: "Natural Corundum",
+    subtext: "Pigeon Blood to Purplish Red corundum grading",
+    image: "https://images.unsplash.com/photo-1599707367072-cd6ada2bc375?auto=format&fit=crop&w=800&q=80",
+    isSupported: true,
+    colorBand: "bg-red-900",
   },
   {
     id: "Yellow Sapphire",
     name: "Yellow Sapphire",
-    subtext: "Tone bands · 98 records",
+    species: "Corundum",
+    subtext: "Golden & Canary yellow tone scoring in research",
     image: "https://images.unsplash.com/photo-1600003014755-ba31aa59c4b6?auto=format&fit=crop&w=800&q=80",
-    bgColor: "bg-amber-800",
+    isSupported: false,
+    colorBand: "bg-amber-800",
   },
   {
-    id: "White Sapphire",
-    name: "White Sapphire",
-    subtext: "Cut-weighted · 64 records",
+    id: "Pink Sapphire",
+    name: "Pink Sapphire",
+    species: "Corundum",
+    subtext: "Hot pink to pastel magenta scoring model in research",
+    image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
+    isSupported: false,
+    colorBand: "bg-pink-900",
+  },
+  {
+    id: "White / Colourless Sapphire",
+    name: "White / Colourless Sapphire",
+    species: "Corundum",
+    subtext: "Leucosapphire diamond-substitute cut rules in research",
     image: "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?auto=format&fit=crop&w=800&q=80",
-    bgColor: "bg-slate-700",
+    isSupported: false,
+    colorBand: "bg-slate-700",
   },
   {
     id: "Star Sapphire",
     name: "Star Sapphire",
-    subtext: "Support in review · notify me",
+    species: "Phenomenal Corundum",
+    subtext: "6-ray asterism chatoyancy model in research",
     image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80",
-    bgColor: "bg-indigo-950",
+    isSupported: false,
+    colorBand: "bg-indigo-950",
   },
 ];
 
+const SHAPE_OPTIONS = [
+  "Oval · Mixed Cut",
+  "Cushion · Modified Brilliant",
+  "Round · Brilliant Cut",
+  "Emerald / Octagonal Step Cut",
+  "Pear · Modified Brilliant",
+  "Heart · Brilliant Cut",
+  "Cabochon (Smooth Dome)",
+];
+
+type BasicInformationProps = {
+  variety: string;
+  onVarietyChange: (value: string) => void;
+  gemstoneCode?: string;
+  onGemstoneCodeChange?: (value: string) => void;
+  naturalStatus?: "Natural" | "Lab-Grown";
+  onNaturalStatusChange?: (value: "Natural" | "Lab-Grown") => void;
+  shape?: string;
+  onShapeChange?: (value: string) => void;
+  photoUrl?: string;
+  onPhotoChange?: (value: string) => void;
+};
+
 export default function BasicInformation({
   variety,
-  caratWeight,
-  gemstoneCode = "CEY-2026-0847",
-  originValue = "Sri Lanka (Ceylon)",
-  originReliability = "Seller Provided",
-  treatmentStatus = "Heated (H)",
-  treatmentType = "Laboratory Verified",
-  shape = "Oval · Mixed Cut",
-  sellerSource = "Beruwala B2B Market",
   onVarietyChange,
-  onCaratWeightChange,
+  gemstoneCode = "",
   onGemstoneCodeChange,
-  onOriginValueChange,
-  onOriginReliabilityChange,
-  onTreatmentStatusChange,
-  onTreatmentTypeChange,
+  naturalStatus = "Natural",
+  onNaturalStatusChange,
+  shape = "Oval · Mixed Cut",
   onShapeChange,
-  onSellerSourceChange,
-  stepMode = "gemstone",
+  photoUrl = "",
+  onPhotoChange,
 }: BasicInformationProps) {
-  // Local state fallbacks if handlers not passed
-  const [localCode, setLocalCode] = useState(gemstoneCode);
-  const [localOrigin, setLocalOrigin] = useState(originValue);
-  const [localOriginRel, setLocalOriginRel] = useState(originReliability);
-  const [localTreatment, setLocalTreatment] = useState(treatmentStatus);
-  const [localTreatmentVer, setLocalTreatmentVer] = useState(treatmentType);
-  const [localShape, setLocalShape] = useState(shape);
-  const [localSource, setLocalSource] = useState(sellerSource);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  if (stepMode === "gemstone") {
-    return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+  const selectedVarietyObj = GEMSTONE_VARIETIES.find(
+    (v) =>
+      v.id.toLowerCase() === variety.toLowerCase() ||
+      v.name.toLowerCase() === variety.toLowerCase() ||
+      (variety.toLowerCase().includes("blue") && v.id === "Blue Sapphire") ||
+      (variety.toLowerCase().includes("pad") && v.id === "Padparadscha") ||
+      (variety.toLowerCase().includes("ruby") && v.id === "Ruby")
+  ) || GEMSTONE_VARIETIES[0];
+
+  const isCurrentSupported = selectedVarietyObj.isSupported;
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Please upload an image smaller than 5 MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (uploadEvent) => {
+      const result = uploadEvent.target?.result as string;
+      if (onPhotoChange && result) {
+        onPhotoChange(result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = () => {
+    if (onPhotoChange) onPhotoChange("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* ================= 1. VARIETY SELECTOR CARDS ================= */}
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <label className="text-sm font-bold text-slate-900 block">
+              Gemstone Variety <span className="text-rose-500">*</span>
+            </label>
+            <p className="text-xs text-slate-500">
+              Select the species and color variety. Only varieties with calibrated CAGS scoring models are enabled for active evaluation.
+            </p>
+          </div>
+          <span className="text-xs text-slate-400 font-medium">
+            3 supported · 4 in development
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {GEMSTONE_VARIETIES.map((item) => {
-            const isSelected =
-              variety === item.id ||
-              variety === item.name ||
-              (variety === "" && item.id === "Ceylon Blue Sapphire");
+            const isSelected = selectedVarietyObj.id === item.id;
 
             return (
               <div
                 key={item.id}
                 onClick={() => onVarietyChange(item.name)}
-                className={`group relative rounded-2xl overflow-hidden cursor-pointer bg-white border transition duration-200 shadow-xs flex flex-col justify-between ${
+                className={`group relative rounded-2xl overflow-hidden cursor-pointer bg-white border transition duration-150 flex flex-col justify-between ${
                   isSelected
-                    ? "border-2 border-indigo-600 ring-2 ring-indigo-100 shadow-md"
-                    : "border-slate-200 hover:border-slate-300 hover:shadow-md"
+                    ? "border-2 border-blue-600 ring-4 ring-blue-500/10 shadow-md"
+                    : "border-slate-200/90 hover:border-slate-300 hover:shadow-2xs"
                 }`}
               >
-                {/* Gemstone Image Thumbnail */}
-                <div className={`h-40 w-full relative ${item.bgColor} overflow-hidden`}>
+                {/* Thumbnail */}
+                <div className={`h-36 w-full relative ${item.colorBand} overflow-hidden`}>
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="w-full h-full object-cover object-center group-hover:scale-105 transition duration-300"
+                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                   />
 
-                  {/* Top Right Checkmark Badge */}
-                  {isSelected && (
-                    <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-slate-900/90 text-white flex items-center justify-center text-xs font-bold shadow-md">
-                      ✓
-                    </div>
-                  )}
+                  {/* Badges Top */}
+                  <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between">
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs ${
+                        item.isSupported
+                          ? "bg-emerald-600 text-white"
+                          : "bg-slate-900/80 text-slate-200 backdrop-blur-xs"
+                      }`}
+                    >
+                      {item.isSupported ? "Supported" : "In Development"}
+                    </span>
+
+                    {isSelected && (
+                      <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shadow-md">
+                        <Check className="w-3 h-3" />
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                {/* Card Info Footer */}
-                <div className="p-4 flex items-center justify-between">
-                  <div>
-                    <h3 className="font-bold text-slate-900 text-sm">
-                      {item.name}
-                    </h3>
-                    <p className="text-xs text-slate-400 mt-0.5 font-medium">
-                      {item.subtext}
-                    </p>
-                  </div>
-
-                  {isSelected && (
-                    <span className="bg-slate-100 text-slate-700 font-semibold text-[11px] px-2.5 py-1 rounded-lg border border-slate-200">
-                      Selected
-                    </span>
-                  )}
+                {/* Info Footer */}
+                <div className="p-3.5 space-y-1">
+                  <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
+                    {item.name}
+                  </h3>
+                  <p className="text-[11px] text-slate-400 leading-snug line-clamp-2">
+                    {item.subtext}
+                  </p>
                 </div>
               </div>
             );
           })}
         </div>
+
+        {/* Warning if unsupported variety is selected */}
+        {!isCurrentSupported && (
+          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-3 animate-in fade-in-0 duration-200">
+            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <span className="font-bold block">
+                Evaluation Not Yet Supported for {selectedVarietyObj.name}
+              </span>
+              <p className="leading-relaxed">
+                Scientific scoring weights and market reference datasets are currently undergoing CAGS gemmological review for this variety.
+                To complete an automated evaluation and generate a report, please select{" "}
+                <strong>Blue Sapphire</strong>, <strong>Padparadscha</strong>, or <strong>Ruby</strong>.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
-    );
-  }
 
-  // ================= STEP 2: GEMSTONE INFORMATION (2-COLUMN GRID) =================
-  const currentOriginVer = originReliability || localOriginRel;
-  const currentTreatmentVer = treatmentType || localTreatmentVer;
-
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      
-      {/* LEFT COLUMN: FORM FIELDS (8-col) */}
-      <div className="lg:col-span-8 space-y-6">
-        
-        {/* Row 1: Gemstone ID & Gemstone Variety */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Gemstone ID <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={gemstoneCode || localCode}
-              onChange={(e) => {
-                setLocalCode(e.target.value);
-                if (onGemstoneCodeChange) onGemstoneCodeChange(e.target.value);
-              }}
-              placeholder="CEY-2026-0847"
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Gemstone Variety <span className="text-red-500">*</span>
-            </label>
-            <ShadcnSelect
-              value={variety || "Ceylon Blue Sapphire"}
-              onValueChange={onVarietyChange}
-              options={[
-                "Ceylon Blue Sapphire",
-                "Padparadscha Sapphire",
-                "Pink Sapphire",
-                "Yellow Sapphire",
-                "White Sapphire",
-                "Star Sapphire",
-              ]}
-            />
-          </div>
-        </div>
-
-        {/* Row 2: Origin & Origin Verification */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
-              <span>Origin</span>
-              <span className="text-red-500">*</span>
-              <span className="text-slate-400 text-[10px]">🕒</span>
-            </label>
-            <ShadcnSelect
-              value={originValue || localOrigin}
-              onValueChange={(val) => {
-                setLocalOrigin(val);
-                if (onOriginValueChange) onOriginValueChange(val);
-              }}
-              options={[
-                "Sri Lanka (Ceylon)",
-                "Madagascar",
-                "Burma (Myanmar)",
-                "Kashmir",
-                "Other / Unknown",
-              ]}
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
-              <span>Origin Verification</span>
-              <span className="text-slate-400 text-[10px]">🕒</span>
-            </label>
-            <ShadcnSelect
-              value={currentOriginVer}
-              onValueChange={(val) => {
-                setLocalOriginRel(val);
-                if (onOriginReliabilityChange) onOriginReliabilityChange(val);
-              }}
-              options={[
-                "Seller Provided",
-                "Laboratory Verified",
-                "Unverified / Self-Claimed",
-              ]}
-            />
-          </div>
-        </div>
-
-        {/* Row 3: Treatment Status & Treatment Verification */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
-              <span>Treatment Status</span>
-              <span className="text-red-500">*</span>
-              <span className="text-slate-400 text-[10px]">🕒</span>
-            </label>
-            <ShadcnSelect
-              value={treatmentStatus || localTreatment}
-              onValueChange={(val) => {
-                setLocalTreatment(val);
-                if (onTreatmentStatusChange) onTreatmentStatusChange(val);
-              }}
-              options={[
-                "Heated (H)",
-                "Unheated (N)",
-                "Beryllium Treated (BE)",
-                "Glass Filled (GF)",
-              ]}
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
-              <span>Treatment Verification</span>
-              <span className="text-slate-400 text-[10px]">🕒</span>
-            </label>
-            <ShadcnSelect
-              value={currentTreatmentVer}
-              onValueChange={(val) => {
-                setLocalTreatmentVer(val);
-                if (onTreatmentTypeChange) onTreatmentTypeChange(val);
-              }}
-              options={[
-                "Laboratory Verified",
-                "Seller Provided",
-                "Unverified",
-              ]}
-            />
-          </div>
-        </div>
-
-        {/* Row 4: Shape / Cut Style & Seller / Source */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Shape / Cut Style
-            </label>
-            <ShadcnSelect
-              value={shape || localShape}
-              onValueChange={(val) => {
-                setLocalShape(val);
-                if (onShapeChange) onShapeChange(val);
-              }}
-              options={[
-                "Oval · Mixed Cut",
-                "Cushion · Brilliant Cut",
-                "Round · Mixed Cut",
-                "Emerald Cut",
-                "Pear Cut",
-              ]}
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Seller / Source
-            </label>
-            <input
-              type="text"
-              value={sellerSource || localSource}
-              onChange={(e) => {
-                setLocalSource(e.target.value);
-                if (onSellerSourceChange) onSellerSourceChange(e.target.value);
-              }}
-              placeholder="Beruwala B2B Market"
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-            />
-          </div>
-        </div>
-
-        {/* Info Banner Box */}
-        <div className="rounded-2xl bg-blue-50/70 border border-blue-100 p-4 text-xs text-slate-600 flex items-start gap-3">
-          <span className="text-blue-500 shrink-0 text-base mt-0.5">🕒</span>
-          <p className="leading-relaxed">
-            Treatment and origin shape the price modifiers. If you are unsure, mark the field Seller Provided or Unverified — the system will flag verification in your recommendations.
+      {/* ================= 2. NATURAL VS LAB-GROWN DECLARATION ================= */}
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
+        <div>
+          <label className="text-xs sm:text-sm font-bold text-slate-900 block">
+            Natural vs. Lab-Grown Declaration <span className="text-rose-500">*</span>
+          </label>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Gemological grading systems evaluate natural geological specimens and laboratory-synthesized crystals under separate protocols.
           </p>
         </div>
 
-      </div>
-
-      {/* RIGHT COLUMN: INFORMATION RELIABILITY CARD (4-col) */}
-      <div className="lg:col-span-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-5">
-          
-          {/* Card Header */}
-          <div className="flex items-start gap-2.5">
-            <div className="w-5 h-5 rounded-md bg-slate-900 text-white flex items-center justify-center text-xs shrink-0 mt-0.5 font-bold">
-              ✓
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div
+            onClick={() => onNaturalStatusChange && onNaturalStatusChange("Natural")}
+            className={`p-4 rounded-xl border cursor-pointer transition flex items-start gap-3 ${
+              naturalStatus === "Natural"
+                ? "bg-blue-50/60 border-blue-600 ring-2 ring-blue-500/20"
+                : "bg-slate-50/50 border-slate-200 hover:border-slate-300"
+            }`}
+          >
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-slate-900 block leading-tight">
-                Information Reliability
-              </h3>
-              <p className="text-[11px] text-slate-400 block mt-0.5">
-                Evidence source used for the evaluation.
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-900">Natural Corundum</span>
+                <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded font-bold">
+                  Engine Calibrated
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Formed via natural geological metamorphic or igneous crystallization. Supported by Open 4Cs price comparables.
               </p>
             </div>
           </div>
 
-          {/* Reliability Items List */}
-          <div className="space-y-4 pt-1 text-xs">
-            
-            {/* Item 1: Gemstone ID */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <span className="font-semibold text-slate-700">Gemstone ID</span>
-              <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                <span>👁️</span>
-                <span>User Observed</span>
-              </span>
+          <div
+            onClick={() => onNaturalStatusChange && onNaturalStatusChange("Lab-Grown")}
+            className={`p-4 rounded-xl border cursor-pointer transition flex items-start gap-3 ${
+              naturalStatus === "Lab-Grown"
+                ? "bg-amber-50/60 border-amber-500 ring-2 ring-amber-500/20"
+                : "bg-slate-50/50 border-slate-200 hover:border-slate-300"
+            }`}
+          >
+            <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+              <AlertCircle className="w-4 h-4" />
             </div>
-
-            {/* Item 2: Origin */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <span className="font-semibold text-slate-700">Origin</span>
-              {currentOriginVer === "Laboratory Verified" ? (
-                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                  <span>✓</span>
-                  <span>Lab Verified</span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-900">Lab-Grown / Synthetic</span>
+                <span className="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-bold">
+                  Separate Market
                 </span>
-              ) : (
-                <span className="bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                  <span>⚠️</span>
-                  <span>{currentOriginVer}</span>
-                </span>
-              )}
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Synthesized via Flame Fusion (Verneuil), Flux, or Hydrothermal methods.
+              </p>
             </div>
-
-            {/* Item 3: Treatment */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <span className="font-semibold text-slate-700">Treatment</span>
-              {currentTreatmentVer === "Laboratory Verified" ? (
-                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                  <span>✓</span>
-                  <span>Laboratory Verified</span>
-                </span>
-              ) : (
-                <span className="bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                  <span>⚠️</span>
-                  <span>{currentTreatmentVer}</span>
-                </span>
-              )}
-            </div>
-
-            {/* Item 4: Carat Weight */}
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-slate-700">Carat Weight</span>
-              <span className="bg-teal-50 text-teal-700 border border-teal-200 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                <span>⚖️</span>
-                <span>Measured</span>
-              </span>
-            </div>
-
           </div>
+        </div>
 
-          {/* Legend Footer Note */}
-          <div className="pt-3 border-t border-slate-100 text-[10px] text-slate-400 leading-relaxed space-y-1">
-            <p>
-              <strong className="text-slate-600">Measured</strong> = calibrated instrument · <strong className="text-slate-600">Lab Verified</strong> = report attached · <strong className="text-slate-600">Seller Provided</strong> = needs verification.
+        {naturalStatus === "Lab-Grown" && (
+          <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900">
+            <strong>Honest Pricing Disclosure:</strong> Open 4Cs scoring rules and price comparables are calibrated exclusively for natural corundum. Lab-grown corundum operates under industrial production supply curves and is not currently priced by this engine.
+          </div>
+        )}
+      </div>
+
+      {/* ================= 3. PHOTO REFERENCE UPLOAD ================= */}
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <label className="text-xs sm:text-sm font-bold text-slate-900 block">
+              Gemstone Photographic Reference <span className="text-slate-400 font-normal">(Optional)</span>
+            </label>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Attach a face-up photograph of the gemstone. The image is included in your generated assessment report.
             </p>
           </div>
+          <span className="text-xs text-slate-400 font-medium shrink-0">JPG, PNG, WebP up to 5MB</span>
+        </div>
 
+        {photoUrl ? (
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="w-20 h-20 rounded-xl overflow-hidden bg-slate-200 shrink-0 border border-slate-300 relative">
+              <img
+                src={photoUrl}
+                alt="Gemstone preview"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="text-xs font-bold text-slate-900 block truncate">
+                Photographic reference attached
+              </span>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Ready to be embedded into Open 4Cs Assessment Report PDF.
+              </p>
+              <button
+                type="button"
+                onClick={handleRemovePhoto}
+                className="mt-2 text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline inline-flex items-center gap-1 cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Remove photo</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            className="border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/20 rounded-2xl p-6 text-center cursor-pointer transition"
+          >
+            <UploadCloud className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+            <span className="text-xs font-bold text-slate-800 block">
+              Click to select or drag and drop gemstone photograph
+            </span>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Supports standard high-resolution gemstone macro photography
+            </p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png, image/jpeg, image/webp"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+          </div>
+        )}
+
+        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-[11px] text-slate-500">
+          <strong>Neutral Disclosure:</strong> Visual reference only. Consumer smartphone photos cannot determine natural origin, microscopic inclusion relief, or quantitative spectral absorption.
         </div>
       </div>
 
+      {/* ================= 4. GEMSTONE ID & CUT SHAPE ================= */}
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
+        <h3 className="text-xs sm:text-sm font-bold text-slate-900">
+          Identification & Faceting Style
+        </h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+              Gemstone Lot / Inventory ID <span className="text-slate-400 font-normal">(Optional)</span>
+            </label>
+            <input
+              type="text"
+              value={gemstoneCode}
+              onChange={(e) => onGemstoneCodeChange && onGemstoneCodeChange(e.target.value)}
+              placeholder="e.g. CEY-2026-0847"
+              className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-900 outline-none transition focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+            />
+            <p className="text-[10px] text-slate-400 mt-1">
+              Used to track this stone in your evaluation history and on PDF reports.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+              Shape & Cutting Style <span className="text-rose-500">*</span>
+            </label>
+            <select
+              value={shape}
+              onChange={(e) => onShapeChange && onShapeChange(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-900 outline-none transition focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+            >
+              {SHAPE_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+            <p className="text-[10px] text-slate-400 mt-1">
+              Determines acceptable length-to-width and depth tolerances on the Cut step.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

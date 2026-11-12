@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useEvaluationDraft } from "@/context/EvaluationDraftContext";
 import ClaritySection from "@/components/gemstone/ClaritySection";
 import ClarityVisualGuide from "@/components/gemstone/ClarityVisualGuide";
+import LiveScoreSidebar from "@/components/gemstone/LiveScoreSidebar";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 export default function ClarityStepPage() {
   const router = useRouter();
@@ -22,7 +24,7 @@ export default function ClarityStepPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-5">
         <div>
           <span className="text-xs font-extrabold uppercase tracking-widest text-blue-600">
-            Step 3 of 6 · Clarity Evaluation
+            Step 3 of 7 · Clarity Evaluation
           </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
             Evaluate Gemstone Clarity
@@ -56,11 +58,15 @@ export default function ClarityStepPage() {
               onInclusionLocationChange={(val) => updateDraft({ inclusionLocation: val })}
               onSeverityChange={(val) => updateDraft({ severity: val })}
             />
+
+            <div className="pt-4">
+              <ClarityVisualGuide />
+            </div>
           </div>
 
-          {/* Educational Visual Guide (4 cols) */}
+          {/* Educational Visual Guide & Live Score (4 cols) */}
           <div className="lg:col-span-4 sticky top-20">
-            <ClarityVisualGuide />
+            <LiveScoreSidebar activeStep="clarity" />
           </div>
         </div>
 
@@ -70,16 +76,16 @@ export default function ClarityStepPage() {
             href="/evaluate/color"
             className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
           >
-            <span>←</span>
+            <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Color</span>
           </Link>
 
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-blue-700 shadow-md shadow-blue-500/20 transition"
+            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-blue-700 shadow-md shadow-blue-500/20 transition cursor-pointer"
           >
             <span>Continue to Cut Evaluation</span>
-            <span>→</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </form>

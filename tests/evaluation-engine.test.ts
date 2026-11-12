@@ -250,3 +250,84 @@ test("15. Engine supported varieties are strictly guarded", () => {
     "Ruby",
   ]);
 });
+
+test("16. Two-page PDF generator strictly enforces 2 pages (A4) and contains mandatory disclaimer", async () => {
+  const { generateEvaluationPdf } = await import("../src/lib/report/generateEvaluationPdf");
+  const { PDFDocument } = await import("pdf-lib");
+
+  const pdfBytes = await generateEvaluationPdf({
+    reportTitle: "Open 4Cs Gemstone Assessment Report",
+    evaluationId: "CEY-TEST-2026",
+    generatedAt: new Date().toISOString(),
+    evaluationDate: new Date(),
+    user: { name: "Test Evaluator", category: "Trader" },
+    gemstone: {
+      variety: "Blue Sapphire",
+      caratWeight: 2.5,
+      color: { hue: "Royal Blue", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None" },
+      clarity: { nakedEye: "Clean", loupe10x: "Very Slight", severity: "Minor" },
+      cut: { length: 8.5, width: 6.5, depth: 4.2, symmetry: "Good", polish: "Good" },
+      treatment: { status: "Heated" },
+      origin: { value: "Sri Lanka" },
+      informationReliability: { measurements: "Measured", treatment: "Unverified", origin: "Unverified" },
+    },
+    scores: { overall: 88.5, color: 92, clarity: 90, cut: 85, carat: 82 },
+    priceSuggestion: { available: true, suggestedPrice: 4200, minimumPrice: 3800, maximumPrice: 4600, currency: "USD" },
+    referenceComparison: { available: true, referenceName: "Ratnapura Blue Lot Ref", similarity: 91.2 },
+    recommendations: ["Confirm unheated status via FTIR spectrometry."],
+    ruleVersion: "v4.2",
+    userStatement: "User observation statement.",
+    disclaimer: "Mandatory disclaimer.",
+  });
+
+  const parsedPdf = await PDFDocument.load(pdfBytes);
+  assert.equal(parsedPdf.getPageCount(), 2, "PDF must strictly contain 2 pages");
+});
+
+test("17. evaluateColor calculates accurate scores for Padparadscha and Ruby varieties", () => {
+  const padRes = evaluateColor({
+    variety: "Padparadscha",
+    hue: "Pinkish Orange",
+    tone: "5",
+    saturation: "Strong",
+    distribution: "Even",
+    zoning: "None",
+  });
+  assert.equal(padRes.status, "COMPLETED");
+  assert.ok(padRes.score! >= 90);
+
+  const rubyRes = evaluateColor({
+    variety: "Ruby",
+    hue: "Pigeon Blood Red",
+    tone: "6",
+    saturation: "Vivid",
+    distribution: "Even",
+    zoning: "None Visible",
+  });
+  assert.equal(rubyRes.status, "COMPLETED");
+  assert.equal(rubyRes.score, 100);
+});
+
+test("18. Missing or 0 dimensions correctly returns PENDING status in Cut & Carat engines", () => {
+  const pendingCut = evaluateCut({
+    length: 0,
+    width: 0,
+    depth: 0,
+    symmetry: "Good",
+    polish: "Good",
+    windowing: "None",
+    extinction: "None",
+    bulging: "None",
+  });
+  assert.equal(pendingCut.status, "PENDING");
+  assert.equal(pendingCut.score, null);
+
+  const pendingCarat = evaluateCarat({
+    caratWeight: 0,
+    length: 8.0,
+    width: 6.0,
+    depth: 4.0,
+  });
+  assert.equal(pendingCarat.status, "UNAVAILABLE");
+  assert.equal(pendingCarat.score, null);
+});

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEvaluationDraft } from "@/context/EvaluationDraftContext";
 import ReviewSection from "@/components/gemstone/ReviewSection";
 import EvaluationProcessingScreen from "@/components/gemstone/EvaluationProcessingScreen";
+import { ArrowLeft, AlertCircle } from "lucide-react";
 
 export default function ReviewStepPage() {
   const router = useRouter();
@@ -15,24 +16,26 @@ export default function ReviewStepPage() {
   const handleEditStep = (stepNumber: number) => {
     switch (stepNumber) {
       case 1:
-      case 2:
-      case 6:
         router.push("/evaluate/gemstone");
         break;
-      case 3:
+      case 2:
         router.push("/evaluate/color");
         break;
-      case 4:
+      case 3:
         router.push("/evaluate/clarity");
         break;
-      case 5:
+      case 4:
         router.push("/evaluate/cut");
         break;
-      case 7:
+      case 5:
+        router.push("/evaluate/carat");
+        break;
+      case 6:
         router.push("/evaluate/additional");
         break;
+      case 7:
       default:
-        router.push("/evaluate/gemstone");
+        router.push("/evaluate/review");
     }
   };
 
@@ -57,27 +60,28 @@ export default function ReviewStepPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-5">
         <div>
           <span className="text-xs font-extrabold uppercase tracking-widest text-blue-600">
-            Step 6 of 6 · Review & Verify
+            Step 7 of 7 · Review & Save
           </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
             Review Your Gemstone Observations
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Confirm all recorded 4C metrics and origin factors. Click any edit icon to adjust values before running the deterministic rule engine.
+            Confirm all recorded 4C metrics, origin factors, and photo evidence before executing the deterministic evaluation engine.
           </p>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            All 6 stages verified
+            All 7 stages complete
           </span>
         </div>
       </div>
 
       {(localError || submitError) && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-700">
-          ⚠️ {localError || submitError}
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-700 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{localError || submitError}</span>
         </div>
       )}
 
@@ -118,8 +122,8 @@ export default function ReviewStepPage() {
           href="/evaluate/additional"
           className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
         >
-          <span>←</span>
-          <span>Back to Additional Factors</span>
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back to Treatment & Origin</span>
         </Link>
       </div>
     </div>

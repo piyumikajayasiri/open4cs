@@ -19,6 +19,8 @@ export interface EvaluationDraft {
   // Step 1: Gemstone variety & identification
   variety: string;
   stoneId?: string;
+  naturalStatus?: "Natural" | "Lab-Grown";
+  photoUrl?: string;
 
   // Step 2 / Step 6: Carat & Basic dimensions
   caratWeight: string;
@@ -66,6 +68,8 @@ export interface EvaluationDraft {
 export const initialDraftState: EvaluationDraft = {
   variety: "Blue Sapphire",
   stoneId: "",
+  naturalStatus: "Natural",
+  photoUrl: "",
   caratWeight: "",
   shape: "Oval",
   hue: "Royal Blue",

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
+import { CheckCircle2, AlertTriangle, Edit3, ShieldAlert, Sparkles, Scale, Check } from "lucide-react";
 
 type ReviewSectionProps = {
   variety: string;
@@ -17,13 +17,13 @@ type ReviewSectionProps = {
   nakedEye: string;
   loupe10x: string;
   inclusionType: string;
-  inclusionLocation: string;
+  inclusionLocation?: string;
   severity: string;
   symmetry: string;
   polish: string;
-  windowing: string;
-  extinction: string;
-  bulging: string;
+  windowing?: string;
+  extinction?: string;
+  bulging?: string;
   treatmentStatus: string;
   treatmentType: string;
   originValue: string;
@@ -56,67 +56,73 @@ export default function ReviewSection({
   originReliability,
   onEditStep,
   onRunEvaluation,
-  onSaveDraft,
   loading = false,
 }: ReviewSectionProps) {
-  const displayVariety = variety || "Ceylon Blue Sapphire";
-  const displayCarat = caratWeight || "2.45";
-  const displayLength = length || "8.42";
-  const displayWidth = width || "6.31";
-  const displayDepth = depth || "4.55";
+  const displayVariety = variety || "Blue Sapphire";
+  const hasCarat = Boolean(caratWeight && Number(caratWeight) > 0);
+  const hasDimensions = Boolean(
+    length && Number(length) > 0 &&
+    width && Number(width) > 0 &&
+    depth && Number(depth) > 0
+  );
 
-  // Calculated values
-  const lVal = parseFloat(displayLength) || 8.42;
-  const wVal = parseFloat(displayWidth) || 6.31;
-  const dVal = parseFloat(displayDepth) || 4.55;
-  const lwRatio = wVal > 0 ? (lVal / wVal).toFixed(2) : "1.33";
-  const depthPercent = wVal > 0 ? ((dVal / wVal) * 100).toFixed(1) : "72.1";
+  const lVal = parseFloat(length);
+  const wVal = parseFloat(width);
+  const dVal = parseFloat(depth);
+  const lwRatio = hasDimensions && wVal > 0 ? (lVal / wVal).toFixed(2) : null;
+  const depthPercent = hasDimensions && wVal > 0 ? ((dVal / wVal) * 100).toFixed(1) : null;
 
-  // Review Items for the left stack
+  // Review Items for the 7 stages
   const reviewCards = [
     {
       id: "gemstone",
-      title: "Gemstone Information",
-      subtitle: `${displayVariety} · Oval · ${displayLength} × ${displayWidth} × ${displayDepth} mm`,
+      title: "1. Gemstone Category & Origin Nature",
+      subtitle: `${displayVariety} · Natural Corundum · Faceted Oval / Mixed Cut`,
       iconType: "check",
       step: 1,
     },
     {
       id: "color",
-      title: "Color",
-      subtitle: `${saturation || "Vivid"} ${hue || "Blue"} · Tone ${tone || "6"} · ${distribution || "Even"} · 8.6 provisional`,
-      iconType: "check",
-      step: 3,
+      title: "2. Color Observation",
+      subtitle: `${saturation || "Vivid"} ${hue || "Blue"} · Tone ${tone || "6"} · Distribution ${distribution || "Even"} · Zoning ${zoning || "None"}`,
+      iconType: hue && tone && saturation ? "check" : "warning",
+      step: 2,
     },
     {
       id: "clarity",
-      title: "Clarity",
-      subtitle: `${nakedEye || "Eye-clean"} · ${inclusionType ? "Minor " + inclusionType : "Minor silk"} · 7.9 provisional`,
-      iconType: "check",
-      step: 4,
+      title: "3. Clarity Assessment",
+      subtitle: `${nakedEye || "Eye-clean"} · 10× loupe: ${loupe10x || "Very slight"} ${inclusionType ? `(${inclusionType})` : ""} · Relief: ${severity || "Minor"}`,
+      iconType: nakedEye && loupe10x ? "check" : "warning",
+      step: 3,
     },
     {
       id: "cut",
-      title: "Cut",
-      subtitle: `L:W ${lwRatio} · Depth ${depthPercent}% · 8.1 provisional`,
-      iconType: "check",
-      step: 5,
+      title: "4. Cut & Proportions",
+      subtitle: hasDimensions
+        ? `${length} × ${width} × ${depth} mm · L:W ${lwRatio} · Depth ${depthPercent}% · Symmetry ${symmetry || "Good"} · Polish ${polish || "Good"}`
+        : "Dimensions incomplete — length, width, and depth required",
+      iconType: hasDimensions ? "check" : "warning",
+      step: 4,
     },
     {
       id: "carat",
-      title: "Carat Weight",
-      subtitle: `${displayCarat} ct · Liquid commercial band`,
-      iconType: "check",
-      step: 6,
+      title: "5. Carat Weight",
+      subtitle: hasCarat
+        ? `${caratWeight} ct calibrated electronic scale weight`
+        : "Carat weight required",
+      iconType: hasCarat ? "check" : "warning",
+      step: 5,
     },
     {
       id: "treatment_origin",
-      title: "Treatment & Origin",
-      subtitle: `${treatmentStatus || "Heated (H)"} lab-verified · Origin ${originValue || "Sri Lanka (Ceylon)"} (${originReliability || "seller-provided"})`,
-      iconType: "warning",
-      step: 7,
+      title: "6. Treatment & Geographic Origin",
+      subtitle: `${treatmentStatus || "Heated"} · Origin: ${originValue || "Sri Lanka"} (${originReliability || "Unverified evidence"})`,
+      iconType: "check",
+      step: 6,
     },
   ];
+
+  const canSubmit = hasCarat && hasDimensions;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -129,22 +135,20 @@ export default function ReviewSection({
           >
             <div className="flex items-center gap-3.5">
               {card.iconType === "check" ? (
-                <div className="w-6 h-6 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-3.5 h-3.5 stroke-current" fill="none" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-                  </svg>
+                <div className="w-7 h-7 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
+                  <Check className="w-4 h-4" />
                 </div>
               ) : (
-                <div className="w-6 h-6 rounded-full bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center flex-shrink-0 text-xs font-bold">
-                  ⚠️
+                <div className="w-7 h-7 rounded-full bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-4 h-4" />
                 </div>
               )}
 
-              <div>
+              <div className="min-w-0">
                 <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
                   {card.title}
                 </h4>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5 truncate">
                   {card.subtitle}
                 </p>
               </div>
@@ -153,19 +157,19 @@ export default function ReviewSection({
             <button
               type="button"
               onClick={() => onEditStep(card.step)}
-              className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition flex items-center gap-1 flex-shrink-0 px-2 py-1 rounded-lg hover:bg-blue-50"
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition flex items-center gap-1 shrink-0 px-2.5 py-1.5 rounded-lg hover:bg-blue-50 cursor-pointer"
             >
-              <span>✏️</span>
+              <Edit3 className="w-3.5 h-3.5" />
               <span>Edit</span>
             </button>
           </div>
         ))}
 
         {/* Bottom Disclaimer Banner */}
-        <div className="rounded-2xl border border-[#F6E7C4] bg-[#FEF9EE] p-4 sm:p-5 flex items-start gap-3 mt-6">
-          <span className="text-base text-amber-600 flex-shrink-0 mt-0.5">⚠️</span>
-          <p className="text-xs text-amber-900/90 leading-relaxed font-normal">
-            This system provides an estimated B2B price suggestion based on the information provided, predefined evaluation and pricing rules, comparable gemstone data, and available reference information. It is not a professional laboratory valuation, gemstone certification, authentication, legally binding valuation, or guaranteed selling price.
+        <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 sm:p-5 flex items-start gap-3 mt-6">
+          <ShieldAlert className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-900 leading-relaxed font-normal">
+            <strong>Formal Notice:</strong> This Open 4Cs assessment report provides a rule-based evaluation and indicative price range derived from user-submitted grading observations and verified historical market references. It is not a gemological laboratory certificate, authentication guarantee, or legally binding appraisal.
           </p>
         </div>
       </div>
@@ -173,16 +177,15 @@ export default function ReviewSection({
       {/* Right Column: Stone Summary & Action Card (4 cols on large screens) */}
       <div className="lg:col-span-4 space-y-4">
         <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-5">
-          {/* Real Gemstone Photo */}
-          <div className="relative w-full h-48 rounded-xl overflow-hidden bg-slate-100 border border-slate-200/60 shadow-inner">
-            <Image
-              src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80"
-              alt="Ceylon Blue Sapphire"
-              fill
-              unoptimized
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 33vw"
-            />
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              Summary
+            </span>
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
+              <Sparkles className="w-3 h-3" />
+              Rule v4.2
+            </span>
           </div>
 
           {/* Title and Identification */}
@@ -190,31 +193,39 @@ export default function ReviewSection({
             <h3 className="text-base font-extrabold text-slate-900">
               {displayVariety}
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
-              CEY-2026-0847 · {displayCarat} ct · Oval
+            <p className="text-xs text-slate-500 mt-0.5">
+              {hasCarat ? `${caratWeight} ct` : "Carat pending"} · {hasDimensions ? `${length} × ${width} × ${depth} mm` : "Dimensions pending"}
             </p>
           </div>
 
           {/* Validation Checklist */}
-          <div className="space-y-2.5 pt-1 border-t border-slate-100">
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <span className="text-emerald-500 font-bold">✔</span>
-              <span>Required information complete</span>
+          <div className="space-y-2.5 pt-2 border-t border-slate-100 text-xs">
+            <div className="flex items-center gap-2 text-slate-700">
+              {hasCarat ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              ) : (
+                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+              )}
+              <span>Carat weight recorded ({hasCarat ? `${caratWeight} ct` : "Required"})</span>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <span className="text-emerald-500 font-bold">✔</span>
-              <span>Measurements valid</span>
+            <div className="flex items-center gap-2 text-slate-700">
+              {hasDimensions ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              ) : (
+                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+              )}
+              <span>Millimeter dimensions ({hasDimensions ? "Valid" : "Required"})</span>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <span className="text-emerald-500 font-bold">✔</span>
-              <span>Supported gemstone variety</span>
+            <div className="flex items-center gap-2 text-slate-700">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Supported natural corundum variety</span>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-amber-700 font-medium">
-              <span>⚠️</span>
-              <span>Treatment information requires verification</span>
+            <div className="flex items-center gap-2 text-slate-500 text-[11px]">
+              <span className="text-blue-600 font-bold">ℹ</span>
+              <span>Evidence tag: [{originReliability || "User Entered"}]</span>
             </div>
           </div>
 
@@ -223,19 +234,21 @@ export default function ReviewSection({
             <button
               type="button"
               onClick={onRunEvaluation}
-              disabled={loading}
-              className="w-full bg-[#0F172A] hover:bg-[#1E293B] text-white text-xs sm:text-sm font-bold py-3 rounded-xl shadow-md transition disabled:opacity-50 text-center"
+              disabled={loading || !canSubmit}
+              className={`w-full text-xs sm:text-sm font-bold py-3 rounded-xl shadow-md transition text-center cursor-pointer ${
+                canSubmit && !loading
+                  ? "bg-[#0B1528] hover:bg-slate-800 text-white shadow-slate-900/10"
+                  : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
+              }`}
             >
-              {loading ? "Evaluating..." : "Run Evaluation"}
+              {loading ? "Executing Evaluation Engine..." : "Run Evaluation & Generate Report"}
             </button>
 
-            <button
-              type="button"
-              onClick={onSaveDraft || (() => {})}
-              className="w-full border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold py-3 rounded-xl transition text-center"
-            >
-              Save Draft
-            </button>
+            {!canSubmit && (
+              <p className="text-[11px] text-amber-700 text-center">
+                Please complete carat weight and dimensions to proceed.
+              </p>
+            )}
           </div>
         </div>
       </div>
