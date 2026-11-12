@@ -274,7 +274,7 @@ test("16. Two-page PDF generator strictly enforces 2 pages (A4) and contains man
     scores: { overall: 88.5, color: 92, clarity: 90, cut: 85, carat: 82 },
     priceSuggestion: { available: true, suggestedPrice: 4200, minimumPrice: 3800, maximumPrice: 4600, currency: "USD" },
     referenceComparison: { available: true, referenceName: "Ratnapura Blue Lot Ref", similarity: 91.2 },
-    recommendations: ["Confirm unheated status via FTIR spectrometry."],
+    recommendations: ["Request treatment assessment from a qualified gemmological laboratory."],
     ruleVersion: "v4.2",
     userStatement: "User observation statement.",
     disclaimer: "Mandatory disclaimer.",

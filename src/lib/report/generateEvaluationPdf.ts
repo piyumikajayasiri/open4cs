@@ -787,9 +787,9 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
     const recs = report.recommendations.length > 0
       ? report.recommendations.slice(0, 4)
       : [
-          "Confirm heating status via accredited gemmological laboratory with FTIR / Raman spectroscopy before commercial trade.",
-          "Check facet alignment under 10× binocular microscope to assess pavilion light leakage.",
-          "Record accurate calibrated dimensions on digital vernier calipers before finalizing valuation.",
+          "Request treatment assessment from a qualified gemmological laboratory.",
+          "Check facet alignment and symmetry under 10× magnification to assess pavilion light return.",
+          "Record calibrated dimensions on precision instruments before finalizing commercial decisions.",
         ];
 
     let recY = y - 36;
@@ -817,77 +817,142 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
       borderWidth: 1,
     });
 
-    const baseUrl =
+    const rawBaseUrl =
       process.env.NEXTAUTH_URL ||
       process.env.NEXT_PUBLIC_APP_URL ||
       process.env.APP_URL ||
-      "https://open4cs.app";
-    const auditRecordUrl = `${baseUrl}/evaluations/${report.evaluationId}`;
+      "";
+    const baseUrl = rawBaseUrl.trim().replace(/\/$/, "");
+    const isUrlConfigured = baseUrl.length > 0;
+    const auditRecordUrl = isUrlConfigured
+      ? `${baseUrl}/evaluations/${report.evaluationId}`
+      : null;
 
-    // Generate genuine scannable QR code encoded to the record URL
-    let qrImageEmbedded = false;
-    try {
-      const qrPngBuffer = await QRCode.toBuffer(auditRecordUrl, {
-        type: "png",
-        margin: 1,
-        width: 150,
-        errorCorrectionLevel: "M",
-      });
-      const qrImage = await pdf.embedPng(qrPngBuffer);
-      page2.drawImage(qrImage, {
-        x: margin + 14,
-        y: y - 64,
-        width: 52,
-        height: 52,
-      });
-      qrImageEmbedded = true;
-    } catch (qrErr) {
-      console.warn("Failed to generate QR code PNG:", qrErr);
-    }
+    if (isUrlConfigured && auditRecordUrl) {
+      // Generate genuine scannable QR code encoded to the record URL
+      let qrImageEmbedded = false;
+      try {
+        const qrPngBuffer = await QRCode.toBuffer(auditRecordUrl, {
+          type: "png",
+          margin: 1,
+          width: 150,
+          errorCorrectionLevel: "M",
+        });
+        const qrImage = await pdf.embedPng(qrPngBuffer);
+        page2.drawImage(qrImage, {
+          x: margin + 14,
+          y: y - 64,
+          width: 52,
+          height: 52,
+        });
+        qrImageEmbedded = true;
+      } catch (qrErr) {
+        console.warn("Failed to generate QR code PNG:", qrErr);
+      }
 
-    if (!qrImageEmbedded) {
+      if (!qrImageEmbedded) {
+        page2.drawRectangle({
+          x: margin + 14,
+          y: y - 64,
+          width: 52,
+          height: 52,
+          color: rgb(1, 1, 1),
+          borderColor: darkNavy,
+          borderWidth: 1,
+        });
+      }
+
+      page2.drawText("DIGITAL AUDIT & RECORD VERIFICATION", {
+        x: margin + 74,
+        y: y - 18,
+        size: 8,
+        font: boldFont,
+        color: darkNavy,
+      });
+
+      page2.drawText(`Record URL: ${auditRecordUrl}`, {
+        x: margin + 74,
+        y: y - 32,
+        size: 7,
+        font: regularFont,
+        color: primaryBlue,
+      });
+
+      page2.drawText("Access to saved Open 4Cs assessment record · Not independent laboratory verification", {
+        x: margin + 74,
+        y: y - 46,
+        size: 6.5,
+        font: italicFont,
+        color: textMuted,
+      });
+
+      page2.drawText(`Open 4Cs Rule Core ${report.ruleVersion || "prototype-v1"} · Immutable University Evaluation Record`, {
+        x: margin + 74,
+        y: y - 58,
+        size: 6.5,
+        font: regularFont,
+        color: textDark,
+      });
+    } else {
+      // Unconfigured Application URL: omit QR code and clearly explain record access is not configured
       page2.drawRectangle({
         x: margin + 14,
         y: y - 64,
         width: 52,
         height: 52,
-        color: rgb(1, 1, 1),
-        borderColor: darkNavy,
+        color: rgb(0.96, 0.96, 0.98),
+        borderColor: borderLight,
         borderWidth: 1,
       });
+
+      page2.drawText("NO QR", {
+        x: margin + 16,
+        y: y - 34,
+        size: 8,
+        font: boldFont,
+        color: textMuted,
+      });
+
+      page2.drawText("UNCONFIGURED", {
+        x: margin + 8,
+        y: y - 46,
+        size: 5,
+        font: regularFont,
+        color: textSubtle,
+      });
+
+      page2.drawText("DIGITAL AUDIT & RECORD VERIFICATION", {
+        x: margin + 74,
+        y: y - 18,
+        size: 8,
+        font: boldFont,
+        color: darkNavy,
+      });
+
+      page2.drawText("Digital record verification is unavailable: Application URL is not configured.", {
+        x: margin + 74,
+        y: y - 32,
+        size: 7,
+        font: boldFont,
+        color: rgb(0.75, 0.2, 0.2),
+      });
+
+      page2.drawText("Configure NEXTAUTH_URL or NEXT_PUBLIC_APP_URL to enable direct QR verification of saved records.", {
+        x: margin + 74,
+        y: y - 46,
+        size: 6.5,
+        font: italicFont,
+        color: textMuted,
+      });
+
+      page2.drawText(`Open 4Cs Rule Core ${report.ruleVersion || "prototype-v1"} · Immutable University Evaluation Record`, {
+        x: margin + 74,
+        y: y - 58,
+        size: 6.5,
+        font: regularFont,
+        color: textDark,
+      });
     }
-
-    page2.drawText("DIGITAL AUDIT & RECORD VERIFICATION", {
-      x: margin + 74,
-      y: y - 18,
-      size: 8,
-      font: boldFont,
-      color: darkNavy,
-    });
-
-    page2.drawText(`Record URL: ${auditRecordUrl}`, {
-      x: margin + 74,
-      y: y - 32,
-      size: 7,
-      font: regularFont,
-      color: primaryBlue,
-    });
-
-    page2.drawText("Access to saved Open 4Cs assessment record · Not independent laboratory verification", {
-      x: margin + 74,
-      y: y - 46,
-      size: 6.5,
-      font: italicFont,
-      color: textMuted,
-    });
-
-    page2.drawText(`Open 4Cs Rule Core ${report.ruleVersion || "prototype-v1"} · Immutable University Evaluation Record`, {
-      x: margin + 74,
-      y: y - 58,
-      size: 6.5,
-      font: regularFont,
-      color: textSubtle,
-    });
 
     // Page 2 Footer
     page2.drawLine({

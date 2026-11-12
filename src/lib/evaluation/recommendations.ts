@@ -65,7 +65,7 @@ export function generateInformationReliabilityRecommendations(
     recommendations.push({
       category: "VERIFICATION",
       message:
-        "Treatment information is unverified. Consider laboratory verification where appropriate.",
+        "Treatment information is unverified. Request treatment assessment from a qualified gemmological laboratory.",
     });
   }
 
