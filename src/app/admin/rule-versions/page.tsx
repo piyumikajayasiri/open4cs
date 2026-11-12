@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
+import React, { useState, useEffect } from "react";
 import {
   GitCompare,
   CheckCircle2,
@@ -9,10 +8,8 @@ import {
   PenLine,
   Layers,
   X,
-  UserPlus,
-  ShieldCheck,
-  ArrowRight,
   Clock,
+  Sparkles,
 } from "lucide-react";
 import ToastNotification, {
   ToastMessage,
@@ -47,7 +44,7 @@ interface ManagedUser {
   status: "Active" | "Reviewer" | "Suspended";
 }
 
-const RULE_VERSIONS: RuleVersionItem[] = [
+const DEFAULT_RULE_VERSIONS: RuleVersionItem[] = [
   {
     id: "ver-4.2",
     version: "v4.2",
@@ -103,77 +100,17 @@ const RULE_VERSIONS: RuleVersionItem[] = [
   },
 ];
 
-const AUDIT_HISTORY: AuditHistoryItem[] = [
-  {
-    id: "aud-1",
-    title: "Approved REF-1099 verification",
-    subtitle: "Sep 24 · 14:02 · Dr. Mendis · Reference data",
-    iconType: "check",
-    details: "Verified 2.74 ct Ceylon Blue sapphire lot evidence with minor silk inclusion mapping.",
-  },
-  {
-    id: "aud-2",
-    title: "Bulk import 12 records (HIST-Q3)",
-    subtitle: "Sep 23 · 16:40 · Data desk · Historical pricing",
-    iconType: "upload",
-    details: "Ingested 12 Colombo auction clearing benchmark records into quarterly aggregate history.",
-  },
-  {
-    id: "aud-3",
-    title: "Signed PM-4.2 heated modifier",
-    subtitle: "Sep 22 · 11:15 · Pricing board · Pricing matrix",
-    iconType: "pen",
-    details: "Board signed off on -4% thermal enhancement modifier across all corundum varieties.",
-  },
-  {
-    id: "aud-4",
-    title: "Rule snapshot pinned for 214 evaluations",
-    subtitle: "Sep 21 · 09:03 · System · Engine",
-    iconType: "pin",
-    details: "Pinned version v4.2 snapshot ensuring immutability for 214 ongoing evaluation drafts.",
-  },
-];
-
-const INITIAL_USERS: ManagedUser[] = [
-  {
-    id: "usr-1",
-    name: "Amaya Fernando",
-    roleAffiliation: "Student · Uni of Moratuwa",
-    category: "Student",
-    evals: "142 evals",
-    status: "Active",
-  },
-  {
-    id: "usr-2",
-    name: "Nimal Perera",
-    roleAffiliation: "Trader · Beruwala",
-    category: "Trader",
-    evals: "48 evals",
-    status: "Active",
-  },
-  {
-    id: "usr-3",
-    name: "Dr. S. Mendis",
-    roleAffiliation: "Gemologist · Reviewer",
-    category: "Gemologist",
-    evals: "312 reviews",
-    status: "Reviewer",
-  },
-  {
-    id: "usr-4",
-    name: "H. Okafor",
-    roleAffiliation: "Professional · Exporter",
-    category: "Professional",
-    evals: "87 evals",
-    status: "Suspended",
-  },
-];
-
 export default function RuleVersionsPage() {
-  const [users, setUsers] = useState<ManagedUser[]>(INITIAL_USERS);
+  const [ruleVersions] = useState<RuleVersionItem[]>(DEFAULT_RULE_VERSIONS);
+  const [auditHistory, setAuditHistory] = useState<AuditHistoryItem[]>([]);
+  const [users, setUsers] = useState<ManagedUser[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [loadingAudit, setLoadingAudit] = useState(true);
+
   const [selectedVersion, setSelectedVersion] = useState<RuleVersionItem | null>(null);
   const [showCompareModal, setShowCompareModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [submittingInvite, setSubmittingInvite] = useState(false);
 
   // Invite user form state
   const [inviteName, setInviteName] = useState("");
@@ -188,28 +125,134 @@ export default function RuleVersionsPage() {
   };
   const dismissToast = (id: string) => setToasts((prev) => prev.filter((t) => t.id !== id));
 
-  const handleInviteUser = (e: React.FormEvent) => {
+  // Load real users
+  const fetchUsers = async () => {
+    try {
+      setLoadingUsers(true);
+      const res = await fetch("/api/admin/users");
+      const data = await res.json();
+      if (data.success && Array.isArray(data.users)) {
+        interface RawDbUser {
+          _id: string;
+          name: string;
+          category?: string;
+          role?: string;
+          accountStatus?: string;
+          status?: string;
+          evaluationsCount?: number;
+        }
+        const mapped: ManagedUser[] = data.users.map((u: RawDbUser) => {
+          const category = (u.category || "Professional") as ManagedUser["category"];
+          const isSuspended = u.accountStatus === "SUSPENDED" || u.status === "SUSPENDED";
+          const isReviewer = u.role === "CAGS_ADMIN" || category === "Gemologist";
+          return {
+            id: u._id,
+            name: u.name,
+            roleAffiliation: `${category} · ${u.role === "CAGS_ADMIN" ? "Admin Staff" : "Portal Member"}`,
+            category,
+            evals: `${u.evaluationsCount || 0} evals`,
+            status: isSuspended ? "Suspended" : isReviewer ? "Reviewer" : "Active",
+          };
+        });
+        setUsers(mapped);
+      }
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  // Load real audit logs
+  const fetchAudit = async () => {
+    try {
+      setLoadingAudit(true);
+      const res = await fetch("/api/admin/audit?limit=4");
+      const data = await res.json();
+      if (data.success && Array.isArray(data.logs)) {
+        interface RawDbAudit {
+          _id: string;
+          action: string;
+          resource: string;
+          details?: string;
+          actor?: { name?: string };
+          createdAt: string;
+        }
+        const mapped: AuditHistoryItem[] = data.logs.map((l: RawDbAudit) => {
+          let iconType: AuditHistoryItem["iconType"] = "check";
+          if (l.action.includes("CREATE") || l.action.includes("IMPORT")) iconType = "upload";
+          else if (l.action.includes("UPDATE") || l.action.includes("SIGN")) iconType = "pen";
+          else if (l.action.includes("PIN") || l.action.includes("VERSION")) iconType = "pin";
+
+          const dateStr = new Date(l.createdAt).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          });
+          const timeStr = new Date(l.createdAt).toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          });
+
+          return {
+            id: l._id,
+            title: `${l.action} ${l.resource}`,
+            subtitle: `${dateStr} · ${timeStr} · ${l.actor?.name || "System"} · ${l.resource}`,
+            iconType,
+            details: l.details || "Administrative event logged to immutable audit trail.",
+          };
+        });
+        setAuditHistory(mapped);
+      }
+    } catch (err) {
+      console.error("Error fetching audit logs:", err);
+    } finally {
+      setLoadingAudit(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+    fetchAudit();
+  }, []);
+
+  const handleInviteUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteName.trim() || !inviteEmail.trim()) {
       showToast("Please provide both Name and Email.", "error");
       return;
     }
 
-    const newUser: ManagedUser = {
-      id: `usr-${Date.now()}`,
-      name: inviteName.trim(),
-      roleAffiliation: `${inviteCategory} · ${inviteAffiliation.trim() || "Colombo"}`,
-      category: inviteCategory,
-      evals: "0 evals",
-      status: inviteCategory === "Gemologist" ? "Reviewer" : "Active",
-    };
+    try {
+      setSubmittingInvite(true);
+      const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: inviteName.trim(),
+          email: inviteEmail.trim(),
+          category: inviteCategory,
+          role: inviteCategory === "Gemologist" ? "CAGS_ADMIN" : "USER",
+        }),
+      });
 
-    setUsers((prev) => [...prev, newUser]);
-    showToast(`Invitation dispatched to ${inviteEmail.trim()} with ${inviteCategory} access.`, "success");
-    setInviteName("");
-    setInviteEmail("");
-    setInviteAffiliation("");
-    setShowInviteModal(false);
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(`User account created and invitation queued for ${inviteEmail.trim()}.`, "success");
+        setInviteName("");
+        setInviteEmail("");
+        setInviteAffiliation("");
+        setShowInviteModal(false);
+        fetchUsers();
+        fetchAudit();
+      } else {
+        showToast(data.message || "Failed to invite user.", "error");
+      }
+    } catch {
+      showToast("Network error while inviting user.", "error");
+    } finally {
+      setSubmittingInvite(false);
+    }
   };
 
   return (
@@ -247,7 +290,7 @@ export default function RuleVersionsPage() {
             <h2 className="text-base font-bold text-slate-900 mb-4">Rule versions</h2>
 
             <div className="divide-y divide-slate-100">
-              {RULE_VERSIONS.map((ver) => (
+              {ruleVersions.map((ver) => (
                 <div
                   key={ver.id}
                   onClick={() => setSelectedVersion(ver)}
@@ -290,27 +333,36 @@ export default function RuleVersionsPage() {
           <div>
             <h2 className="text-base font-bold text-slate-900 mb-4">Audit history</h2>
 
-            <div className="space-y-4">
-              {AUDIT_HISTORY.map((item) => (
-                <div key={item.id} className="flex items-start gap-3">
-                  <div className="mt-0.5 shrink-0 text-emerald-600">
-                    {item.iconType === "check" && <CheckCircle2 className="w-4 h-4" />}
-                    {item.iconType === "upload" && <Upload className="w-4 h-4" />}
-                    {item.iconType === "pen" && <PenLine className="w-4 h-4" />}
-                    {item.iconType === "pin" && <Layers className="w-4 h-4" />}
-                  </div>
+            {loadingAudit ? (
+              <div className="py-8 text-center text-xs text-slate-400">Loading audit history...</div>
+            ) : auditHistory.length === 0 ? (
+              <div className="py-8 text-center text-xs text-slate-400">
+                <Clock className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                No administrative actions logged yet.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {auditHistory.map((item) => (
+                  <div key={item.id} className="flex items-start gap-3">
+                    <div className="mt-0.5 shrink-0 text-emerald-600">
+                      {item.iconType === "check" && <CheckCircle2 className="w-4 h-4" />}
+                      {item.iconType === "upload" && <Upload className="w-4 h-4" />}
+                      {item.iconType === "pen" && <PenLine className="w-4 h-4" />}
+                      {item.iconType === "pin" && <Layers className="w-4 h-4" />}
+                    </div>
 
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-                      {item.title}
-                    </h3>
-                    <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
-                      {item.subtitle}
-                    </p>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
+                        {item.title}
+                      </h3>
+                      <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
+                        {item.subtitle}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -329,44 +381,52 @@ export default function RuleVersionsPage() {
           </button>
         </div>
 
-        <div className="divide-y divide-slate-100">
-          {users.map((u) => (
-            <div
-              key={u.id}
-              className="py-3.5 first:pt-1 last:pb-1 flex items-center justify-between gap-4"
-            >
-              {/* User Name */}
-              <div className="w-44 sm:w-56 font-bold text-slate-900 text-xs sm:text-sm truncate">
-                {u.name}
-              </div>
+        {loadingUsers ? (
+          <div className="py-8 text-center text-xs text-slate-400">Loading verified users...</div>
+        ) : users.length === 0 ? (
+          <div className="py-8 text-center text-xs text-slate-400">
+            No active users found in database.
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {users.map((u) => (
+              <div
+                key={u.id}
+                className="py-3.5 first:pt-1 last:pb-1 flex items-center justify-between gap-4"
+              >
+                {/* User Name */}
+                <div className="w-44 sm:w-56 font-bold text-slate-900 text-xs sm:text-sm truncate">
+                  {u.name}
+                </div>
 
-              {/* Role & Affiliation */}
-              <div className="flex-1 text-xs text-slate-500 truncate hidden sm:block">
-                {u.roleAffiliation}
-              </div>
+                {/* Role & Affiliation */}
+                <div className="flex-1 text-xs text-slate-500 truncate hidden sm:block">
+                  {u.roleAffiliation}
+                </div>
 
-              {/* Activity Counts */}
-              <div className="text-xs text-slate-700 font-medium whitespace-nowrap text-right w-24">
-                {u.evals}
-              </div>
+                {/* Activity Counts */}
+                <div className="text-xs text-slate-700 font-medium whitespace-nowrap text-right w-24">
+                  {u.evals}
+                </div>
 
-              {/* Status Badge */}
-              <div className="w-24 text-right">
-                <span
-                  className={`inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold ${
-                    u.status === "Active"
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                      : u.status === "Reviewer"
-                      ? "bg-blue-50 text-blue-700 border border-blue-200"
-                      : "bg-rose-50 text-rose-700 border border-rose-200"
-                  }`}
-                >
-                  {u.status}
-                </span>
+                {/* Status Badge */}
+                <div className="w-24 text-right">
+                  <span
+                    className={`inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold ${
+                      u.status === "Active"
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        : u.status === "Reviewer"
+                        ? "bg-blue-50 text-blue-700 border border-blue-200"
+                        : "bg-rose-50 text-rose-700 border border-rose-200"
+                    }`}
+                  >
+                    {u.status}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ================= COMPARE VERSIONS MODAL ================= */}
@@ -576,14 +636,16 @@ export default function RuleVersionsPage() {
                   type="button"
                   onClick={() => setShowInviteModal(false)}
                   className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50"
+                  disabled={submittingInvite}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-[#0B1528] text-white px-5 py-2 font-bold shadow-xs"
+                  disabled={submittingInvite}
+                  className="rounded-xl bg-[#0B1528] text-white px-5 py-2 font-bold shadow-xs hover:bg-slate-800 transition disabled:opacity-50"
                 >
-                  Send Invitation
+                  {submittingInvite ? "Sending..." : "Send Invitation"}
                 </button>
               </div>
             </form>

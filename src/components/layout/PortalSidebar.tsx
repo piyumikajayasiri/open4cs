@@ -8,6 +8,7 @@ export type PortalSidebarItem =
   | "dashboard"
   | "new_evaluation"
   | "my_evaluations"
+  | "guide"
   | "history"
   | "compare"
   | "reports"
