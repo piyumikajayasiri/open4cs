@@ -5,6 +5,7 @@ import { verifySessionToken } from "@/lib/auth/session";
 import { connectToDatabase } from "@/lib/mongodb";
 import Evaluation from "@/models/Evaluation";
 import Gemstone from "@/models/Gemstone";
+import User from "@/models/User";
 
 if (!mongoose.models.Gemstone) {
   void Gemstone;
@@ -15,8 +16,16 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get("session")?.value;
+    let sessionToken: string | undefined;
+    try {
+      const cookieStore = await cookies();
+      sessionToken = cookieStore.get("session")?.value;
+    } catch {
+      sessionToken = request.cookies.get("session")?.value;
+    }
+    if (!sessionToken) {
+      sessionToken = request.cookies.get("session")?.value;
+    }
 
     if (!sessionToken) {
       return NextResponse.json(
@@ -42,6 +51,14 @@ export async function GET(
     }
 
     await connectToDatabase();
+
+    const activeUser = await User.findById(session.userId).select("status isActive role");
+    if (!activeUser || activeUser.isActive === false || activeUser.status === "SUSPENDED") {
+      return NextResponse.json(
+        { error: "Account is inactive or suspended." },
+        { status: 403 }
+      );
+    }
 
     const evaluation = await Evaluation.findById(id)
       .populate("gemstoneId")

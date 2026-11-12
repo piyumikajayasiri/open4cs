@@ -1,4 +1,5 @@
 import { PDFDocument, PDFPage, PDFFont, RGB, StandardFonts, rgb } from "pdf-lib";
+import QRCode from "qrcode";
 
 export type ReportData = {
   reportTitle: string;
@@ -315,9 +316,17 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
     const widVal = formatNum(cutObj.width);
     const depVal = formatNum(cutObj.depth);
 
+    const shapeVal = String(
+      (report.gemstone as Record<string, unknown>).shape ||
+        cutObj.shape ||
+        "Oval"
+    );
+    const cutStyleVal = String(cutObj.cutStyle || "Mixed Cut");
+    const shapeAndCut = `${shapeVal} · ${cutStyleVal}`;
+
     const physicalSpecs = [
       ["Carat Weight", `${formatNum(report.gemstone.caratWeight)} ct`, "[Measured]"],
-      ["Shape & Cut", "Oval · Mixed Cut", "[Observed]"],
+      ["Shape & Cut", shapeAndCut, "[User Declared]"],
       ["Length", `${lenVal} mm`, "[Measured]"],
       ["Width", `${widVal} mm`, "[Measured]"],
       ["Depth", `${depVal} mm`, "[Measured]"],
@@ -329,7 +338,7 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
     for (const [k, v, tag] of physicalSpecs) {
       page1.drawText(k, { x: leftX + 12, y: rowY, size: 8, font: regularFont, color: textMuted });
       page1.drawText(v, { x: leftX + 90, y: rowY, size: 8, font: boldFont, color: textDark });
-      page1.drawText(tag, { x: leftX + colWidth - 55, y: rowY, size: 6.5, font: boldFont, color: primaryBlue });
+      page1.drawText(tag, { x: leftX + colWidth - 62, y: rowY, size: 6.5, font: boldFont, color: primaryBlue });
       rowY -= 18;
     }
 
@@ -359,9 +368,16 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
     const clarityObj = (report.gemstone.clarity || {}) as Record<string, unknown>;
     const relObj = (report.gemstone.informationReliability || {}) as Record<string, unknown>;
 
+    const declaredSpecies = String(
+      (report.gemstone as Record<string, unknown>).species ||
+        ((report.gemstone as Record<string, unknown>).naturalStatus
+          ? `${(report.gemstone as Record<string, unknown>).naturalStatus} Corundum`
+          : "Corundum (User Declared)")
+    );
+
     const charSpecs = [
-      ["Mineral Species", "Natural Corundum", "[Rule Engine]"],
-      ["Gemstone Variety", report.gemstone.variety || "Blue Sapphire", "[Declared]"],
+      ["Mineral Species", declaredSpecies, "[User Declared]"],
+      ["Gemstone Variety", report.gemstone.variety || "Blue Sapphire", "[User Declared]"],
       ["Primary Hue", formatVal(colorObj.hue), "[User Graded]"],
       ["Tone (1–9 Scale)", formatVal(colorObj.tone), "[User Graded]"],
       ["Saturation (1–6)", formatVal(colorObj.saturation), "[User Graded]"],
@@ -427,7 +443,7 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
       color: textDark,
     });
 
-    page1.drawText(`Evaluation Protocol: CAGS 4C Research Calibrated`, {
+    page1.drawText(`Evaluation Protocol: Open 4Cs Provisional Modelling Framework`, {
       x: margin + 260,
       y: y - 46,
       size: 8,
@@ -723,22 +739,23 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
       const unavailReason = report.priceSuggestion.reason ||
         "At least 3 verified completed-sale commercial transaction records are required. Demo and unverified records are strictly excluded from commercial valuation.";
 
-      page2.drawText(
-        unavailReason.length > 95 ? unavailReason.slice(0, 95) + "..." : unavailReason,
-        {
-          x: margin + 16,
-          y: y - 62,
-          size: 7.5,
-          font: regularFont,
-          color: textMuted,
-        }
+      drawWrappedText(
+        page2,
+        unavailReason,
+        margin + 16,
+        y - 58,
+        contentWidth - 32,
+        8,
+        regularFont,
+        textMuted,
+        11
       );
 
       page2.drawText(
-        "Gemstone 4C quality scores above remain fully valid and independent of market pricing.",
+        "Gemstone 4C quality scores are calculated using provisional Open 4Cs modelling rules and remain available when market data is insufficient.",
         {
           x: margin + 16,
-          y: y - 76,
+          y: y - 80,
           size: 7.5,
           font: italicFont,
           color: primaryBlue,
@@ -800,26 +817,45 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
       borderWidth: 1,
     });
 
-    // Stylized QR code box
-    page2.drawRectangle({
-      x: margin + 14,
-      y: y - 62,
-      width: 50,
-      height: 50,
-      color: rgb(1, 1, 1),
-      borderColor: darkNavy,
-      borderWidth: 1,
-    });
-    // Draw QR inner target squares
-    page2.drawRectangle({ x: margin + 18, y: y - 28, width: 14, height: 14, color: darkNavy });
-    page2.drawRectangle({ x: margin + 21, y: y - 25, width: 8, height: 8, color: rgb(1, 1, 1) });
-    page2.drawRectangle({ x: margin + 46, y: y - 28, width: 14, height: 14, color: darkNavy });
-    page2.drawRectangle({ x: margin + 49, y: y - 25, width: 8, height: 8, color: rgb(1, 1, 1) });
-    page2.drawRectangle({ x: margin + 18, y: y - 56, width: 14, height: 14, color: darkNavy });
-    page2.drawRectangle({ x: margin + 21, y: y - 53, width: 8, height: 8, color: rgb(1, 1, 1) });
-
-    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const baseUrl =
+      process.env.NEXTAUTH_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.APP_URL ||
+      "https://open4cs.app";
     const auditRecordUrl = `${baseUrl}/evaluations/${report.evaluationId}`;
+
+    // Generate genuine scannable QR code encoded to the record URL
+    let qrImageEmbedded = false;
+    try {
+      const qrPngBuffer = await QRCode.toBuffer(auditRecordUrl, {
+        type: "png",
+        margin: 1,
+        width: 150,
+        errorCorrectionLevel: "M",
+      });
+      const qrImage = await pdf.embedPng(qrPngBuffer);
+      page2.drawImage(qrImage, {
+        x: margin + 14,
+        y: y - 64,
+        width: 52,
+        height: 52,
+      });
+      qrImageEmbedded = true;
+    } catch (qrErr) {
+      console.warn("Failed to generate QR code PNG:", qrErr);
+    }
+
+    if (!qrImageEmbedded) {
+      page2.drawRectangle({
+        x: margin + 14,
+        y: y - 64,
+        width: 52,
+        height: 52,
+        color: rgb(1, 1, 1),
+        borderColor: darkNavy,
+        borderWidth: 1,
+      });
+    }
 
     page2.drawText("DIGITAL AUDIT & RECORD VERIFICATION", {
       x: margin + 74,

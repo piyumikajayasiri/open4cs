@@ -5,9 +5,9 @@ import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
 import AuditLog from "@/models/AuditLog";
 
-export async function GET() {
+export async function GET(request?: NextRequest) {
   try {
-    const admin = await getCurrentUser();
+    const admin = await getCurrentUser(request);
     if (!admin || admin.role !== "CAGS_ADMIN") {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
