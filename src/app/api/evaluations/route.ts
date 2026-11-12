@@ -16,6 +16,7 @@ import {
   ENGINE_SUPPORTED_ORIGIN_RELIABILITIES,
 } from "@/lib/evaluation/rules";
 import Evaluation from "@/models/Evaluation";
+import GemstoneVariety from "@/models/GemstoneVariety";
 import { calculateComparableReferencePrice } from "@/lib/evaluation/comparablePrice";
 
 const SUPPORTED_INFORMATION_RELIABILITY = [
@@ -136,6 +137,22 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           message: `${data.variety} is not currently supported for automated 4C evaluation. Currently supported varieties: ${ENGINE_SUPPORTED_VARIETIES.join(", ")}.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    await connectToDatabase();
+
+    const varietyDoc = (await GemstoneVariety.findOne({
+      name: { $regex: new RegExp(`^${data.variety.trim()}$`, "i") },
+    }).lean()) as { isActive?: boolean } | null;
+
+    if (varietyDoc && !varietyDoc.isActive) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `${data.variety} is currently suspended and not accepting new evaluations.`,
         },
         { status: 400 }
       );

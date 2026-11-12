@@ -34,7 +34,7 @@ export interface VarietyItem {
 const DEFAULT_VARIETIES: VarietyItem[] = [
   {
     id: "var-1",
-    name: "Ceylon Blue Sapphire",
+    name: "Blue Sapphire",
     species: "Corundum",
     shapes: "Oval/Round",
     referenceCoverage: "214 refs",
@@ -46,7 +46,7 @@ const DEFAULT_VARIETIES: VarietyItem[] = [
   },
   {
     id: "var-2",
-    name: "Padparadscha Sapphire",
+    name: "Padparadscha",
     species: "Corundum",
     shapes: "Oval",
     referenceCoverage: "88 refs",

@@ -14,14 +14,25 @@ export type ClarityEvaluationInput = {
 
 export type ClarityEvaluationResult = ScoredEvaluationResult;
 
+const CLARITY_VALUE_ALIASES: Record<string, string> = {
+  eyeclean: "clean",
+  eye_clean: "clean",
+  "eye-clean": "clean",
+  veryslightlyincluded: "veryslight",
+  slightlyincluded: "slight",
+  moderatelyincluded: "noticeable",
+  heavilyincluded: "obvious",
+};
+
 function getRuleScore(
   value: string,
   rules: Record<string, number>
 ): number | null {
-  const normalizedValue = value
+  const rawNormalized = value
     .trim()
     .toLowerCase()
-    .replace(/\s+/g, "");
+    .replace(/[\s\-_]+/g, "");
+  const normalizedValue = CLARITY_VALUE_ALIASES[rawNormalized] || rawNormalized;
 
   const matchedKey = Object.keys(rules).find(
     (key) => key.toLowerCase() === normalizedValue

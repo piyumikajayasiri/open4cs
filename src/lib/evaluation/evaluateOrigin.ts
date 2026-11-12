@@ -30,12 +30,28 @@ function getOriginAdjustmentFactor(
     : null;
 }
 
+const ORIGIN_RELIABILITY_ALIASES: Record<string, string> = {
+  laboratoryverified: "high",
+  labverified: "high",
+  verified: "high",
+  high: "high",
+  medium: "medium",
+  low: "low",
+  declared: "medium",
+  selfdeclared: "medium",
+  unverified: "unknown",
+  unknown: "unknown",
+};
+
 function getOriginReliabilityFactor(
   reliability: string
 ): number | null {
-  const normalizedReliability = reliability
+  const rawNormalized = reliability
     .trim()
-    .toLowerCase();
+    .toLowerCase()
+    .replace(/[\s\-_]+/g, "");
+  const normalizedReliability =
+    ORIGIN_RELIABILITY_ALIASES[rawNormalized] || rawNormalized;
 
   const matchedKey = Object.keys(
     ORIGIN_RULES.reliability
