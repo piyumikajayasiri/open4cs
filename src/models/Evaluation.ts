@@ -44,6 +44,11 @@ const EvaluationSchema = new Schema(
       default: null,
     },
 
+    exchangeRate: {
+      type: Schema.Types.Mixed,
+      default: null,
+    },
+
     photoUrl: {
       type: String,
       default: "",

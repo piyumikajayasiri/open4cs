@@ -4,7 +4,7 @@
 > **System:** Open 4Cs — Gemstone Evaluation and Price Suggestion System  
 > **Rule Version:** Deterministic Core v4.2  
 > **Scope:** Loose Faceted Natural Corundum (*Blue Sapphire*, *Padparadscha*, *Ruby*)  
-> **Currency Modeling:** Sri Lankan Rupee (LKR) primary, United States Dollar (USD) secondary ($1\text{ USD} \approx 300\text{ LKR}$)  
+> **Currency Modeling:** Sri Lankan Rupee (LKR) primary, United States Dollar (USD) secondary via Central Bank of Sri Lanka (CBSL) Indicative Spot Rate (`304.25 LKR / USD` as of 2026-11-12; graceful fallback to LKR only)  
 > **Status Disclosure:** All numerical weights, thresholds, and adjustment multipliers documented herein represent **Provisional Open 4Cs University Modelling Assumptions**. They are developed for individual academic research and are **not** claimed as ISO/CIBJO certified standards or scientifically validated laboratory grading systems.
 
 ---
@@ -140,7 +140,31 @@ In previous prototypes, origin reliability (High, Medium, Low) was used as a num
 * If fewer than 3 verified references exist, `calculatePriceSuggestion` returns `status: "UNAVAILABLE"`:
   > *"Insufficient verified market data: At least 3 verified market references are required to suggest a reliable regional wholesale clearing price."*
 
-### 5.4 Sri Lanka Regional Currency Model
+### 5.4 Sri Lanka Regional Currency Model & CBSL Dated Exchange Rates
 * **Primary Currency:** Sri Lankan Rupee (LKR), matching Ratnapura, Beruwala, and Colombo dealer transactions.
-* **Secondary Currency:** US Dollars (USD), using exchange rate conversion ($1\text{ USD} = 300\text{ LKR}$).
-* **Market Level:** Explicitly designated as **Wholesale Clearing Benchmark (B2B Dealer Trade)**. It excludes retail jewellery showroom markup (100%–300%), luxury taxes, and precious metal mounting.
+* **Secondary Currency (USD Conversion):** US Dollars (USD) are computed strictly against the official **Central Bank of Sri Lanka (CBSL) Indicative Spot Exchange Rate** (`304.25 LKR / USD` as of 2026-11-12, official source: [CBSL Exchange Rates](https://www.cbsl.gov.lk/en/rates-and-indicators/exchange-rates)).
+* **Graceful FX Fallback:** If live or dated CBSL exchange rate data is unavailable or omitted, the application strictly displays Sri Lankan Rupees (LKR) only and does not guess, invent, or hardcode conversion rates.
+* **Market Level Classification:** 
+  * **Verified Commercial Reference:** Indicative Wholesale Market Range (B2B Dealer Trade), requiring $\ge 3$ verified completed-sale market references.
+  * **Pedagogical Demo Data:** Seed reference records are explicitly classified as `dataClassification: "Demo"` and `transactionContext: "Dealer Estimate"`. Under Open 4Cs data integrity rules, demo references are excluded from certified commercial valuation; the system displays `"Market Price Suggestion: Unavailable"` while preserving 100% of the 4C quality evaluation scores.
+
+---
+
+## 6. Traceable Reference Data Provenance Schema
+
+To ensure total transparency and auditability, every reference record in MongoDB (`ReferenceGemstone`) requires comprehensive provenance metadata:
+
+| Schema Field | Type / Enum | Description |
+| :--- | :--- | :--- |
+| `dataClassification` | `"Real"` \| `"Demo"` | Strict partition between real-world commercial dealer data and pedagogical research simulation data. |
+| `sourceEvidence` | `string` | Documented origin citation (e.g. auction lot, dealer ledger, field survey observation). |
+| `observationDate` | `string` (ISO 8601) | Date when physical specimen characteristics and market clearing values were recorded. |
+| `transactionContext` | `"Completed Sale"` \| `"Dealer Estimate"` \| `"Asking Price"` | Explicit classification of financial reliability (completed transactions vs asking quotations). |
+| `marketContext` | `"Wholesale B2B"` \| `"Dealer Consignment"` \| `"Retail Indicative"` | Trade environment context. |
+| `originalCurrency` | `"LKR"` \| `"USD"` | Currency in which transaction occurred. |
+| `originalPrice` | `number` | Transacted or estimated price in original currency. |
+| `originalCaratWeight`| `number` | Physical calibrated carat weight of reference specimen. |
+| `treatmentEvidence` | `string` | Laboratory / microscopic diagnostic observations confirming treatment status. |
+| `originEvidence` | `string` | Regional geological diagnostic markers (e.g. silk rutile lattices, mica flakes, fluid veining). |
+| `reviewer` | `string` | Authorized gemmologist or system auditor responsible for record validation. |
+| `reviewDate` | `string` (ISO 8601) | Date of formal record audit and verification. |

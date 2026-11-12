@@ -358,18 +358,44 @@ test("20. Pricing engine requires at least 3 verified references for data suffic
   assert.equal(result.suggestedPrice, null);
 });
 
-test("21. Multi-currency regional model outputs both LKR and USD (1 USD = 300 LKR)", () => {
-  const resultLkr = calculatePriceSuggestion(300000, "LKR", 1.0, 1.0, {
+test("21. Dated exchange rate source converts USD; omits USD if unavailable (LKR only)", () => {
+  const datedRate = {
+    currencyPair: "USD/LKR" as const,
+    rate: 300,
+    source: "Central Bank of Sri Lanka (CBSL) - Indicative Spot Exchange Rate",
+    asOfDate: "2026-11-12",
+    isOfficial: true,
+    isAvailable: true,
+  };
+
+  // With dated official exchange rate
+  const resultWithFx = calculatePriceSuggestion(300000, "LKR", 1.0, 1.0, {
     referenceCount: 3,
+    exchangeRate: datedRate,
   });
 
-  assert.equal(resultLkr.status, "COMPLETED");
-  assert.equal(resultLkr.priceLkr, 300000);
-  assert.equal(resultLkr.priceUsd, 1000); // 300,000 / 300 = 1,000 USD
-  assert.equal(resultLkr.priceRangeLkr?.minimum, 270000);
-  assert.equal(resultLkr.priceRangeLkr?.maximum, 330000);
-  assert.equal(resultLkr.priceRangeUsd?.minimum, 900);
-  assert.equal(resultLkr.priceRangeUsd?.maximum, 1100);
+  assert.equal(resultWithFx.status, "COMPLETED");
+  assert.equal(resultWithFx.priceLkr, 300000);
+  assert.equal(resultWithFx.priceUsd, 1000);
+  assert.equal(resultWithFx.priceRangeLkr?.minimum, 270000);
+  assert.equal(resultWithFx.priceRangeLkr?.maximum, 330000);
+  assert.equal(resultWithFx.priceRangeUsd?.minimum, 900);
+  assert.equal(resultWithFx.priceRangeUsd?.maximum, 1100);
+  assert.equal(resultWithFx.exchangeRate?.rate, 300);
+  assert.equal(resultWithFx.exchangeRate?.source, "Central Bank of Sri Lanka (CBSL) - Indicative Spot Exchange Rate");
+  assert.equal(resultWithFx.exchangeRate?.asOfDate, "2026-11-12");
+
+  // When exchange rate is unavailable: display LKR only without silent guessing
+  const resultLkrOnly = calculatePriceSuggestion(300000, "LKR", 1.0, 1.0, {
+    referenceCount: 3,
+    exchangeRate: null,
+  });
+
+  assert.equal(resultLkrOnly.status, "COMPLETED");
+  assert.equal(resultLkrOnly.priceLkr, 300000);
+  assert.equal(resultLkrOnly.priceUsd, null);
+  assert.equal(resultLkrOnly.priceRangeUsd, null);
+  assert.equal(resultLkrOnly.exchangeRate, null);
 });
 
 test("22. evaluateColor strictly rejects cross-variety hues", () => {

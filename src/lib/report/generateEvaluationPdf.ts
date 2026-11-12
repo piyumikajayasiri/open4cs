@@ -37,6 +37,19 @@ export type ReportData = {
     minimumPrice: number | null;
     maximumPrice: number | null;
     currency: string | null;
+    priceLkr?: number | null;
+    priceUsd?: number | null;
+    priceRangeLkr?: { minimum: number; maximum: number } | null;
+    priceRangeUsd?: { minimum: number; maximum: number } | null;
+    exchangeRate?: {
+      rate: number;
+      source: string;
+      asOfDate: string;
+      isAvailable: boolean;
+    } | null;
+    marketLevel?: string;
+    isRealMarketData?: boolean;
+    reason?: string;
   };
 
   referenceComparison: {
@@ -206,6 +219,17 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
         } else if (rawPhoto.startsWith("data:image/jpeg;base64,") || rawPhoto.startsWith("data:image/jpg;base64,")) {
           imageBytes = Buffer.from(rawPhoto.replace(/^data:image\/(jpeg|jpg);base64,/, ""), "base64");
           isPng = false;
+        } else if (rawPhoto.startsWith("http://") || rawPhoto.startsWith("https://")) {
+          try {
+            const imgRes = await fetch(rawPhoto);
+            if (imgRes.ok) {
+              const arrayBuf = await imgRes.arrayBuffer();
+              imageBytes = Buffer.from(arrayBuf);
+              isPng = rawPhoto.toLowerCase().includes(".png") || (imgRes.headers.get("content-type")?.includes("png") ?? false);
+            }
+          } catch {
+            // Ignore network fetch error; fallback to placeholder
+          }
         }
 
         if (imageBytes && imageBytes.length > 0) {
@@ -601,10 +625,14 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
       borderWidth: 1,
     });
 
-    page2.drawText("INDICATIVE WHOLESALE CLEARING BENCHMARK (SRI LANKA REGION)", {
+    const marketHeader = report.priceSuggestion.isRealMarketData
+      ? "INDICATIVE WHOLESALE MARKET RANGE (VERIFIED COMPLETED SALES)"
+      : "INDICATIVE RESEARCH BENCHMARK (DEMONSTRATION / ACADEMIC DATA)";
+
+    page2.drawText(marketHeader, {
       x: margin + 16,
       y: y - 18,
-      size: 8.5,
+      size: 8,
       font: boldFont,
       color: darkNavy,
     });
@@ -614,28 +642,31 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
       report.priceSuggestion.suggestedPrice != null &&
       report.priceSuggestion.currency
     ) {
-      const curr = report.priceSuggestion.currency;
-      const sugPrice = report.priceSuggestion.suggestedPrice;
-      const minPrice = report.priceSuggestion.minimumPrice || sugPrice * 0.9;
-      const maxPrice = report.priceSuggestion.maximumPrice || sugPrice * 1.1;
+      const lkrPrice = report.priceSuggestion.priceLkr ?? report.priceSuggestion.suggestedPrice;
+      const usdPrice = report.priceSuggestion.priceUsd;
+      const minLkr = report.priceSuggestion.priceRangeLkr?.minimum ?? report.priceSuggestion.minimumPrice ?? lkrPrice * 0.9;
+      const maxLkr = report.priceSuggestion.priceRangeLkr?.maximum ?? report.priceSuggestion.maximumPrice ?? lkrPrice * 1.1;
+      const minUsd = report.priceSuggestion.priceRangeUsd?.minimum;
+      const maxUsd = report.priceSuggestion.priceRangeUsd?.maximum;
+      const fx = report.priceSuggestion.exchangeRate;
 
-      // Sri Lanka regional currency model: Primary LKR with USD equivalent (1 USD ~ 300 LKR)
-      const lkrPrice = curr === "USD" ? sugPrice * 300 : sugPrice;
-      const usdPrice = curr === "USD" ? sugPrice : Math.round(sugPrice / 300);
-      const minLkr = curr === "USD" ? minPrice * 300 : minPrice;
-      const maxLkr = curr === "USD" ? maxPrice * 300 : maxPrice;
-      const minUsd = curr === "USD" ? minPrice : Math.round(minPrice / 300);
-      const maxUsd = curr === "USD" ? maxPrice : Math.round(maxPrice / 300);
+      const priceHeadline = (typeof usdPrice === "number" && usdPrice > 0)
+        ? `LKR ${formatMoneyNum(lkrPrice)}  (~ $${formatMoneyNum(usdPrice)} USD)`
+        : `LKR ${formatMoneyNum(lkrPrice)}`;
 
-      page2.drawText(`LKR ${formatMoneyNum(lkrPrice)}  (~ $${formatMoneyNum(usdPrice)} USD)`, {
+      page2.drawText(priceHeadline, {
         x: margin + 16,
         y: y - 48,
-        size: 16,
+        size: 15,
         font: boldFont,
         color: emeraldDark,
       });
 
-      page2.drawText(`Estimated Trading Range: LKR ${formatMoneyNum(minLkr)} – ${formatMoneyNum(maxLkr)} (~ $${formatMoneyNum(minUsd)} – $${formatMoneyNum(maxUsd)} USD)`, {
+      const rangeLine = (typeof minUsd === "number" && typeof maxUsd === "number")
+        ? `Estimated Range: LKR ${formatMoneyNum(minLkr)} – ${formatMoneyNum(maxLkr)} (~ $${formatMoneyNum(minUsd)} – $${formatMoneyNum(maxUsd)} USD)`
+        : `Estimated Range: LKR ${formatMoneyNum(minLkr)} – ${formatMoneyNum(maxLkr)}`;
+
+      page2.drawText(rangeLine, {
         x: margin + 16,
         y: y - 68,
         size: 8,
@@ -643,10 +674,11 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
         color: textDark,
       });
 
-      // Price per carat
-      const perCtLkr = report.gemstone.caratWeight > 0 ? lkrPrice / report.gemstone.caratWeight : 0;
-      const perCtUsd = report.gemstone.caratWeight > 0 ? usdPrice / report.gemstone.caratWeight : 0;
-      page2.drawText(`Wholesale clearing per ct: LKR ${formatMoneyNum(perCtLkr)} (~ $${formatMoneyNum(perCtUsd)} USD/ct) · Ratnapura/Beruwala dealer clearing`, {
+      const fxLine = (fx && fx.isAvailable && fx.rate > 0)
+        ? `Dated CBSL FX: 1 USD = ${fx.rate} LKR (${fx.asOfDate}) · Wholesale Dealer Clearing`
+        : `Primary currency: LKR (Secondary USD conversion omitted: dated official FX rate required)`;
+
+      page2.drawText(fxLine, {
         x: margin + 16,
         y: y - 80,
         size: 7,
@@ -680,22 +712,36 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
         });
       }
     } else {
-      page2.drawText("Insufficient verified market data for a reliable price estimate.", {
+      page2.drawText("Market Price Suggestion: Unavailable", {
         x: margin + 16,
-        y: y - 46,
+        y: y - 44,
         size: 10,
         font: boldFont,
-        color: textMuted,
+        color: textDark,
       });
 
+      const unavailReason = report.priceSuggestion.reason ||
+        "At least 3 verified completed-sale commercial transaction records are required. Demo and unverified records are strictly excluded from commercial valuation.";
+
       page2.drawText(
-        "Open 4Cs requires at least 3 verified active trade comparables to project price suggestions. No speculative price is generated.",
+        unavailReason.length > 95 ? unavailReason.slice(0, 95) + "..." : unavailReason,
         {
           x: margin + 16,
-          y: y - 66,
-          size: 8,
+          y: y - 62,
+          size: 7.5,
           font: regularFont,
-          color: textSubtle,
+          color: textMuted,
+        }
+      );
+
+      page2.drawText(
+        "Gemstone 4C quality scores above remain fully valid and independent of market pricing.",
+        {
+          x: margin + 16,
+          y: y - 76,
+          size: 7.5,
+          font: italicFont,
+          color: primaryBlue,
         }
       );
     }
@@ -772,36 +818,39 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
     page2.drawRectangle({ x: margin + 18, y: y - 56, width: 14, height: 14, color: darkNavy });
     page2.drawRectangle({ x: margin + 21, y: y - 53, width: 8, height: 8, color: rgb(1, 1, 1) });
 
-    page2.drawText("DIGITAL VERIFICATION & AUDIT INTEGRITY", {
+    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const auditRecordUrl = `${baseUrl}/evaluations/${report.evaluationId}`;
+
+    page2.drawText("DIGITAL AUDIT & RECORD VERIFICATION", {
       x: margin + 74,
-      y: y - 20,
+      y: y - 18,
       size: 8,
       font: boldFont,
       color: darkNavy,
     });
 
-    page2.drawText(`Verification Destination: /evaluations/${report.evaluationId}`, {
+    page2.drawText(`Record URL: ${auditRecordUrl}`, {
       x: margin + 74,
-      y: y - 34,
-      size: 7.5,
+      y: y - 32,
+      size: 7,
       font: regularFont,
       color: primaryBlue,
     });
 
-    page2.drawText(`Deterministic Engine Stamp: Open 4Cs Rule Core ${report.ruleVersion || "v4.2"} · Immutable Record`, {
+    page2.drawText("Access to saved Open 4Cs assessment record · Not independent laboratory verification", {
       x: margin + 74,
-      y: y - 48,
-      size: 7,
+      y: y - 46,
+      size: 6.5,
       font: italicFont,
       color: textMuted,
     });
 
-    page2.drawText("Open 4Cs Academic Research & Assessment Methodology", {
+    page2.drawText(`Open 4Cs Rule Core ${report.ruleVersion || "prototype-v1"} · Immutable University Evaluation Record`, {
       x: margin + 74,
-      y: y - 60,
-      size: 7,
-      font: boldFont,
-      color: textDark,
+      y: y - 58,
+      size: 6.5,
+      font: regularFont,
+      color: textSubtle,
     });
 
     // Page 2 Footer

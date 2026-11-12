@@ -8,6 +8,7 @@ import { evaluateGemstone } from "@/lib/evaluation/evaluateGemstone";
 import type { EvaluationInput } from "@/lib/evaluation/evaluationInput";
 import { compareReferenceGemstones } from "@/lib/evaluation/compareReferenceGemstones";
 import { calculatePriceSuggestion } from "@/lib/evaluation/priceSuggestion";
+import { getActiveExchangeRate } from "@/lib/currency/exchangeRate";
 import {
   REFERENCE_COMPARISON_RULES,
   ENGINE_SUPPORTED_VARIETIES,
@@ -140,6 +141,21 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           message: `${data.variety} is not currently supported for automated 4C evaluation. Currently supported varieties: ${ENGINE_SUPPORTED_VARIETIES.join(", ")}.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Direct API bypass guard for synthetic or lab-grown submissions
+    if (
+      data.naturalStatus &&
+      data.naturalStatus.toLowerCase() !== "natural"
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Automated 4Cs evaluation and price comparables are strictly calibrated for natural corundum. Laboratory-grown or synthetic gemstones cannot be evaluated under this model.",
         },
         { status: 400 }
       );
@@ -380,6 +396,13 @@ export async function POST(request: NextRequest) {
     const refOriginWeight = ORIGIN_RULES.value[refOriginValue as keyof typeof ORIGIN_RULES.value] ?? 1.0;
     const relativeOriginMultiplier = refOriginWeight > 0 ? (candidateOriginWeight / refOriginWeight) : 1.0;
 
+    const exchangeRate = getActiveExchangeRate();
+    const hasRealMarketData =
+      suitableComparableReferences.length > 0 &&
+      suitableComparableReferences.every(
+        (r) => r.dataClassification === "Real" && r.transactionContext === "Completed Sale"
+      );
+
     const priceSuggestion =
       calculatePriceSuggestion(
         suitableReferenceMatch
@@ -392,6 +415,9 @@ export async function POST(request: NextRequest) {
           referenceCount: suitableComparableReferences.length,
           relativeTreatmentMultiplier,
           relativeOriginMultiplier,
+          exchangeRate,
+          dataClassification: hasRealMarketData ? "Real" : "Demo",
+          isRealMarketData: hasRealMarketData,
         }
       );
 
@@ -413,6 +439,7 @@ export async function POST(request: NextRequest) {
       referenceDataSufficiency,
       bestReferenceMatch,
       priceSuggestion,
+      exchangeRate: priceSuggestion.exchangeRate ?? null,
       photoUrl: data.photoUrl || "",
     });
 

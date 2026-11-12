@@ -49,6 +49,11 @@ export async function compareReferenceGemstones(
 
       treatment: reference.treatment ? { status: reference.treatment.status } : undefined,
       origin: reference.origin ? { value: reference.origin.value, reliability: reference.origin.reliability } : undefined,
+      dataClassification: (reference.dataClassification as "Real" | "Demo") ?? "Demo",
+      transactionContext: (reference.transactionContext as "Completed Sale" | "Asking Price" | "Dealer Estimate") ?? "Dealer Estimate",
+      marketContext: (reference.marketContext as "Wholesale" | "Retail" | "Auction") ?? "Wholesale",
+      sourceEvidence: reference.sourceEvidence,
+      observationDate: reference.observationDate,
     }));
 
   return compareWithReferences(

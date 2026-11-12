@@ -211,6 +211,18 @@ export async function POST(request: NextRequest) {
       labCertificate: body.labCertificate || "",
       verifiedBy: body.verifiedBy || "CAGS Admin",
       verifiedAt: body.verifiedAt || new Date().toISOString(),
+      dataClassification: body.dataClassification || "Demo",
+      sourceEvidence: body.sourceEvidence || "",
+      observationDate: body.observationDate || new Date().toISOString().split("T")[0],
+      transactionContext: body.transactionContext || "Dealer Estimate",
+      marketContext: body.marketContext || "Wholesale",
+      originalCurrency: (body.originalCurrency || priceCurrency || currency || "LKR").toUpperCase(),
+      originalPrice: Number(body.originalPrice) || Number(referencePrice) || 0,
+      originalCaratWeight: Number(body.originalCaratWeight) || Number(caratWeight) || 0,
+      treatmentEvidence: body.treatmentEvidence || "",
+      originEvidence: body.originEvidence || "",
+      reviewer: body.reviewer || "CAGS Admin",
+      reviewDate: body.reviewDate || new Date().toISOString().split("T")[0],
     });
 
     const populatedReference = await ReferenceGemstone.findById(reference._id).lean();

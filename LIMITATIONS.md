@@ -15,9 +15,9 @@
 2. **Instant Live Scoring Feedback:**  
    Displays component score updates, positive factor breakdowns, deductions, and missing field checklists on each step of the 7-step wizard via `LiveScoreSidebar.tsx` using the production engine.
 3. **Wholesale Clearing Benchmark Pricing (Sri Lanka Region):**  
-   Models indicative wholesale B2B clearing benchmark prices in Sri Lankan Rupees (LKR) with secondary USD equivalent ($1\text{ USD} \approx 300\text{ LKR}$) using relative adjustment factors that prevent double-counting.
-4. **Strict Data Sufficiency Enforcement ($\ge 3$ References):**  
-   Outputs *"Insufficient verified market data: At least 3 verified market references are required"* whenever active verified comparables are fewer than 3, strictly prohibiting speculative price hallucination.
+   Models indicative wholesale B2B clearing benchmark prices in Sri Lankan Rupees (LKR) with secondary USD equivalent via official Central Bank of Sri Lanka (CBSL) Indicative Spot Rates (`304.25 LKR / USD` as of 2026-11-12) using relative adjustment factors that eliminate double-counting. If FX data is omitted or unavailable, the system strictly falls back to LKR only.
+4. **Strict Data Sufficiency & Demo Data Exclusion ($\ge 3$ Verified Real References):**  
+   Requires a minimum of 3 active, verified, commercial completed-sale market references. Seed reference benchmarks are transparently classified as pedagogical demonstration records (`dataClassification: "Demo"`, `transactionContext: "Dealer Estimate"`); when commercial sales data is not populated, the engine outputs *"Market Price Suggestion: Unavailable"* while keeping the 4C quality evaluation engine 100% operational.
 5. **Publication-Quality 2-Page Assessment Report Generation:**  
    Generates a formal 2-page PDF report incorporating physical measurements, reported characteristics, embedded user specimen photographs, 4C scores, market comparables, and digital verification signatures.
 6. **Role-Based Access Control & Immutable Governance Trail:**  
