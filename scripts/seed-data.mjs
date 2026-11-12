@@ -12,7 +12,7 @@ if (!uri) {
 await mongoose.connect(uri);
 console.log("Connected to MongoDB for data seeding...");
 
-// 1. Gemstone Varieties (Catalogue)
+// 1. Gemstone Varieties (7 Canonical Varieties)
 const GemstoneVariety =
   mongoose.models.GemstoneVariety ||
   mongoose.model(
@@ -32,10 +32,15 @@ const GemstoneVariety =
     )
   );
 
+// Clean up duplicate legacy names
+await GemstoneVariety.deleteMany({
+  name: { $in: ["Ceylon Blue Sapphire", "Padparadscha Sapphire"] }
+});
+
 const varieties = [
   {
-    name: "Ceylon Blue Sapphire",
-    description: "Premier benchmark variety with comprehensive color, clarity, and cut rule calibration.",
+    name: "Blue Sapphire",
+    description: "Premier Ceylon benchmark variety with comprehensive color, clarity, and cut rule calibration.",
     species: "Corundum",
     supportedShapes: ["Oval", "Round"],
     ruleVersion: "v4.2",
@@ -44,12 +49,22 @@ const varieties = [
     isActive: true,
   },
   {
-    name: "Padparadscha Sapphire",
+    name: "Padparadscha",
     description: "Delicate pinkish-orange corundum with strict spectral saturation bounds.",
     species: "Corundum",
     supportedShapes: ["Oval"],
     ruleVersion: "v4.2",
     referenceCount: 88,
+    engineSupported: true,
+    isActive: true,
+  },
+  {
+    name: "Ruby",
+    description: "Chromium red corundum calibrated for standard market valuation.",
+    species: "Corundum",
+    supportedShapes: ["Oval", "Cushion"],
+    ruleVersion: "v4.2",
+    referenceCount: 45,
     engineSupported: true,
     isActive: true,
   },
@@ -91,45 +106,15 @@ const varieties = [
     ruleVersion: "—",
     referenceCount: 21,
     engineSupported: false,
-    isActive: true,
-  },
-  // Engine canonical references:
-  {
-    name: "Blue Sapphire",
-    description: "Corundum - Sri Lanka benchmark variety",
-    species: "Corundum",
-    supportedShapes: ["Oval", "Round"],
-    ruleVersion: "v4.2",
-    referenceCount: 214,
-    engineSupported: true,
-    isActive: true,
-  },
-  {
-    name: "Padparadscha",
-    description: "Corundum - rare pink-orange Ceylon variety",
-    species: "Corundum",
-    supportedShapes: ["Oval"],
-    ruleVersion: "v4.2",
-    referenceCount: 88,
-    engineSupported: true,
-    isActive: true,
-  },
-  {
-    name: "Ruby",
-    description: "Corundum - chromium red variety",
-    species: "Corundum",
-    supportedShapes: ["Oval", "Cushion"],
-    ruleVersion: "v4.2",
-    referenceCount: 45,
-    engineSupported: true,
-    isActive: true,
+    isActive: false, // Suspended / In Review
   },
 ];
 
 for (const v of varieties) {
   await GemstoneVariety.findOneAndUpdate({ name: v.name }, v, { upsert: true });
 }
-console.log(`Seeded ${varieties.length} gemstone varieties.`);
+const countVarieties = await GemstoneVariety.countDocuments();
+console.log(`Seeded exactly ${countVarieties} canonical gemstone varieties.`);
 
 // 2. Origins
 const OriginOption =
@@ -244,7 +229,12 @@ const ReferenceGemstone =
     )
   );
 
-// Benchmark Reference Gemstones aligned with CAGS Evidence Data
+// Clean up legacy references without referenceId
+await ReferenceGemstone.deleteMany({
+  $or: [{ referenceId: { $exists: false } }, { referenceId: null }]
+});
+
+// Benchmark Reference Gemstones (Unvalidated sample trade data for testing)
 const referenceGemstones = [
   {
     referenceId: "REF-1207",
@@ -281,8 +271,8 @@ const referenceGemstones = [
     source: "Unheated · Lab",
     sourceType: "Lab",
     verificationStatus: "Verified",
-    labCertificate: "GIA Report #64829104 - Certified Natural Unheated",
-    verifiedBy: "Dr. K. Mendis",
+    labCertificate: "Sample Trade Benchmark Standard (Unvalidated Demo)",
+    verifiedBy: "CAGS Pricing Board",
     verifiedAt: "Oct 24, 2026",
   },
   {
@@ -320,8 +310,8 @@ const referenceGemstones = [
     source: "Heated · Lab",
     sourceType: "Lab",
     verificationStatus: "Verified",
-    labCertificate: "SSEF Report #119402 - Thermal Enhancement (H)",
-    verifiedBy: "Prof. S. Wickramasinghe",
+    labCertificate: "Sample Trade Benchmark Standard (Unvalidated Demo)",
+    verifiedBy: "CAGS Pricing Board",
     verifiedAt: "Oct 19, 2026",
   },
   {
@@ -359,8 +349,8 @@ const referenceGemstones = [
     source: "Heated · Desk",
     sourceType: "Desk",
     verificationStatus: "Verified",
-    labCertificate: "CAGS Colombo Verification Standard #CV-934",
-    verifiedBy: "Data Desk (E. Alwis)",
+    labCertificate: "Sample Trade Benchmark Standard (Unvalidated Demo)",
+    verifiedBy: "Data Desk",
     verifiedAt: "Oct 12, 2026",
   },
   {
@@ -397,8 +387,8 @@ const referenceGemstones = [
     currency: "LKR",
     source: "Heated · Member",
     sourceType: "Member",
-    verificationStatus: "Pending",
-    labCertificate: "Trader Submission - Pending 2nd Gemologist Sign-off",
+    verificationStatus: "Pending", // Pending verification - excluded from similarity comparison until verified
+    labCertificate: "Trader Submission - Unverified Sample",
     verifiedBy: "Pending Board Sign-off",
     verifiedAt: "Submitted Oct 29, 2026",
   },
@@ -437,7 +427,7 @@ const referenceGemstones = [
     source: "Desk + members",
     sourceType: "Desk + members",
     verificationStatus: "Verified",
-    labCertificate: "Colombo B2B Auction Clearing Benchmark Matrix Q2",
+    labCertificate: "Colombo Auction Benchmark Aggregate (Unvalidated Sample)",
     verifiedBy: "CAGS Pricing Board",
     verifiedAt: "Sep 30, 2026",
   },
@@ -476,8 +466,8 @@ const referenceGemstones = [
     source: "Heated · Desk",
     sourceType: "Desk",
     verificationStatus: "Verified",
-    labCertificate: "SSEF Report #120341 - Heated Padparadscha",
-    verifiedBy: "Dr. K. Mendis",
+    labCertificate: "Sample Trade Benchmark Standard (Unvalidated Demo)",
+    verifiedBy: "CAGS Pricing Board",
     verifiedAt: "Aug 15, 2026",
   },
   {
@@ -515,8 +505,8 @@ const referenceGemstones = [
     source: "Unheated · Lab",
     sourceType: "Lab",
     verificationStatus: "Verified",
-    labCertificate: "GIA Report #5192841 - Mogok Natural Ruby",
-    verifiedBy: "Dr. K. Mendis",
+    labCertificate: "Sample Trade Benchmark Standard (Unvalidated Demo)",
+    verifiedBy: "CAGS Pricing Board",
     verifiedAt: "Jul 10, 2026",
   },
   {
@@ -554,8 +544,8 @@ const referenceGemstones = [
     source: "Heated · Desk",
     sourceType: "Desk",
     verificationStatus: "Verified",
-    labCertificate: "CAGS Colombo Verification Standard #CV-Ruby-210",
-    verifiedBy: "Data Desk (E. Alwis)",
+    labCertificate: "Sample Trade Benchmark Standard (Unvalidated Demo)",
+    verifiedBy: "Data Desk",
     verifiedAt: "Jun 28, 2026",
   },
 ];
