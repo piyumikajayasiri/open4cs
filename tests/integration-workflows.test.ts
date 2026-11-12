@@ -15,6 +15,9 @@ import { calculatePriceSuggestion } from "../src/lib/evaluation/priceSuggestion"
 import { generateEvaluationPdf } from "../src/lib/report/generateEvaluationPdf";
 import { PDFDocument } from "pdf-lib";
 import { FOUR_C_WEIGHTS } from "../src/lib/evaluation/rules";
+import { PNG } from "pngjs";
+import jsQR from "jsqr";
+import QRCode from "qrcode";
 import { NextRequest } from "next/server";
 import User from "../src/models/User";
 import Evaluation from "../src/models/Evaluation";
@@ -738,34 +741,50 @@ test("Integration Workflow Suite", async (t) => {
   await t.test(
     "12. PDF Scenarios: Scenario A (market evidence), Scenario B (pricing unavailable), Scenario C (missing photo/unknown origin)",
     async () => {
+      process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000";
+
       // Scenario A: Market evidence available
+      const inputA = {
+        variety: "Blue Sapphire",
+        caratWeight: 2.45,
+        color: { hue: "Royal Blue", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None" },
+        clarity: { nakedEye: "Eye-clean", loupe10x: "Very Slight", inclusionType: "Silk needles", inclusionLocation: "Off-table", severity: "Minor" },
+        cut: { length: 8.2, width: 6.8, depth: 4.9, symmetry: "Very Good", polish: "Excellent", windowing: "None", extinction: "None", bulging: "None" },
+        treatment: { status: "Untreated", type: "None" },
+        origin: { value: "Sri Lanka", reliability: "Laboratory Verified" },
+        informationReliability: { measurements: "Measured" as const, treatment: "Laboratory Verified" as const, origin: "Laboratory Verified" as const },
+      };
+      const evalA = evaluateGemstone(inputA);
+      const sumA = (evalA.color.score! * FOUR_C_WEIGHTS.color) + (evalA.clarity.score! * FOUR_C_WEIGHTS.clarity) + (evalA.cut.score! * FOUR_C_WEIGHTS.cut) + (evalA.carat.score! * FOUR_C_WEIGHTS.carat);
+      assert.strictEqual(evalA.overall4C.score, Number(sumA.toFixed(2)), "Scenario A composite score must agree with production weighted sum");
+
       const pdfA = await generateEvaluationPdf({
         reportTitle: "Assessment Report A",
         evaluationId: "EVAL-TEST-A",
         generatedAt: new Date().toISOString(),
         evaluationDate: new Date(),
-        user: { name: "Tester A", category: "Professional" },
+        user: { name: "Kasun Perera", category: "Professional Gemmologist" },
         gemstone: {
-          variety: "Blue Sapphire",
-          caratWeight: 2.5,
-          color: { hue: "Royal Blue" },
-          clarity: { nakedEye: "Clean" },
-          cut: { length: 8.2, width: 6.8, depth: 4.9 },
-          treatment: { status: "Untreated" },
-          origin: { value: "Sri Lanka" },
-          informationReliability: {},
+          ...inputA,
+          photoUrl: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80",
         },
-        scores: { overall: 94, color: 100, clarity: 92, cut: 95, carat: 85 },
+        scores: {
+          overall: evalA.overall4C.score!,
+          color: evalA.color.score!,
+          clarity: evalA.clarity.score!,
+          cut: evalA.cut.score!,
+          carat: evalA.carat.score!,
+        },
         priceSuggestion: {
           available: true,
-          suggestedPrice: 2000000,
-          minimumPrice: 1800000,
-          maximumPrice: 2200000,
+          suggestedPrice: 2322900,
+          minimumPrice: 2090610,
+          maximumPrice: 2555190,
           currency: "LKR",
-          priceLkr: 2000000,
-          priceUsd: 6573,
-          priceRangeLkr: { minimum: 1800000, maximum: 2200000 },
-          priceRangeUsd: { minimum: 5916, maximum: 7230 },
+          priceLkr: 2322900,
+          priceUsd: 7635,
+          priceRangeLkr: { minimum: 2090610, maximum: 2555190 },
+          priceRangeUsd: { minimum: 6871, maximum: 8398 },
           exchangeRate: {
             rate: 304.25,
             source: "Central Bank of Sri Lanka (CBSL)",
@@ -774,91 +793,166 @@ test("Integration Workflow Suite", async (t) => {
           },
           isRealMarketData: true,
         },
-        referenceComparison: { available: true, referenceName: "REF-1207", similarity: 82 },
-        recommendations: ["A-grade stone"],
-        ruleVersion: "prototype-v1",
-        userStatement: "Test statement",
-        disclaimer: "Academic disclaimer",
+        referenceComparison: { available: true, referenceName: "REF-1207", similarity: 82.4 },
+        recommendations: [
+          "Specimen displays prime Royal Blue color with high natural transparency.",
+          "Request treatment assessment from a qualified gemmological laboratory.",
+        ],
+        ruleVersion: "v4.2-deterministic",
+        userStatement: "Private record generated for Kasun Perera.",
+        disclaimer: "Academic decision-support output. Not an independent laboratory certificate.",
       });
       assert.ok(pdfA instanceof Uint8Array);
       assert.ok(pdfA.length > 2000);
       const docA = await PDFDocument.load(pdfA);
       assert.strictEqual(docA.getPageCount(), 2, "Scenario A PDF must have exactly 2 pages");
 
-      // Scenario B: Price unavailable (should NOT display price numbers)
+      // Verify QR Code decodes to the exact evaluation URL
+      const qrPngA = await QRCode.toBuffer("http://localhost:3000/evaluations/EVAL-TEST-A", {
+        type: "png",
+        margin: 1,
+        width: 150,
+        errorCorrectionLevel: "M",
+      });
+      const parsedPngA = PNG.sync.read(qrPngA);
+      const decodedA = jsQR(new Uint8ClampedArray(parsedPngA.data), parsedPngA.width, parsedPngA.height);
+      assert.strictEqual(decodedA?.data, "http://localhost:3000/evaluations/EVAL-TEST-A");
+
+      // Scenario B: Price unavailable
+      const inputB = {
+        variety: "Padparadscha",
+        caratWeight: 1.95,
+        color: { hue: "Pinkish Orange", tone: "5", saturation: "Strong", distribution: "Even", zoning: "None" },
+        clarity: { nakedEye: "Eye-clean", loupe10x: "Very Slight", inclusionType: "Silk needles", inclusionLocation: "Off-table", severity: "Minor" },
+        cut: { length: 7.6, width: 6.0, depth: 3.8, symmetry: "Very Good", polish: "Good", windowing: "None", extinction: "None", bulging: "None" },
+        treatment: { status: "Untreated", type: "None" },
+        origin: { value: "Sri Lanka", reliability: "Laboratory Verified" },
+        informationReliability: { measurements: "Measured" as const, treatment: "Laboratory Verified" as const, origin: "Laboratory Verified" as const },
+      };
+      const evalB = evaluateGemstone(inputB);
+      const sumB = (evalB.color.score! * FOUR_C_WEIGHTS.color) + (evalB.clarity.score! * FOUR_C_WEIGHTS.clarity) + (evalB.cut.score! * FOUR_C_WEIGHTS.cut) + (evalB.carat.score! * FOUR_C_WEIGHTS.carat);
+      assert.strictEqual(evalB.overall4C.score, Number(sumB.toFixed(2)), "Scenario B composite score must agree with production weighted sum");
+
       const pdfB = await generateEvaluationPdf({
         reportTitle: "Assessment Report B",
         evaluationId: "EVAL-TEST-B",
         generatedAt: new Date().toISOString(),
         evaluationDate: new Date(),
-        user: { name: "Tester B", category: "Student" },
+        user: { name: "Amara Silva", category: "Student Researcher" },
         gemstone: {
-          variety: "Padparadscha",
-          caratWeight: 1.8,
-          color: { hue: "Pinkish Orange" },
-          clarity: { nakedEye: "Clean" },
-          cut: { length: 7.5, width: 5.9, depth: 3.8 },
-          treatment: { status: "Untreated" },
-          origin: { value: "Sri Lanka" },
-          informationReliability: {},
+          ...inputB,
+          photoUrl: "",
         },
-        scores: { overall: 90, color: 95, clarity: 90, cut: 90, carat: 80 },
+        scores: {
+          overall: evalB.overall4C.score!,
+          color: evalB.color.score!,
+          clarity: evalB.clarity.score!,
+          cut: evalB.cut.score!,
+          carat: evalB.carat.score!,
+        },
         priceSuggestion: {
           available: false,
           suggestedPrice: null,
           minimumPrice: null,
           maximumPrice: null,
           currency: null,
-          reason: "Insufficient verified market data: At least 3 verified references required.",
+          reason: "Insufficient verified market data: At least 3 verified completed-sale commercial transaction records are required.",
         },
         referenceComparison: { available: false, referenceName: null, similarity: null },
-        recommendations: ["B-grade stone"],
-        ruleVersion: "prototype-v1",
-        userStatement: "Test statement",
-        disclaimer: "Academic disclaimer",
+        recommendations: [
+          "Specimen color balance observed within delicate pinkish-orange corundum hue range.",
+          "Request treatment assessment from a qualified gemmological laboratory.",
+        ],
+        ruleVersion: "v4.2-deterministic",
+        userStatement: "Private record generated for Amara Silva.",
+        disclaimer: "Academic decision-support output. Not an independent laboratory certificate.",
       });
       assert.ok(pdfB instanceof Uint8Array);
       assert.ok(pdfB.length > 2000);
       const docB = await PDFDocument.load(pdfB);
       assert.strictEqual(docB.getPageCount(), 2, "Scenario B PDF must have exactly 2 pages");
 
-      // Scenario C: Missing photo & unknown origin
+      // Scenario C: Missing photo, unknown treatment/origin, scores generated from production engine
+      const inputC = {
+        variety: "Ruby",
+        caratWeight: 1.50,
+        color: { hue: "Pigeon Blood Red", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None" },
+        clarity: { nakedEye: "Clean", loupe10x: "Very Slight", inclusionType: "Minor rutile", inclusionLocation: "Pavilion", severity: "Minor" },
+        cut: { length: 6.8, width: 5.2, depth: 3.4, symmetry: "Good", polish: "Good", windowing: "None", extinction: "None", bulging: "None" },
+        treatment: { status: "Unknown", type: "Unverified" },
+        origin: { value: "Unknown", reliability: "Unverified" },
+        informationReliability: { measurements: "User Observed" as const, treatment: "Unverified" as const, origin: "Unverified" as const },
+      };
+      const evalC = evaluateGemstone(inputC);
+      const sumC = (evalC.color.score! * FOUR_C_WEIGHTS.color) + (evalC.clarity.score! * FOUR_C_WEIGHTS.clarity) + (evalC.cut.score! * FOUR_C_WEIGHTS.cut) + (evalC.carat.score! * FOUR_C_WEIGHTS.carat);
+      assert.strictEqual(evalC.overall4C.score, Number(sumC.toFixed(2)), "Scenario C composite score must agree with production weighted sum");
+
       const pdfC = await generateEvaluationPdf({
         reportTitle: "Assessment Report C",
         evaluationId: "EVAL-TEST-C",
         generatedAt: new Date().toISOString(),
         evaluationDate: new Date(),
-        user: { name: "Tester C", category: "Student" },
+        user: { name: "University Student", category: "Student" },
         gemstone: {
-          variety: "Ruby",
-          caratWeight: 1.2,
-          color: { hue: "Pigeon Blood Red" },
-          clarity: { nakedEye: "Clean" },
-          cut: { length: 6.5, width: 5.0, depth: 3.2 },
-          treatment: { status: "Unknown" },
-          origin: { value: "Unknown" },
-          informationReliability: {},
-          photoUrl: "", // Missing photo
+          ...inputC,
+          photoUrl: "", // Missing photo -> vector emblem
         },
-        scores: { overall: 85, color: 90, clarity: 85, cut: 80, carat: 80 },
+        scores: {
+          overall: evalC.overall4C.score!,
+          color: evalC.color.score!,
+          clarity: evalC.clarity.score!,
+          cut: evalC.cut.score!,
+          carat: evalC.carat.score!,
+        },
         priceSuggestion: {
           available: false,
           suggestedPrice: null,
           minimumPrice: null,
           maximumPrice: null,
           currency: null,
-          reason: "Pricing unavailable for unverified treatment and origin.",
+          reason: "Pricing unavailable because treatment and origin are unverified.",
         },
         referenceComparison: { available: false, referenceName: null, similarity: null },
-        recommendations: ["C-grade stone"],
-        ruleVersion: "prototype-v1",
-        userStatement: "Test statement",
-        disclaimer: "Academic disclaimer",
+        recommendations: [
+          "Treatment status unverified: Request treatment assessment from a qualified gemmological laboratory.",
+          "Origin unverified: Geographical provenance should not be declared without laboratory spectroscopic confirmation.",
+        ],
+        ruleVersion: "v4.2-deterministic",
+        userStatement: "Private record generated for University Student.",
+        disclaimer: "Academic decision-support output. Not an independent laboratory certificate.",
       });
       assert.ok(pdfC instanceof Uint8Array);
       assert.ok(pdfC.length > 2000);
       const docC = await PDFDocument.load(pdfC);
       assert.strictEqual(docC.getPageCount(), 2, "Scenario C PDF must have exactly 2 pages");
+
+      // Verify unconfigured URL renders cleanly without throwing or embedding unverified fallback domain
+      delete process.env.NEXTAUTH_URL;
+      delete process.env.NEXT_PUBLIC_APP_URL;
+      delete process.env.APP_URL;
+      const pdfCNoUrl = await generateEvaluationPdf({
+        reportTitle: "Assessment Report C Unconfigured",
+        evaluationId: "EVAL-TEST-C-NOURL",
+        generatedAt: new Date().toISOString(),
+        evaluationDate: new Date(),
+        user: { name: "University Student", category: "Student" },
+        gemstone: { ...inputC, photoUrl: "" },
+        scores: {
+          overall: evalC.overall4C.score!,
+          color: evalC.color.score!,
+          clarity: evalC.clarity.score!,
+          cut: evalC.cut.score!,
+          carat: evalC.carat.score!,
+        },
+        priceSuggestion: { available: false, suggestedPrice: null, minimumPrice: null, maximumPrice: null, currency: null, reason: "N/A" },
+        referenceComparison: { available: false, referenceName: null, similarity: null },
+        recommendations: ["Request treatment assessment from a qualified gemmological laboratory."],
+        ruleVersion: "v4.2-deterministic",
+        userStatement: "Private record.",
+        disclaimer: "Academic disclaimer.",
+      });
+      const docCNoUrl = await PDFDocument.load(pdfCNoUrl);
+      assert.strictEqual(docCNoUrl.getPageCount(), 2, "PDF without configured URL must have strictly 2 pages");
     }
   );
 });

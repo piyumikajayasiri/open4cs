@@ -3,47 +3,75 @@ export type ExchangeRateRecord = {
   rate: number;
   source: string;
   sourceUrl?: string;
+  sourceEvidence?: string;
   asOfDate: string;
   isOfficial: boolean;
   isAvailable: boolean;
 };
 
 /**
- * Official dated exchange rate reference published by the Central Bank of Sri Lanka (CBSL).
- * Source: https://www.cbsl.gov.lk/en/rates-and-indicators/exchange-rates
+ * Validates and retrieves the active verified exchange rate for currency conversions.
  *
- * Used strictly with explicit source provenance and observation date.
- * If disabled or unavailable, the system strictly outputs LKR without inventing a rate.
+ * Strict Open 4Cs Currency Policy:
+ * - Does NOT hard-code an unverified default rate.
+ * - Requires explicit supporting source evidence, observation date, and non-zero numerical rate.
+ * - When an exchange rate is not explicitly verified or configured, returns null.
+ * - When null is returned, the system operates in LKR-only mode and excludes foreign references
+ *   that cannot be converted reliably.
  */
-export const OFFICIAL_CBSL_EXCHANGE_RATE: ExchangeRateRecord = {
-  currencyPair: "USD/LKR",
-  rate: 304.25,
-  source: "Central Bank of Sri Lanka (CBSL) - Indicative Spot Exchange Rate",
-  sourceUrl: "https://www.cbsl.gov.lk/en/rates-and-indicators/exchange-rates",
-  asOfDate: "2026-11-12",
-  isOfficial: true,
-  isAvailable: true,
-};
-
 export function getActiveExchangeRate(
   customRate?: Partial<ExchangeRateRecord> | null
 ): ExchangeRateRecord | null {
   if (customRate === null) {
     return null;
   }
-  if (customRate && customRate.isAvailable === false) {
+
+  // 1. Check custom rate if explicitly supplied
+  if (customRate && customRate.isAvailable !== false) {
+    if (
+      typeof customRate.rate === "number" &&
+      customRate.rate > 0 &&
+      customRate.source &&
+      customRate.source.trim().length > 0 &&
+      customRate.asOfDate &&
+      /^\d{4}-\d{2}-\d{2}$/.test(customRate.asOfDate.trim())
+    ) {
+      return {
+        currencyPair: "USD/LKR",
+        rate: customRate.rate,
+        source: customRate.source.trim(),
+        sourceUrl: customRate.sourceUrl?.trim(),
+        sourceEvidence: customRate.sourceEvidence?.trim(),
+        asOfDate: customRate.asOfDate.trim(),
+        isOfficial: Boolean(customRate.isOfficial),
+        isAvailable: true,
+      };
+    }
+    // If partial/invalid custom rate was provided, do not guess
     return null;
   }
-  if (customRate && typeof customRate.rate === "number" && customRate.rate > 0) {
-    return {
-      currencyPair: "USD/LKR",
-      rate: customRate.rate,
-      source: customRate.source || "Verified Custom Market Rate",
-      sourceUrl: customRate.sourceUrl,
-      asOfDate: customRate.asOfDate || new Date().toISOString().split("T")[0],
-      isOfficial: Boolean(customRate.isOfficial),
-      isAvailable: true,
-    };
+
+  // 2. Check environment configuration with required provenance fields
+  const envRateStr = process.env.EXCHANGE_RATE_USD_LKR;
+  const envSource = process.env.EXCHANGE_RATE_SOURCE;
+  const envDate = process.env.EXCHANGE_RATE_DATE;
+
+  if (envRateStr && envSource && envDate && /^\d{4}-\d{2}-\d{2}$/.test(envDate.trim())) {
+    const parsedRate = Number(envRateStr);
+    if (!Number.isNaN(parsedRate) && parsedRate > 0) {
+      return {
+        currencyPair: "USD/LKR",
+        rate: parsedRate,
+        source: envSource.trim(),
+        sourceUrl: process.env.EXCHANGE_RATE_URL?.trim(),
+        sourceEvidence: process.env.EXCHANGE_RATE_EVIDENCE?.trim(),
+        asOfDate: envDate.trim(),
+        isOfficial: process.env.EXCHANGE_RATE_OFFICIAL === "true",
+        isAvailable: true,
+      };
+    }
   }
-  return OFFICIAL_CBSL_EXCHANGE_RATE;
+
+  // No verified exchange rate is actively configured -> default to null (LKR-only mode)
+  return null;
 }

@@ -7,6 +7,8 @@ const artifactDir = "C:\\Users\\DELL\\.gemini\\antigravity\\brain\\cbddecf0-aaae
 const workspaceDir = path.join(process.cwd(), "sample-reports");
 
 async function generateSamplePdfs() {
+  process.env.NEXT_PUBLIC_APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
   if (!fs.existsSync(workspaceDir)) {
     fs.mkdirSync(workspaceDir, { recursive: true });
   }
@@ -35,11 +37,11 @@ async function generateSamplePdfs() {
       photoUrl: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80",
     },
     scores: {
-      overall: evalA.overall4C.score ?? 94.94,
-      color: evalA.color.score ?? 100,
-      clarity: evalA.clarity.score ?? 92.75,
-      cut: evalA.cut.score ?? 98.75,
-      carat: evalA.carat.score ?? 85,
+      overall: evalA.overall4C.score!,
+      color: evalA.color.score!,
+      clarity: evalA.clarity.score!,
+      cut: evalA.cut.score!,
+      carat: evalA.carat.score!,
     },
     priceSuggestion: {
       available: true,
@@ -95,11 +97,11 @@ async function generateSamplePdfs() {
       photoUrl: "",
     },
     scores: {
-      overall: evalB.overall4C.score ?? 90.76,
-      color: evalB.color.score ?? 94.5,
-      clarity: evalB.clarity.score ?? 92.75,
-      cut: evalB.cut.score ?? 92.5,
-      carat: evalB.carat.score ?? 80,
+      overall: evalB.overall4C.score!,
+      color: evalB.color.score!,
+      clarity: evalB.clarity.score!,
+      cut: evalB.cut.score!,
+      carat: evalB.carat.score!,
     },
     priceSuggestion: {
       available: false,
@@ -112,7 +114,7 @@ async function generateSamplePdfs() {
     referenceComparison: { available: false, referenceName: null, similarity: null },
     recommendations: [
       "Specimen color balance observed within delicate pinkish-orange corundum hue range.",
-      "Submit for FTIR spectrometry to confirm absence of beryllium lattice diffusion.",
+      "Request treatment assessment from a qualified gemmological laboratory.",
     ],
     ruleVersion: "v4.2-deterministic",
     userStatement: "Private record generated for Amara Silva, registered as Student Researcher.",
@@ -143,11 +145,11 @@ async function generateSamplePdfs() {
       photoUrl: "",
     },
     scores: {
-      overall: evalC.overall4C.score ?? 91.19,
-      color: evalC.color.score ?? 100,
-      clarity: evalC.clarity.score ?? 92.75,
-      cut: evalC.cut.score ?? 85.0,
-      carat: evalC.carat.score ?? 80,
+      overall: evalC.overall4C.score!,
+      color: evalC.color.score!,
+      clarity: evalC.clarity.score!,
+      cut: evalC.cut.score!,
+      carat: evalC.carat.score!,
     },
     priceSuggestion: {
       available: false,
@@ -159,7 +161,7 @@ async function generateSamplePdfs() {
     },
     referenceComparison: { available: false, referenceName: null, similarity: null },
     recommendations: [
-      "Treatment status unverified: Submit to an accredited gemmological laboratory for FTIR heating analysis.",
+      "Treatment status unverified: Request treatment assessment from a qualified gemmological laboratory.",
       "Origin unverified: Geographical provenance should not be declared without laboratory spectroscopic confirmation.",
     ],
     ruleVersion: "v4.2-deterministic",
