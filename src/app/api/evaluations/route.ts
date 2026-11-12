@@ -20,8 +20,13 @@ import {
   ORIGIN_RULES,
 } from "@/lib/evaluation/rules";
 import Evaluation from "@/models/Evaluation";
+import Gemstone from "@/models/Gemstone";
 import User from "@/models/User";
 import GemstoneVariety from "@/models/GemstoneVariety";
+
+if (!mongoose.models.Gemstone) {
+  void Gemstone;
+}
 import { calculateComparableReferencePrice } from "@/lib/evaluation/comparablePrice";
 
 const SUPPORTED_INFORMATION_RELIABILITY = [
@@ -279,6 +284,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Normalize treatment status from UI variants
+    if (data.treatment?.status) {
+      const rawTreatment = data.treatment.status.toLowerCase();
+      if (rawTreatment.includes("untreated") || rawTreatment.includes("natural")) {
+        data.treatment.status = "Untreated";
+      } else if (rawTreatment.includes("heat")) {
+        data.treatment.status = "Heated";
+      } else if (!ENGINE_SUPPORTED_TREATMENTS.some((item) => item === data.treatment.status)) {
+        data.treatment.status = "Unknown";
+      }
+    }
+
     if (
       !data.treatment ||
       !ENGINE_SUPPORTED_TREATMENTS.some(
@@ -294,6 +311,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Normalize origin value from UI variants
+    if (data.origin?.value) {
+      const rawOriginVal = data.origin.value.toLowerCase();
+      if (rawOriginVal.includes("sri lanka") || rawOriginVal.includes("ceylon")) {
+        data.origin.value = "Sri Lanka";
+      } else if (rawOriginVal.includes("myanmar") || rawOriginVal.includes("burma")) {
+        data.origin.value = "Myanmar";
+      } else if (rawOriginVal.includes("madagascar")) {
+        data.origin.value = "Madagascar";
+      } else if (!ENGINE_SUPPORTED_ORIGINS.some((item) => item === data.origin.value)) {
+        data.origin.value = "Unknown";
+      }
+    }
+
     if (
       !data.origin ||
       !ENGINE_SUPPORTED_ORIGINS.some(
@@ -307,6 +338,20 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       );
+    }
+
+    // Normalize origin reliability from UI variants
+    if (data.origin?.reliability) {
+      const rawOriginRel = data.origin.reliability.toLowerCase().replace(/[\s\-_]+/g, "");
+      if (rawOriginRel === "high" || rawOriginRel.includes("verified")) {
+        data.origin.reliability = "High";
+      } else if (rawOriginRel === "medium" || rawOriginRel.includes("declared") || rawOriginRel.includes("seller")) {
+        data.origin.reliability = "Medium";
+      } else if (rawOriginRel === "low") {
+        data.origin.reliability = "Low";
+      } else {
+        data.origin.reliability = "Unknown";
+      }
     }
 
     if (
