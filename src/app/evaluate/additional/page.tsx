@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useEvaluationDraft, InformationReliabilityType } from "@/context/EvaluationDraftContext";
 import AdditionalInformationSection from "@/components/gemstone/AdditionalInformationSection";
 import InformationReliabilityCard from "@/components/gemstone/InformationReliabilityCard";
+import LiveScoreSidebar from "@/components/gemstone/LiveScoreSidebar";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 export default function AdditionalStepPage() {
   const router = useRouter();
@@ -34,10 +36,10 @@ export default function AdditionalStepPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-5">
         <div>
           <span className="text-xs font-extrabold uppercase tracking-widest text-blue-600">
-            Step 5 of 6 · Additional Factors
+            Step 6 of 7 · Treatment & Origin
           </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
-            Treatment, Origin & Reliability
+            Treatment, Origin & Evidence Reliability
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Record thermal enhancement, geographic origin, supporting lab certificates, and data reliability levels.
@@ -68,34 +70,38 @@ export default function AdditionalStepPage() {
               onOriginReliabilityChange={(val) => updateDraft({ originReliability: val })}
               onInformationReliabilityChange={handleReliabilityChange}
             />
+
+            <div className="pt-4">
+              <InformationReliabilityCard
+                measurementReliability={draft.informationReliability.measurements}
+                treatmentReliability={draft.informationReliability.treatment}
+                originReliability={draft.informationReliability.origin}
+              />
+            </div>
           </div>
 
-          {/* Educational Visual Guide (4 cols) */}
+          {/* Educational Visual Guide & Live Score (4 cols) */}
           <div className="lg:col-span-4 sticky top-20">
-            <InformationReliabilityCard
-              measurementReliability={draft.informationReliability.measurements}
-              treatmentReliability={draft.informationReliability.treatment}
-              originReliability={draft.informationReliability.origin}
-            />
+            <LiveScoreSidebar activeStep="all" />
           </div>
         </div>
 
         {/* Navigation Action Buttons */}
         <div className="flex items-center justify-between pt-6 border-t border-slate-200">
           <Link
-            href="/evaluate/cut"
+            href="/evaluate/carat"
             className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
           >
-            <span>←</span>
-            <span>Back to Cut</span>
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Carat</span>
           </Link>
 
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-blue-700 shadow-md shadow-blue-500/20 transition"
+            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-blue-700 shadow-md shadow-blue-500/20 transition cursor-pointer"
           >
-            <span>Continue to Review</span>
-            <span>→</span>
+            <span>Continue to Review & Save</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </form>

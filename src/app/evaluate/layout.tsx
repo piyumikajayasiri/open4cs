@@ -10,8 +10,9 @@ const EVALUATION_STEPS = [
   { path: "/evaluate/color", label: "Color", stepNum: 2 },
   { path: "/evaluate/clarity", label: "Clarity", stepNum: 3 },
   { path: "/evaluate/cut", label: "Cut", stepNum: 4 },
-  { path: "/evaluate/additional", label: "Additional", stepNum: 5 },
-  { path: "/evaluate/review", label: "Review", stepNum: 6 },
+  { path: "/evaluate/carat", label: "Carat", stepNum: 5 },
+  { path: "/evaluate/additional", label: "Treatment & Origin", stepNum: 6 },
+  { path: "/evaluate/review", label: "Review", stepNum: 7 },
 ];
 
 function EvaluationHeader() {
@@ -23,7 +24,7 @@ function EvaluationHeader() {
 
   return (
     <div className="border-b border-slate-200/80 bg-white sticky top-0 z-40 shadow-2xs">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
         {/* Left: Brand & Flow Name */}
         <div className="flex items-center gap-3">
           <Link
@@ -45,7 +46,7 @@ function EvaluationHeader() {
         </div>
 
         {/* Center / Right: Progress Steps */}
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+        <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
           {EVALUATION_STEPS.map((step) => {
             const isActive = pathname?.startsWith(step.path);
             const isCompleted = currentStep.stepNum > step.stepNum;
@@ -56,7 +57,7 @@ function EvaluationHeader() {
                 href={step.path}
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition flex-shrink-0 ${
                   isActive
-                    ? "bg-blue-50 text-blue-700 border border-blue-200"
+                    ? "bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs"
                     : isCompleted
                     ? "text-slate-700 hover:text-slate-900 hover:bg-slate-50"
                     : "text-slate-400 hover:text-slate-600"
@@ -73,7 +74,8 @@ function EvaluationHeader() {
                 >
                   {isCompleted ? "✓" : step.stepNum}
                 </span>
-                <span>{step.label}</span>
+                <span className="hidden sm:inline">{step.label}</span>
+                <span className="sm:hidden">{step.stepNum}</span>
               </Link>
             );
           })}
