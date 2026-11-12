@@ -60,7 +60,39 @@ export function calculatePriceSuggestion(
   }
 ): PriceSuggestionResult {
   const minReferences = 3;
-  if (options?.referenceCount !== undefined && options.referenceCount < minReferences) {
+
+  // Strict Real Market Data Guard: Demo data must never produce commercial prices
+  if (
+    options?.dataClassification === "Demo" ||
+    options?.isRealMarketData === false
+  ) {
+    return {
+      status: "UNAVAILABLE",
+      reason:
+        "Market price suggestion is unavailable: Open 4Cs data integrity rules strictly require verified real-market completed sales. Demonstration records and dealer estimates are excluded from commercial price suggestions.",
+      currency,
+      referencePrice,
+      suggestedPrice: null,
+      priceRange: {
+        minimum: null,
+        maximum: null,
+      },
+      priceLkr: null,
+      priceUsd: null,
+      priceRangeLkr: null,
+      priceRangeUsd: null,
+      adjustmentFactors: {
+        treatment: treatmentFactor,
+        origin: originFactor,
+      },
+      exchangeRate: null,
+    };
+  }
+
+  if (
+    options?.referenceCount !== undefined &&
+    options.referenceCount < minReferences
+  ) {
     return {
       status: "UNAVAILABLE",
       reason: `Insufficient verified market data: At least ${minReferences} verified market references are required (found ${options.referenceCount}). Demo records are excluded from real commercial valuation.`,
@@ -71,6 +103,10 @@ export function calculatePriceSuggestion(
         minimum: null,
         maximum: null,
       },
+      priceLkr: null,
+      priceUsd: null,
+      priceRangeLkr: null,
+      priceRangeUsd: null,
       adjustmentFactors: {
         treatment: treatmentFactor,
         origin: originFactor,
@@ -96,6 +132,10 @@ export function calculatePriceSuggestion(
         minimum: null,
         maximum: null,
       },
+      priceLkr: null,
+      priceUsd: null,
+      priceRangeLkr: null,
+      priceRangeUsd: null,
       adjustmentFactors: {
         treatment: treatmentFactor,
         origin: originFactor,
@@ -123,41 +163,87 @@ export function calculatePriceSuggestion(
     suggestedPrice *
     (1 + PRICE_SUGGESTION_RULES.rangePercentage);
 
-  const priceLkr = Math.round(suggestedPrice);
-  const priceRangeLkr = {
-    minimum: Math.round(minimumPrice),
-    maximum: Math.round(maximumPrice),
-  };
+  // Currency Normalization:
+  // Determine if rate is available
+  const hasRate = Boolean(
+    options?.exchangeRate &&
+      options.exchangeRate.isAvailable &&
+      typeof options.exchangeRate.rate === "number" &&
+      options.exchangeRate.rate > 0
+  );
+  const fxRate = hasRate ? (options!.exchangeRate!.rate as number) : null;
 
-  // Explicit, dated currency handling: Only compute USD if a valid, dated exchange rate is provided
+  let priceLkr: number | null = null;
   let priceUsd: number | null = null;
+  let priceRangeLkr: { minimum: number; maximum: number } | null = null;
   let priceRangeUsd: { minimum: number; maximum: number } | null = null;
   let exchangeRateInfo: PriceSuggestionResult["exchangeRate"] = null;
 
-  if (
-    options?.exchangeRate &&
-    options.exchangeRate.isAvailable &&
-    typeof options.exchangeRate.rate === "number" &&
-    options.exchangeRate.rate > 0
-  ) {
-    const rate = options.exchangeRate.rate;
-    priceUsd = Math.round(priceLkr / rate);
+  const normCurrency = (currency || "LKR").toUpperCase().trim();
+
+  if (normCurrency === "USD") {
+    if (!fxRate) {
+      // Cannot reliably normalize USD to regional LKR without a verified exchange rate
+      return {
+        status: "UNAVAILABLE",
+        reason:
+          "Market price suggestion is unavailable: Reference price is denominated in USD but no verified USD/LKR exchange rate is available for conversion to regional LKR.",
+        currency,
+        referencePrice,
+        suggestedPrice: null,
+        priceRange: { minimum: null, maximum: null },
+        priceLkr: null,
+        priceUsd: null,
+        priceRangeLkr: null,
+        priceRangeUsd: null,
+        adjustmentFactors: {
+          treatment: treatmentFactor,
+          origin: originFactor,
+        },
+        exchangeRate: null,
+      };
+    }
+
+    priceUsd = Math.round(suggestedPrice);
     priceRangeUsd = {
-      minimum: Math.round(minimumPrice / rate),
-      maximum: Math.round(maximumPrice / rate),
+      minimum: Math.round(minimumPrice),
+      maximum: Math.round(maximumPrice),
+    };
+    priceLkr = Math.round(suggestedPrice * fxRate);
+    priceRangeLkr = {
+      minimum: Math.round(minimumPrice * fxRate),
+      maximum: Math.round(maximumPrice * fxRate),
     };
     exchangeRateInfo = {
-      rate: options.exchangeRate.rate,
-      source: options.exchangeRate.source,
-      asOfDate: options.exchangeRate.asOfDate,
+      rate: fxRate,
+      source: options!.exchangeRate!.source,
+      asOfDate: options!.exchangeRate!.asOfDate,
       isAvailable: true,
     };
+  } else {
+    // Standard regional LKR base
+    priceLkr = Math.round(suggestedPrice);
+    priceRangeLkr = {
+      minimum: Math.round(minimumPrice),
+      maximum: Math.round(maximumPrice),
+    };
+
+    if (fxRate) {
+      priceUsd = Math.round(priceLkr / fxRate);
+      priceRangeUsd = {
+        minimum: Math.round(minimumPrice / fxRate),
+        maximum: Math.round(maximumPrice / fxRate),
+      };
+      exchangeRateInfo = {
+        rate: fxRate,
+        source: options!.exchangeRate!.source,
+        asOfDate: options!.exchangeRate!.asOfDate,
+        isAvailable: true,
+      };
+    }
   }
 
-  const isDemo = options?.dataClassification === "Demo" || options?.isRealMarketData === false;
-  const marketLevel = isDemo
-    ? "Indicative Research Benchmark (Demonstration / Academic Data)"
-    : "Indicative Wholesale Market Range (Verified Commercial References)";
+  const marketLevel = "Indicative Wholesale Market Range (Verified Commercial References)";
 
   const provisionalAssumptions: string[] = [];
   if (Math.abs(effectiveTreatmentMultiplier - 1.0) > 0.001) {
@@ -173,11 +259,10 @@ export function calculatePriceSuggestion(
 
   return {
     status: "COMPLETED",
-    reason: isDemo
-      ? "Provisional benchmark calculated from pedagogical demonstration references. For academic evaluation purposes only."
-      : "Indicative market price range suggested from verified commercial trade references with relative treatment and origin adjustment.",
+    reason:
+      "Indicative market price range suggested from verified commercial trade references with relative treatment and origin adjustment.",
     marketLevel,
-    currency: currency || "LKR",
+    currency: normCurrency,
     referencePrice,
     suggestedPrice: Number(suggestedPrice.toFixed(2)),
     priceRange: {
@@ -197,6 +282,7 @@ export function calculatePriceSuggestion(
       origin: Number(effectiveOriginMultiplier.toFixed(3)),
     },
     exchangeRate: exchangeRateInfo,
-    provisionalAssumptions: provisionalAssumptions.length > 0 ? provisionalAssumptions : undefined,
+    provisionalAssumptions:
+      provisionalAssumptions.length > 0 ? provisionalAssumptions : undefined,
   };
 }

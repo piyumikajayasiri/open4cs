@@ -32,6 +32,8 @@ export default function LiveScoreSidebar({ activeStep }: { activeStep?: ActiveTa
     if (!draft.hue) missing.push("Hue selection");
     if (!draft.tone) missing.push("Tone (1-9)");
     if (!draft.saturation) missing.push("Saturation (1-6)");
+    if (!draft.distribution) missing.push("Color distribution");
+    if (!draft.zoning) missing.push("Color zoning");
 
     if (missing.length > 0) {
       return { status: "NEED_INFO", score: null, missing };
@@ -42,8 +44,8 @@ export default function LiveScoreSidebar({ activeStep }: { activeStep?: ActiveTa
       hue: draft.hue,
       tone: draft.tone,
       saturation: draft.saturation,
-      distribution: draft.distribution || "Even",
-      zoning: draft.zoning || "None",
+      distribution: draft.distribution,
+      zoning: draft.zoning,
     });
 
     // Extract positive and deductions
@@ -89,6 +91,7 @@ export default function LiveScoreSidebar({ activeStep }: { activeStep?: ActiveTa
     const missing: string[] = [];
     if (!draft.nakedEye) missing.push("Naked eye visibility");
     if (!draft.loupe10x) missing.push("10x magnification observation");
+    if (!draft.severity) missing.push("Inclusion severity rating");
 
     if (missing.length > 0) {
       return { status: "NEED_INFO", score: null, missing };
@@ -99,7 +102,7 @@ export default function LiveScoreSidebar({ activeStep }: { activeStep?: ActiveTa
       loupe10x: draft.loupe10x,
       inclusionType: draft.inclusionType || "",
       inclusionLocation: draft.inclusionLocation || "",
-      severity: draft.severity || "Minor",
+      severity: draft.severity,
     });
 
     const positives: string[] = [];
@@ -141,6 +144,11 @@ export default function LiveScoreSidebar({ activeStep }: { activeStep?: ActiveTa
     if (!len || len <= 0) missing.push("Length (mm)");
     if (!wid || wid <= 0) missing.push("Width (mm)");
     if (!dep || dep <= 0) missing.push("Depth (mm)");
+    if (!draft.symmetry) missing.push("Symmetry rating");
+    if (!draft.polish) missing.push("Polish rating");
+    if (!draft.windowing) missing.push("Windowing observation");
+    if (!draft.extinction) missing.push("Extinction observation");
+    if (!draft.bulging) missing.push("Bulging observation");
 
     if (missing.length > 0) {
       return { status: "NEED_INFO", score: null, missing };
@@ -150,11 +158,11 @@ export default function LiveScoreSidebar({ activeStep }: { activeStep?: ActiveTa
       length: len,
       width: wid,
       depth: dep,
-      symmetry: draft.symmetry || "Good",
-      polish: draft.polish || "Good",
-      windowing: draft.windowing || "None",
-      extinction: draft.extinction || "None",
-      bulging: draft.bulging || "None",
+      symmetry: draft.symmetry,
+      polish: draft.polish,
+      windowing: draft.windowing,
+      extinction: draft.extinction,
+      bulging: draft.bulging,
     });
 
     const positives: string[] = [];

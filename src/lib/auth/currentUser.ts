@@ -1,15 +1,24 @@
 import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
 
 import { verifySessionToken } from "@/lib/auth/session";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
 import { auth } from "@/auth";
 
-export async function getCurrentUser() {
+export async function getCurrentUser(req?: NextRequest) {
   // 1. Try application session token cookie
   try {
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get("session")?.value;
+    let sessionToken: string | undefined;
+    try {
+      const cookieStore = await cookies();
+      sessionToken = cookieStore.get("session")?.value;
+    } catch {
+      sessionToken = req?.cookies.get("session")?.value;
+    }
+    if (!sessionToken && req) {
+      sessionToken = req.cookies.get("session")?.value;
+    }
 
     if (sessionToken) {
       const session = await verifySessionToken(sessionToken);
@@ -18,7 +27,7 @@ export async function getCurrentUser() {
         await connectToDatabase();
         const user = await User.findById(session.userId);
 
-        if (user && user.isActive) {
+        if (user && user.isActive && user.status !== "SUSPENDED") {
           return {
             id: user._id.toString(),
             name: user.name,

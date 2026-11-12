@@ -413,3 +413,42 @@ test("22. evaluateColor strictly rejects cross-variety hues", () => {
   assert.ok(crossVarietyColor.reason.includes("unsupported"));
   assert.equal(crossVarietyColor.score, null);
 });
+
+test("23. Currency normalization converts USD reference prices accurately and rejects demo data", () => {
+  const fxRate = {
+    currencyPair: "USD/LKR" as const,
+    rate: 300,
+    source: "Central Bank of Sri Lanka (CBSL)",
+    asOfDate: "2026-11-12",
+    isOfficial: true,
+    isAvailable: true,
+  };
+
+  // Passing USD reference price of 1,000 USD with rate 300 MUST produce priceLkr: 300,000 and priceUsd: 1,000
+  const usdResult = calculatePriceSuggestion(1000, "USD", 1.0, 1.0, {
+    referenceCount: 3,
+    exchangeRate: fxRate,
+  });
+
+  assert.equal(usdResult.status, "COMPLETED");
+  assert.equal(usdResult.priceUsd, 1000);
+  assert.equal(usdResult.priceLkr, 300000, "1,000 USD reference MUST convert to 300,000 LKR, NOT 1,000 LKR!");
+  assert.equal(usdResult.priceRangeLkr?.minimum, 270000);
+  assert.equal(usdResult.priceRangeLkr?.maximum, 330000);
+
+  // Passing USD reference price WITHOUT exchange rate MUST return UNAVAILABLE rather than guessing
+  const unavailUsd = calculatePriceSuggestion(1000, "USD", 1.0, 1.0, {
+    referenceCount: 3,
+    exchangeRate: null,
+  });
+  assert.equal(unavailUsd.status, "UNAVAILABLE");
+  assert.equal(unavailUsd.suggestedPrice, null);
+
+  // Demo records MUST strictly return UNAVAILABLE
+  const demoResult = calculatePriceSuggestion(300000, "LKR", 1.0, 1.0, {
+    referenceCount: 3,
+    dataClassification: "Demo",
+  });
+  assert.equal(demoResult.status, "UNAVAILABLE");
+  assert.ok(demoResult.reason.includes("Demonstration records and dealer estimates are excluded"));
+});

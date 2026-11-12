@@ -62,6 +62,12 @@ const UserSchema = new Schema(
       required: true,
     },
 
+    status: {
+      type: String,
+      enum: ["ACTIVE", "SUSPENDED"],
+      default: "ACTIVE",
+    },
+
     isActive: {
       type: Boolean,
       default: true,

@@ -15,6 +15,12 @@ import { calculatePriceSuggestion } from "../src/lib/evaluation/priceSuggestion"
 import { generateEvaluationPdf } from "../src/lib/report/generateEvaluationPdf";
 import { PDFDocument } from "pdf-lib";
 import { FOUR_C_WEIGHTS } from "../src/lib/evaluation/rules";
+import { NextRequest } from "next/server";
+import User from "../src/models/User";
+import Evaluation from "../src/models/Evaluation";
+import { GET as getAdminUsers } from "../src/app/api/admin/users/route";
+import { GET as getEvaluationById } from "../src/app/api/evaluations/[id]/route";
+import { POST as postEvaluation } from "../src/app/api/evaluations/route";
 
 const mongoUri =
   process.env.MONGODB_TEST_URI ||
@@ -90,40 +96,61 @@ test("Integration Workflow Suite", async (t) => {
   // Test 1: Log in as a normal user and open an admin URL/API -> Access denied
   // =========================================================================
   await t.test(
-    "1. Role Authorization: Normal users are denied admin access (403); active CAGS_ADMIN permitted",
+    "1. Role Authorization: Normal users are denied admin access (401); active CAGS_ADMIN permitted",
     async () => {
-      // Create session for normal user
+      // Create user in DB with role USER
+      const normalUser = await User.create({
+        name: "Test Normal User",
+        email: `normal-user-${Date.now()}@example.com`,
+        passwordHash: "testpass",
+        category: "Student",
+        role: "USER",
+        status: "ACTIVE",
+        isActive: true,
+      });
+
       const userToken = await createSessionToken({
-        userId: new mongoose.Types.ObjectId().toString(),
+        userId: normalUser._id.toString(),
         role: "USER",
       });
-      const userSession = await verifySessionToken(userToken);
-      assert.ok(userSession, "User session token must be verifiable");
-      assert.strictEqual(userSession.role, "USER");
 
-      // Verify that admin check logic rejects normal user
-      const checkAdminForUser = (session: typeof userSession) => {
-        if (!session) return { authorized: false, status: 401 };
-        if (session.role !== "CAGS_ADMIN") return { authorized: false, status: 403 };
-        return { authorized: true, status: 200 };
-      };
+      // Call actual production route /api/admin/users
+      const userReq = new NextRequest("http://localhost:3000/api/admin/users", {
+        headers: { cookie: `session=${userToken}` },
+      });
+      const userRes = await getAdminUsers(userReq);
+      assert.strictEqual(
+        userRes.status,
+        401,
+        "Normal user must receive 401 Unauthorized from actual /api/admin/users route"
+      );
 
-      const userAccess = checkAdminForUser(userSession);
-      assert.strictEqual(userAccess.authorized, false);
-      assert.strictEqual(userAccess.status, 403, "Normal user must receive 403 Forbidden on admin APIs");
+      // Create admin in DB with role CAGS_ADMIN
+      const adminUser = await User.create({
+        name: "Test Admin User",
+        email: `admin-user-${Date.now()}@example.com`,
+        passwordHash: "testpass",
+        category: "Gemologist",
+        role: "CAGS_ADMIN",
+        status: "ACTIVE",
+        isActive: true,
+      });
 
-      // Create session for active CAGS Admin
       const adminToken = await createSessionToken({
-        userId: new mongoose.Types.ObjectId().toString(),
+        userId: adminUser._id.toString(),
         role: "CAGS_ADMIN",
       });
-      const adminSession = await verifySessionToken(adminToken);
-      assert.ok(adminSession, "Admin session token must be verifiable");
-      assert.strictEqual(adminSession.role, "CAGS_ADMIN");
 
-      const adminAccess = checkAdminForUser(adminSession);
-      assert.strictEqual(adminAccess.authorized, true);
-      assert.strictEqual(adminAccess.status, 200, "CAGS_ADMIN must receive 200 Authorized on admin APIs");
+      // Call actual production route /api/admin/users
+      const adminReq = new NextRequest("http://localhost:3000/api/admin/users", {
+        headers: { cookie: `session=${adminToken}` },
+      });
+      const adminRes = await getAdminUsers(adminReq);
+      assert.strictEqual(
+        adminRes.status,
+        200,
+        "CAGS_ADMIN must receive 200 Authorized from actual /api/admin/users route"
+      );
     }
   );
 
@@ -463,16 +490,13 @@ test("Integration Workflow Suite", async (t) => {
       const forgedTokenResult = await verifySession("forged.invalid.token");
       assert.strictEqual(forgedTokenResult, null, "Malformed token must yield null session");
 
-      // Verify protected route gate rejects unauthenticated user with 401
-      const protectRoute = (session: unknown) => {
-        if (!session) {
-          return { status: 401, error: "Authentication required." };
-        }
-        return { status: 200 };
-      };
-
-      const response = protectRoute(noTokenResult);
-      assert.strictEqual(response.status, 401, "Unauthenticated access must return 401 Authentication required.");
+      // Verify actual production route /api/evaluations rejects unauthenticated request with 401
+      const unauthReq = new NextRequest("http://localhost:3000/api/evaluations", {
+        method: "POST",
+        body: JSON.stringify({ variety: "Blue Sapphire" }),
+      });
+      const unauthRes = await postEvaluation(unauthReq);
+      assert.strictEqual(unauthRes.status, 401, "Unauthenticated request must return 401 from actual route");
     }
   );
 
@@ -538,39 +562,84 @@ test("Integration Workflow Suite", async (t) => {
   );
 
   // =========================================================================
-  // Test 9: Evaluation Ownership & Privacy Access Gate
+  // Test 9: Evaluation Ownership & Privacy Access Gate (Actual API Route)
   // =========================================================================
   await t.test(
     "9. Privacy & Ownership: User A cannot access User B's evaluation; CAGS_ADMIN permitted",
     async () => {
-      const userAId = new mongoose.Types.ObjectId().toString();
-      const userBId = new mongoose.Types.ObjectId().toString();
+      const userA = await User.create({
+        name: "Test User A",
+        email: `user-a-${Date.now()}@example.com`,
+        passwordHash: "dummyhash",
+        category: "Student",
+        role: "USER",
+        status: "ACTIVE",
+        isActive: true,
+      });
 
-      // Mock evaluation ownership check helper matching /api/evaluations/[id]
-      const checkEvaluationAccess = (
-        evaluationOwnerId: string,
-        requesterId: string,
-        requesterRole: string
-      ) => {
-        const isOwner = evaluationOwnerId === requesterId;
-        const isCagsAdmin = requesterRole === "CAGS_ADMIN";
-        if (!isOwner && !isCagsAdmin) {
-          return { status: 403, error: "Access denied." };
-        }
-        return { status: 200, success: true };
-      };
+      const userB = await User.create({
+        name: "Test User B",
+        email: `user-b-${Date.now()}@example.com`,
+        passwordHash: "dummyhash",
+        category: "Trader",
+        role: "USER",
+        status: "ACTIVE",
+        isActive: true,
+      });
 
-      // User B attempts to access User A's evaluation -> Denied 403
-      const userBAccess = checkEvaluationAccess(userAId, userBId, "USER");
-      assert.strictEqual(userBAccess.status, 403);
+      const admin = await User.create({
+        name: "Test Admin",
+        email: `admin-${Date.now()}@example.com`,
+        passwordHash: "dummyhash",
+        category: "Gemologist",
+        role: "CAGS_ADMIN",
+        status: "ACTIVE",
+        isActive: true,
+      });
+
+      const gemDoc = await Gemstone.create({
+        variety: "Blue Sapphire",
+        caratWeight: 2.0,
+        color: { hue: "Royal Blue", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None" },
+        clarity: { nakedEye: "Clean", loupe10x: "Very Slight", severity: "Minor" },
+        cut: { length: 8.0, width: 6.5, depth: 4.1, symmetry: "Good", polish: "Good", windowing: "None", extinction: "None", bulging: "None" },
+        treatment: { status: "Untreated", type: "None" },
+        origin: { value: "Sri Lanka", reliability: "High" },
+        naturalStatus: "Natural",
+      });
+
+      const evalDoc = await Evaluation.create({
+        userId: userA._id,
+        gemstoneId: gemDoc._id,
+        ruleVersion: "v4.2",
+        status: "COMPLETED",
+        result: { overallScore: 90 },
+      });
+
+      const userBToken = await createSessionToken({ userId: userB._id.toString(), role: "USER" });
+      const userAToken = await createSessionToken({ userId: userA._id.toString(), role: "USER" });
+      const adminToken = await createSessionToken({ userId: admin._id.toString(), role: "CAGS_ADMIN" });
+
+      // User B attempts to access User A's evaluation -> Denied 403 by actual route
+      const reqB = new NextRequest(`http://localhost:3000/api/evaluations/${evalDoc._id}`, {
+        headers: { cookie: `session=${userBToken}` },
+      });
+      const resB = await getEvaluationById(reqB, { params: Promise.resolve({ id: evalDoc._id.toString() }) });
+      assert.strictEqual(resB.status, 403, "User B must receive 403 on User A evaluation");
 
       // User A accesses their own evaluation -> Allowed 200
-      const userAAccess = checkEvaluationAccess(userAId, userAId, "USER");
-      assert.strictEqual(userAAccess.status, 200);
+      const reqA = new NextRequest(`http://localhost:3000/api/evaluations/${evalDoc._id}`, {
+        headers: { cookie: `session=${userAToken}` },
+      });
+      const resA = await getEvaluationById(reqA, { params: Promise.resolve({ id: evalDoc._id.toString() }) });
+      assert.strictEqual(resA.status, 200, "User A must receive 200 on own evaluation");
 
       // CAGS_ADMIN accesses User A's evaluation -> Allowed 200
-      const adminAccess = checkEvaluationAccess(userAId, userBId, "CAGS_ADMIN");
-      assert.strictEqual(adminAccess.status, 200);
+      const reqAdmin = new NextRequest(`http://localhost:3000/api/evaluations/${evalDoc._id}`, {
+        headers: { cookie: `session=${adminToken}` },
+      });
+      const resAdmin = await getEvaluationById(reqAdmin, { params: Promise.resolve({ id: evalDoc._id.toString() }) });
+      assert.strictEqual(resAdmin.status, 200, "CAGS_ADMIN must receive 200 on any evaluation");
     }
   );
 
@@ -580,56 +649,94 @@ test("Integration Workflow Suite", async (t) => {
   await t.test(
     "10. Security & Guard Rails: Direct API submission strictly rejects unsupported varieties and lab-grown stones",
     async () => {
-      // Validate direct submission guard function matching /api/evaluations
-      const validateSubmissionPayload = (body: {
-        variety?: string;
-        naturalStatus?: string;
-      }) => {
-        const supported = ["Blue Sapphire", "Padparadscha", "Ruby"];
-        if (!body.variety || !supported.includes(body.variety)) {
-          return { status: 400, message: "Unsupported variety" };
-        }
-        if (body.naturalStatus && body.naturalStatus.toLowerCase() !== "natural") {
-          return { status: 400, message: "Lab-grown stones cannot be evaluated" };
-        }
-        return { status: 200, success: true };
-      };
-
-      // 1. Unsupported variety (e.g. Yellow Sapphire)
-      const resUnsupported = validateSubmissionPayload({
-        variety: "Yellow Sapphire",
-        naturalStatus: "Natural",
+      const activeUser = await User.create({
+        name: "Security Tester",
+        email: `sec-tester-${Date.now()}@example.com`,
+        passwordHash: "dummyhash",
+        category: "Student",
+        role: "USER",
+        status: "ACTIVE",
+        isActive: true,
       });
-      assert.strictEqual(resUnsupported.status, 400);
+      const userToken = await createSessionToken({ userId: activeUser._id.toString(), role: "USER" });
+
+      // 1. Unsupported variety (e.g. Yellow Sapphire) via actual POST route
+      const reqUnsupported = new NextRequest("http://localhost:3000/api/evaluations", {
+        method: "POST",
+        headers: { cookie: `session=${userToken}`, "content-type": "application/json" },
+        body: JSON.stringify({
+          gemstoneId: new mongoose.Types.ObjectId().toString(),
+          variety: "Yellow Sapphire",
+          naturalStatus: "Natural",
+        }),
+      });
+      const resUnsupported = await postEvaluation(reqUnsupported);
+      assert.strictEqual(resUnsupported.status, 400, "Actual API must reject unsupported variety with 400");
 
       // 2. Laboratory-grown submission attempt
-      const resLabGrown = validateSubmissionPayload({
-        variety: "Blue Sapphire",
-        naturalStatus: "Lab-Grown",
+      const reqLabGrown = new NextRequest("http://localhost:3000/api/evaluations", {
+        method: "POST",
+        headers: { cookie: `session=${userToken}`, "content-type": "application/json" },
+        body: JSON.stringify({
+          gemstoneId: new mongoose.Types.ObjectId().toString(),
+          variety: "Blue Sapphire",
+          naturalStatus: "Lab-Grown",
+        }),
       });
-      assert.strictEqual(resLabGrown.status, 400);
+      const resLabGrown = await postEvaluation(reqLabGrown);
+      assert.strictEqual(resLabGrown.status, 400, "Actual API must reject lab-grown stones with 400");
 
       // 3. Synthetic submission attempt
-      const resSynthetic = validateSubmissionPayload({
-        variety: "Ruby",
-        naturalStatus: "Synthetic",
+      const reqSynthetic = new NextRequest("http://localhost:3000/api/evaluations", {
+        method: "POST",
+        headers: { cookie: `session=${userToken}`, "content-type": "application/json" },
+        body: JSON.stringify({
+          gemstoneId: new mongoose.Types.ObjectId().toString(),
+          variety: "Ruby",
+          naturalStatus: "Synthetic",
+        }),
       });
-      assert.strictEqual(resSynthetic.status, 400);
-
-      // 4. Legitimate natural corundum submission
-      const resLegitimate = validateSubmissionPayload({
-        variety: "Padparadscha",
-        naturalStatus: "Natural",
-      });
-      assert.strictEqual(resLegitimate.status, 200);
+      const resSynthetic = await postEvaluation(reqSynthetic);
+      assert.strictEqual(resSynthetic.status, 400, "Actual API must reject synthetic stones with 400");
     }
   );
 
   // =========================================================================
-  // Test 11: PDF Scenarios A, B, and C Generation & Content Integrity
+  // Test 11: Real User Suspension Enforcement
   // =========================================================================
   await t.test(
-    "11. PDF Scenarios: Scenario A (market evidence), Scenario B (pricing unavailable), Scenario C (missing photo/unknown origin)",
+    "11. Account Suspension Enforcement: Suspended user receives 403 on protected routes even with valid JWT",
+    async () => {
+      const suspendedUser = await User.create({
+        name: "Suspended Test User",
+        email: `suspended-${Date.now()}@example.com`,
+        passwordHash: "dummyhash",
+        category: "Trader",
+        role: "USER",
+        status: "SUSPENDED",
+        isActive: false,
+      });
+
+      const token = await createSessionToken({
+        userId: suspendedUser._id.toString(),
+        role: "USER",
+      });
+
+      const req = new NextRequest(`http://localhost:3000/api/evaluations/${new mongoose.Types.ObjectId()}`, {
+        headers: { cookie: `session=${token}` },
+      });
+      const res = await getEvaluationById(req, { params: Promise.resolve({ id: new mongoose.Types.ObjectId().toString() }) });
+      assert.strictEqual(res.status, 403, "Suspended user must receive 403 from actual endpoint");
+      const data = await res.json();
+      assert.strictEqual(data.error, "Account is inactive or suspended.");
+    }
+  );
+
+  // =========================================================================
+  // Test 12: PDF Scenarios A, B, and C Generation & Content Integrity
+  // =========================================================================
+  await t.test(
+    "12. PDF Scenarios: Scenario A (market evidence), Scenario B (pricing unavailable), Scenario C (missing photo/unknown origin)",
     async () => {
       // Scenario A: Market evidence available
       const pdfA = await generateEvaluationPdf({

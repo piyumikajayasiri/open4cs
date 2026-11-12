@@ -20,6 +20,7 @@ import {
   ORIGIN_RULES,
 } from "@/lib/evaluation/rules";
 import Evaluation from "@/models/Evaluation";
+import User from "@/models/User";
 import GemstoneVariety from "@/models/GemstoneVariety";
 import { calculateComparableReferencePrice } from "@/lib/evaluation/comparablePrice";
 
@@ -33,8 +34,16 @@ const SUPPORTED_INFORMATION_RELIABILITY = [
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get("session")?.value;
+    let sessionToken: string | undefined;
+    try {
+      const cookieStore = await cookies();
+      sessionToken = cookieStore.get("session")?.value;
+    } catch {
+      sessionToken = request.cookies.get("session")?.value;
+    }
+    if (!sessionToken) {
+      sessionToken = request.cookies.get("session")?.value;
+    }
 
     if (!sessionToken) {
       return Response.json(
@@ -49,6 +58,15 @@ export async function POST(request: NextRequest) {
       return Response.json(
         { error: "Invalid or expired session." },
         { status: 401 }
+      );
+    }
+
+    await connectToDatabase();
+    const activeUser = await User.findById(session.userId).select("status isActive role");
+    if (!activeUser || activeUser.isActive === false || activeUser.status === "SUSPENDED") {
+      return NextResponse.json(
+        { error: "Account is inactive or suspended." },
+        { status: 403 }
       );
     }
 
@@ -341,85 +359,80 @@ export async function POST(request: NextRequest) {
         },
       });
 
-    const bestReferenceMatch =
-      referenceComparisons.length > 0
-        ? referenceComparisons[0]
-        : null;
+    const exchangeRate = getActiveExchangeRate();
 
-    const pricingCurrency =
-      bestReferenceMatch?.currency ?? null;
+    // Strict Data Traceability: Filter eligible real market records BEFORE counting, matching, and calculating prices
+    const realCompletedReferences = referenceComparisons.filter(
+      (r) => r.dataClassification === "Real" && r.transactionContext === "Completed Sale"
+    );
 
-    const sameCurrencyReferenceComparisons =
-      pricingCurrency
-        ? referenceComparisons.filter(
-            (reference) =>
-              reference.currency === pricingCurrency
-          )
-        : [];
+    const eligibleRealComparables = realCompletedReferences.filter(
+      (reference) =>
+        reference.similarity.overall !== null &&
+        reference.similarity.overall >=
+          REFERENCE_COMPARISON_RULES.minimumSimilarityForPricing
+    );
 
-    const suitableComparableReferences =
-      sameCurrencyReferenceComparisons.filter(
-        (reference) =>
-          reference.similarity.overall !== null &&
-          reference.similarity.overall >=
-            REFERENCE_COMPARISON_RULES.minimumSimilarityForPricing
-      );
+    // Normalize currencies of eligible real comparables to LKR (the regional trading benchmark)
+    const normalizedRealComparables = eligibleRealComparables
+      .map((reference) => {
+        let normPrice = reference.referencePrice;
+        const refCurr = (reference.currency || "LKR").toUpperCase().trim();
+        if (refCurr === "USD") {
+          if (exchangeRate && exchangeRate.isAvailable && exchangeRate.rate > 0) {
+            normPrice = reference.referencePrice * exchangeRate.rate;
+          } else {
+            normPrice = 0; // Exclude USD reference if no verified exchange rate is available
+          }
+        }
+        return {
+          ...reference,
+          referencePrice: Math.round(normPrice),
+          currency: "LKR",
+        };
+      })
+      .filter((r) => r.referencePrice > 0);
 
-    const comparableReferencePrice =
-      calculateComparableReferencePrice(
-        suitableComparableReferences
-      );
+    const hasRealMarketData = normalizedRealComparables.length >= 3;
+    const bestRealMatch =
+      normalizedRealComparables.length > 0 ? normalizedRealComparables[0] : null;
 
-    const hasSufficientReferenceData =
-      referenceComparisons.length >=
-      REFERENCE_COMPARISON_RULES.minimumReferencesForSimilarity;
+    const comparableReferencePrice = hasRealMarketData
+      ? calculateComparableReferencePrice(normalizedRealComparables)
+      : null;
 
-    const suitableReferenceMatch =
-      hasSufficientReferenceData &&
-      bestReferenceMatch &&
-      bestReferenceMatch.similarity.overall !== null &&
-      bestReferenceMatch.similarity.overall >=
-        REFERENCE_COMPARISON_RULES.minimumSimilarityForPricing
-        ? bestReferenceMatch
-        : null;
-
-    // Relative treatment and origin adjustment calculations (preventing double-counting)
+    // Relative treatment and origin adjustment calculations (relative to best real match if available)
     const candidateTreatmentStatus = data.treatment?.status?.toLowerCase() || "unknown";
-    const refTreatmentStatus = suitableReferenceMatch?.treatment?.status?.toLowerCase() || candidateTreatmentStatus;
+    const refTreatmentStatus = bestRealMatch?.treatment?.status?.toLowerCase() || candidateTreatmentStatus;
     const candidateTreatmentWeight = TREATMENT_RULES.status[candidateTreatmentStatus as keyof typeof TREATMENT_RULES.status] ?? 1.0;
     const refTreatmentWeight = TREATMENT_RULES.status[refTreatmentStatus as keyof typeof TREATMENT_RULES.status] ?? 1.0;
     const relativeTreatmentMultiplier = refTreatmentWeight > 0 ? (candidateTreatmentWeight / refTreatmentWeight) : 1.0;
 
     const candidateOriginValue = (data.origin?.value || "unknown").toLowerCase().replace(/\s+/g, "");
-    const refOriginValue = (suitableReferenceMatch?.origin?.value || data.origin?.value || "unknown").toLowerCase().replace(/\s+/g, "");
+    const refOriginValue = (bestRealMatch?.origin?.value || data.origin?.value || "unknown").toLowerCase().replace(/\s+/g, "");
     const candidateOriginWeight = ORIGIN_RULES.value[candidateOriginValue as keyof typeof ORIGIN_RULES.value] ?? 1.0;
     const refOriginWeight = ORIGIN_RULES.value[refOriginValue as keyof typeof ORIGIN_RULES.value] ?? 1.0;
     const relativeOriginMultiplier = refOriginWeight > 0 ? (candidateOriginWeight / refOriginWeight) : 1.0;
 
-    const exchangeRate = getActiveExchangeRate();
-    const hasRealMarketData =
-      suitableComparableReferences.length > 0 &&
-      suitableComparableReferences.every(
-        (r) => r.dataClassification === "Real" && r.transactionContext === "Completed Sale"
-      );
+    const priceSuggestion = calculatePriceSuggestion(
+      hasRealMarketData && bestRealMatch ? comparableReferencePrice : null,
+      "LKR",
+      evaluation.treatment.adjustmentFactor,
+      evaluation.origin.adjustmentFactor,
+      {
+        referenceCount: normalizedRealComparables.length,
+        relativeTreatmentMultiplier,
+        relativeOriginMultiplier,
+        exchangeRate,
+        dataClassification: hasRealMarketData ? "Real" : "Demo",
+        isRealMarketData: hasRealMarketData,
+      }
+    );
 
-    const priceSuggestion =
-      calculatePriceSuggestion(
-        suitableReferenceMatch
-          ? comparableReferencePrice
-          : null,
-        suitableReferenceMatch?.currency ?? null,
-        evaluation.treatment.adjustmentFactor,
-        evaluation.origin.adjustmentFactor,
-        {
-          referenceCount: suitableComparableReferences.length,
-          relativeTreatmentMultiplier,
-          relativeOriginMultiplier,
-          exchangeRate,
-          dataClassification: hasRealMarketData ? "Real" : "Demo",
-          isRealMarketData: hasRealMarketData,
-        }
-      );
+    const hasSufficientReferenceData = hasRealMarketData;
+    const bestReferenceMatch =
+      bestRealMatch ||
+      (referenceComparisons.length > 0 ? referenceComparisons[0] : null);
 
     const referenceDataSufficiency = {
       status: hasSufficientReferenceData
@@ -469,10 +482,18 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request?: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get("session")?.value;
+    let sessionToken: string | undefined;
+    try {
+      const cookieStore = await cookies();
+      sessionToken = cookieStore.get("session")?.value;
+    } catch {
+      sessionToken = request?.cookies.get("session")?.value;
+    }
+    if (!sessionToken && request) {
+      sessionToken = request.cookies.get("session")?.value;
+    }
 
     if (!sessionToken) {
       return Response.json(
@@ -487,6 +508,15 @@ export async function GET() {
       return Response.json(
         { error: "Invalid or expired session." },
         { status: 401 }
+      );
+    }
+
+    await connectToDatabase();
+    const activeUser = await User.findById(session.userId).select("status isActive role");
+    if (!activeUser || activeUser.isActive === false || activeUser.status === "SUSPENDED") {
+      return NextResponse.json(
+        { error: "Account is inactive or suspended." },
+        { status: 403 }
       );
     }
 
