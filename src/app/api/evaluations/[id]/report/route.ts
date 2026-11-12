@@ -5,13 +5,16 @@ import mongoose from "mongoose";
 import { verifySessionToken } from "@/lib/auth/session";
 import { connectToDatabase } from "@/lib/mongodb";
 import Evaluation from "@/models/Evaluation";
+import Gemstone from "@/models/Gemstone";
 import User from "@/models/User";
 import { generateEvaluationPdf } from "@/lib/report/generateEvaluationPdf";
 
-// Ensure User model is registered for mongoose populate
+// Ensure User and Gemstone models are registered for mongoose populate
 if (!mongoose.models.User) {
-  console.log("Registering User model for populate");
   void User;
+}
+if (!mongoose.models.Gemstone) {
+  void Gemstone;
 }
 
 export async function GET(
