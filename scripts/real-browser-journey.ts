@@ -9,11 +9,23 @@ import zlib from "zlib";
 
 dotenv.config({ path: ".env.local" });
 
-const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
-const BASE_URL = "http://localhost:3000";
+const CHROME_PATH =
+  process.env.CHROME_PATH ||
+  process.env.PUPPETEER_EXECUTABLE_PATH ||
+  (process.platform === "win32"
+    ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+    : "/usr/bin/google-chrome");
+
+const BASE_URL =
+  process.env.TEST_APP_URL ||
+  process.env.NEXTAUTH_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  "http://localhost:3000";
 
 const mongoUri =
-  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/gemstone_evaluation";
+  process.env.TEST_MONGODB_URI ||
+  process.env.MONGODB_URI ||
+  "mongodb://127.0.0.1:27017/gemstone_evaluation";
 
 async function runRealBrowserJourney() {
   console.log("=== STARTING REAL BROWSER JOURNEY AUTOMATION ===");

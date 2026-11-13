@@ -53,11 +53,19 @@ const EvaluationSchema = new Schema(
       type: String,
       default: "",
     },
+
+    assessmentSnapshot: {
+      type: Schema.Types.Mixed,
+      default: null,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+EvaluationSchema.index({ userId: 1, createdAt: -1 });
+EvaluationSchema.index({ gemstoneId: 1 });
 
 const Evaluation =
   mongoose.models.Evaluation ||

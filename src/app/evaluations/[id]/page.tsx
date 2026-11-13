@@ -26,12 +26,22 @@ type EvaluationRecord = {
     carat?: { score: number | null };
   };
   priceSuggestion?: {
+    status?: string | null;
+    available?: boolean | null;
     currency?: string | null;
     suggestedPrice?: number | null;
     minimumPrice?: number | null;
     maximumPrice?: number | null;
+    min?: number | null;
+    max?: number | null;
     formattedPriceRange?: string | null;
   };
+  referenceDataSufficiency?: {
+    status?: string;
+    availableReferences?: number;
+    requiredReferences?: number;
+  };
+  bestReferenceMatch?: Record<string, unknown> | null;
 };
 
 export default function EvaluationResultPage({
@@ -161,12 +171,34 @@ export default function EvaluationResultPage({
   const cutSc = res?.cut?.score ?? 81;
   const caratWeight = gem?.caratWeight ?? 2.45;
 
-  const minPriceFormatted = pricing?.minimumPrice
-    ? (pricing.minimumPrice / 1000).toFixed(0) + "K"
-    : "1.42M";
-  const maxPriceFormatted = pricing?.maximumPrice
-    ? (pricing.maximumPrice / 1000).toFixed(0) + "K"
-    : "1.68M";
+  const minVal = pricing?.min ?? pricing?.minimumPrice ?? null;
+  const maxVal = pricing?.max ?? pricing?.maximumPrice ?? null;
+
+  const isPricingAvailable =
+    (pricing?.status === "COMPLETED" || pricing?.available === true) &&
+    typeof minVal === "number" &&
+    typeof maxVal === "number";
+
+  const minPriceFormatted = isPricingAvailable && minVal !== null
+    ? minVal >= 1000000
+      ? (minVal / 1000000).toFixed(2) + "M"
+      : (minVal / 1000).toFixed(0) + "K"
+    : "Unavailable";
+
+  const maxPriceFormatted = isPricingAvailable && maxVal !== null
+    ? maxVal >= 1000000
+      ? (maxVal / 1000000).toFixed(2) + "M"
+      : (maxVal / 1000).toFixed(0) + "K"
+    : "Unavailable";
+
+  const perCaratFormatted =
+    isPricingAvailable && minVal !== null && maxVal !== null && caratWeight > 0
+      ? `${Math.round(minVal / caratWeight / 1000)}K – ${Math.round(maxVal / caratWeight / 1000)}K`
+      : "Unavailable";
+
+  const availableRefCounts =
+    evaluation.referenceDataSufficiency?.availableReferences ??
+    (evaluation.bestReferenceMatch ? 1 : 0);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex font-sans text-slate-900">
@@ -209,7 +241,8 @@ export default function EvaluationResultPage({
             caratLabel="Liquid band"
             priceRangeMin={minPriceFormatted}
             priceRangeMax={maxPriceFormatted}
-            pricePerCarat="580K – 686K"
+            pricePerCarat={perCaratFormatted}
+            priceStatus={pricing?.status || "UNAVAILABLE"}
             initialTab={
               id === "recommendations" || id === "advice"
                 ? "recommendations"
@@ -221,7 +254,7 @@ export default function EvaluationResultPage({
                 ? "comparables"
                 : "breakdown"
             }
-            comparablesCount={7}
+            comparablesCount={availableRefCounts}
             evaluationId={evaluation._id}
             onSave={() => undefined}
             onCompare={() => { router.push("/compare"); }}

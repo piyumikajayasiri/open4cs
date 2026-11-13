@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { verifySessionToken } from "@/lib/auth/session";
 import { connectToDatabase } from "@/lib/mongodb";
 import { evaluateGemstone } from "@/lib/evaluation/evaluateGemstone";
-import type { EvaluationInput } from "@/lib/evaluation/evaluationInput";
+import type { EvaluationInput, InformationReliability } from "@/lib/evaluation/evaluationInput";
 import { compareReferenceGemstones } from "@/lib/evaluation/compareReferenceGemstones";
 import { calculatePriceSuggestion } from "@/lib/evaluation/priceSuggestion";
 import { getActiveExchangeRate } from "@/lib/currency/exchangeRate";
@@ -124,16 +124,8 @@ export async function POST(request: NextRequest) {
       else if (o.includes("unknown")) data.origin.value = "Unknown";
     }
 
-    if (data.origin?.reliability) {
-      const r = data.origin.reliability.toLowerCase();
-      if (r.includes("high") || r.includes("laboratory")) data.origin.reliability = "High";
-      else if (r.includes("medium") || r.includes("seller")) data.origin.reliability = "Medium";
-      else if (r.includes("low") || r.includes("observed") || r.includes("user")) data.origin.reliability = "Low";
-      else if (r.includes("unknown")) data.origin.reliability = "Unknown";
-    }
-
     if (
-      !data.gemstoneId ||
+      data.gemstoneId &&
       !mongoose.Types.ObjectId.isValid(data.gemstoneId)
     ) {
       return NextResponse.json(
@@ -259,6 +251,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (data.informationReliability) {
+      const normalizeRel = (val: unknown): InformationReliability => {
+        if (!val || typeof val !== "string") return "Unverified";
+        const lower = val.toLowerCase().trim();
+        if (lower.includes("lab") || lower.includes("cert") || lower.includes("laboratory")) return "Laboratory Verified";
+        if (lower.includes("seller") || lower.includes("dealer")) return "Seller Provided";
+        if (lower.includes("measured") || lower.includes("caliper") || lower.includes("scale")) return "Measured";
+        if (lower.includes("user") || lower.includes("observed") || lower.includes("eye")) return "User Observed";
+        return "Unverified";
+      };
+
+      data.informationReliability = {
+        measurements: normalizeRel(data.informationReliability.measurements),
+        treatment: normalizeRel(data.informationReliability.treatment),
+        origin: normalizeRel(data.informationReliability.origin),
+      };
+    }
+
     const informationReliability =
       data.informationReliability;
 
@@ -343,7 +353,9 @@ export async function POST(request: NextRequest) {
     // Normalize origin reliability from UI variants
     if (data.origin?.reliability) {
       const rawOriginRel = data.origin.reliability.toLowerCase().replace(/[\s\-_]+/g, "");
-      if (rawOriginRel === "high" || rawOriginRel.includes("verified")) {
+      if (rawOriginRel.includes("unverified") || rawOriginRel === "unknown") {
+        data.origin.reliability = "Unknown";
+      } else if (rawOriginRel === "high" || rawOriginRel.includes("verified") || rawOriginRel.includes("laboratory") || rawOriginRel.includes("lab")) {
         data.origin.reliability = "High";
       } else if (rawOriginRel === "medium" || rawOriginRel.includes("declared") || rawOriginRel.includes("seller")) {
         data.origin.reliability = "Medium";
@@ -488,9 +500,66 @@ export async function POST(request: NextRequest) {
         REFERENCE_COMPARISON_RULES.minimumReferencesForSimilarity,
     };
 
+    let finalGemstoneId = data.gemstoneId;
+
+    if (finalGemstoneId && mongoose.Types.ObjectId.isValid(finalGemstoneId)) {
+      const existingGem = await Gemstone.findById(finalGemstoneId);
+      if (existingGem && existingGem.userId && existingGem.userId.toString() !== session.userId) {
+        return NextResponse.json(
+          { error: "Access denied. You do not own the specified gemstone specimen." },
+          { status: 403 }
+        );
+      }
+    } else {
+      // Atomic specimen creation ensuring ownership and data integrity
+      const createdGemstone = await Gemstone.create({
+        userId: session.userId,
+        variety: data.variety,
+        caratWeight: Number(data.caratWeight),
+        color: data.color,
+        clarity: data.clarity,
+        cut: data.cut,
+        treatment: data.treatment,
+        origin: data.origin,
+        informationReliability: data.informationReliability,
+        photoUrl: data.photoUrl || "",
+        naturalStatus: data.naturalStatus || "Natural",
+      });
+      finalGemstoneId = createdGemstone._id.toString();
+    }
+
+    const assessmentSnapshot = {
+      ownerId: session.userId,
+      gemstone: {
+        variety: data.variety,
+        caratWeight: Number(data.caratWeight),
+        color: data.color,
+        clarity: data.clarity,
+        cut: data.cut,
+        treatment: data.treatment,
+        origin: data.origin,
+        informationReliability: data.informationReliability,
+        photoUrl: data.photoUrl || "",
+        naturalStatus: data.naturalStatus || "Natural",
+      },
+      ruleVersion: evaluation.ruleVersion,
+      scores: {
+        color: evaluation.color.score,
+        clarity: evaluation.clarity.score,
+        cut: evaluation.cut.score,
+        carat: evaluation.carat.score,
+        overall: evaluation.overall4C.score,
+      },
+      overallScore: evaluation.overall4C.score,
+      priceSuggestion,
+      exchangeRate: priceSuggestion.exchangeRate ?? null,
+      recommendations: evaluation.recommendations,
+      timestamp: new Date().toISOString(),
+    };
+
     const savedEvaluation = await Evaluation.create({
       userId: session.userId,
-      gemstoneId: data.gemstoneId,
+      gemstoneId: finalGemstoneId,
       ruleVersion: evaluation.ruleVersion,
       status: evaluation.status,
       result: evaluation,
@@ -499,6 +568,7 @@ export async function POST(request: NextRequest) {
       priceSuggestion,
       exchangeRate: priceSuggestion.exchangeRate ?? null,
       photoUrl: data.photoUrl || "",
+      assessmentSnapshot,
     });
 
     return NextResponse.json(

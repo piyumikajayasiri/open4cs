@@ -30,9 +30,9 @@ export async function GET() {
 
     const user = await User.findById(session.userId);
 
-    if (!user || !user.isActive) {
+    if (!user || !user.isActive || user.status === "SUSPENDED") {
       return Response.json(
-        { error: "User account is unavailable." },
+        { error: "User account is unavailable or suspended." },
         { status: 401 }
       );
     }
@@ -100,11 +100,16 @@ export async function PATCH(request: Request) {
 
     await connectToDatabase();
 
-    const user = await User.findById(session.userId);
+    // In PATCH, select passwordHash to allow password change verification
+    let userQuery = User.findById(session.userId);
+    if (newPassword) {
+      userQuery = userQuery.select("+passwordHash");
+    }
+    const user = await userQuery;
 
-    if (!user || !user.isActive) {
+    if (!user || !user.isActive || user.status === "SUSPENDED") {
       return Response.json(
-        { error: "User account is unavailable." },
+        { error: "User account is unavailable or suspended." },
         { status: 401 }
       );
     }

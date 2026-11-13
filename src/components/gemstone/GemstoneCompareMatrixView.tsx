@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Scale } from "lucide-react";
 
 export type GemstoneCompareItem = {
   id: string;
@@ -198,8 +199,26 @@ export default function GemstoneCompareMatrixView({
         </div>
       </div>
 
-      {/* Top 3 Stone Cards Selector */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {stones.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center space-y-4 shadow-2xs">
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
+            <Scale className="w-6 h-6" />
+          </div>
+          <h2 className="text-lg font-bold text-slate-900">No Evaluations Available for Comparison</h2>
+          <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
+            To compare gemstones side-by-side, complete at least two 4C evaluations. Your saved evaluations will automatically appear here.
+          </p>
+          <button
+            onClick={() => router.push("/evaluate/gemstone")}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-xl transition cursor-pointer"
+          >
+            <span>Start New Evaluation</span>
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Top 3 Stone Cards Selector */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stones.map((stone) => {
           const isSelected = selectedStoneId === stone.id;
 
@@ -300,6 +319,8 @@ export default function GemstoneCompareMatrixView({
           Highlighted rows differ across stones. Differences are informational — suitability depends on your B2B intent.
         </span>
       </div>
+      </>
+      )}
     </div>
   );
 }

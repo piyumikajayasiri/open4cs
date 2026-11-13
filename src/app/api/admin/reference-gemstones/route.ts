@@ -6,8 +6,8 @@ import Gemstone from "@/models/Gemstone";
 import ReferenceGemstone from "@/models/ReferenceGemstone";
 import AuditLog from "@/models/AuditLog";
 
-async function checkAdmin() {
-  const user = await getCurrentUser();
+async function checkAdmin(req?: NextRequest) {
+  const user = await getCurrentUser(req);
 
   if (!user) {
     return {
@@ -32,9 +32,9 @@ async function checkAdmin() {
 }
 
 // GET ALL REFERENCE GEMSTONES
-export async function GET() {
+export async function GET(req?: NextRequest) {
   try {
-    const access = await checkAdmin();
+    const access = await checkAdmin(req);
 
     if (!access.authorized) {
       return NextResponse.json(
@@ -72,7 +72,7 @@ export async function GET() {
 // CREATE REFERENCE GEMSTONE
 export async function POST(request: NextRequest) {
   try {
-    const access = await checkAdmin();
+    const access = await checkAdmin(request);
 
     if (!access.authorized) {
       return NextResponse.json(
@@ -131,97 +131,137 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate numeric values
-    if (
-      caratWeight !== undefined &&
-      caratWeight !== null &&
-      (Number.isNaN(Number(caratWeight)) || Number(caratWeight) < 0)
-    ) {
+    // Strict validation of required fields — eliminate fabricated defaults
+    if (caratWeight === undefined || caratWeight === null || Number.isNaN(Number(caratWeight)) || Number(caratWeight) <= 0) {
       return NextResponse.json(
         {
           success: false,
-          message: "Carat weight must be a valid positive number.",
+          message: "Carat weight is required and must be a valid positive number.",
         },
         { status: 400 },
       );
     }
 
-    if (
-      referencePrice !== undefined &&
-      referencePrice !== null &&
-      (Number.isNaN(Number(referencePrice)) || Number(referencePrice) < 0)
-    ) {
+    if (referencePrice === undefined || referencePrice === null || Number.isNaN(Number(referencePrice)) || Number(referencePrice) <= 0) {
       return NextResponse.json(
         {
           success: false,
-          message: "Reference price must be a valid positive number.",
+          message: "Reference price is required and must be a valid positive number.",
         },
         { status: 400 },
       );
     }
 
-    let varietyName = body.variety || "Blue Sapphire";
+    let varietyName = body.variety?.trim();
     if (gemstoneId && mongoose.Types.ObjectId.isValid(gemstoneId)) {
       const gemstone = await Gemstone.findById(gemstoneId);
       if (gemstone?.name) {
         varietyName = gemstone.name;
       }
     }
+    if (!varietyName) {
+      return NextResponse.json(
+        { success: false, message: "Gemstone variety is required." },
+        { status: 400 }
+      );
+    }
+
+    if (!color || typeof color !== "object" || !color.hue) {
+      return NextResponse.json(
+        { success: false, message: "Color specifications (including hue) are required." },
+        { status: 400 }
+      );
+    }
+
+    if (!clarity || typeof clarity !== "object" || !clarity.severity) {
+      return NextResponse.json(
+        { success: false, message: "Clarity specifications (including severity) are required." },
+        { status: 400 }
+      );
+    }
+
+    if (!cut || typeof cut !== "object" || !cut.symmetry) {
+      return NextResponse.json(
+        { success: false, message: "Cut specifications (including symmetry) are required." },
+        { status: 400 }
+      );
+    }
+
+    const normTreatment = typeof treatment === "object" && treatment !== null && treatment.status
+      ? { status: String(treatment.status).trim() }
+      : typeof treatment === "string" && treatment.trim()
+      ? { status: treatment.trim() }
+      : null;
+
+    if (!normTreatment) {
+      return NextResponse.json(
+        { success: false, message: "Treatment status is required." },
+        { status: 400 }
+      );
+    }
+
+    const normOrigin = typeof origin === "object" && origin !== null && origin.value
+      ? { value: String(origin.value).trim(), reliability: origin.reliability || "Unknown" }
+      : typeof origin === "string" && origin.trim()
+      ? { value: origin.trim(), reliability: "Unknown" }
+      : null;
+
+    if (!normOrigin) {
+      return NextResponse.json(
+        { success: false, message: "Origin is required." },
+        { status: 400 }
+      );
+    }
 
     const reference = await ReferenceGemstone.create({
       referenceId: normalizedReferenceId,
       variety: varietyName,
-      caratWeight: Number(caratWeight) || 2.0,
-      color: typeof color === "object" && color !== null ? color : {
-        hue: typeof color === "string" ? color : "Royal Blue",
-        tone: "6",
-        saturation: "Vivid",
-        distribution: "Even",
-        zoning: "None",
+      caratWeight: Number(caratWeight),
+      color: {
+        hue: color.hue,
+        tone: color.tone || "5",
+        saturation: color.saturation || "Moderate",
+        distribution: color.distribution || "Even",
+        zoning: color.zoning || "None",
       },
-      clarity: typeof clarity === "object" && clarity !== null ? clarity : {
-        nakedEye: typeof clarity === "string" ? clarity : "Clean",
-        loupe10x: "Very Slight",
-        inclusionType: "Minor silk",
-        inclusionLocation: "Off-table",
-        severity: "Minor",
+      clarity: {
+        nakedEye: clarity.nakedEye || "Slight",
+        loupe10x: clarity.loupe10x || "Slight",
+        inclusionType: clarity.inclusionType || "",
+        inclusionLocation: clarity.inclusionLocation || "",
+        severity: clarity.severity || "Minor",
       },
-      cut: typeof cut === "object" && cut !== null ? cut : {
-        length: 8.0,
-        width: 6.5,
-        depth: 4.0,
-        symmetry: "Good",
-        polish: "Good",
-        windowing: "None",
-        extinction: "None",
-        bulging: "None",
+      cut: {
+        length: Number(cut.length) || null,
+        width: Number(cut.width) || null,
+        depth: Number(cut.depth) || null,
+        symmetry: cut.symmetry || "Good",
+        polish: cut.polish || "Good",
+        windowing: cut.windowing || "None",
+        extinction: cut.extinction || "None",
+        bulging: cut.bulging || "None",
       },
-      treatment: typeof treatment === "object" && treatment !== null ? treatment : {
-        status: typeof treatment === "string" ? treatment : "Untreated",
-      },
-      origin: typeof origin === "object" && origin !== null ? origin : {
-        value: typeof origin === "string" ? origin : "Sri Lanka",
-        reliability: "High",
-      },
-      referencePrice: Number(referencePrice) || 600000,
+      treatment: normTreatment,
+      origin: normOrigin,
+      referencePrice: Number(referencePrice),
       currency: (priceCurrency || currency || "LKR").toUpperCase(),
-      source: source ? String(source).trim() : "Desk",
-      sourceType: body.sourceType || "Desk",
-      verificationStatus: verificationStatus || "Verified",
+      source: source ? String(source).trim() : "Market Reference",
+      sourceType: body.sourceType || "Dealer Report",
+      verificationStatus: verificationStatus === "Verified" ? "Verified" : "Pending",
       labCertificate: body.labCertificate || "",
-      verifiedBy: body.verifiedBy || "CAGS Admin",
-      verifiedAt: body.verifiedAt || new Date().toISOString(),
-      dataClassification: body.dataClassification || "Demo",
+      verifiedBy: verificationStatus === "Verified" ? (body.verifiedBy || access.user?.name || "CAGS Admin") : "",
+      verifiedAt: verificationStatus === "Verified" ? (body.verifiedAt || new Date().toISOString()) : "",
+      dataClassification: body.dataClassification === "Real" ? "Real" : "Demo",
       sourceEvidence: body.sourceEvidence || "",
       observationDate: body.observationDate || new Date().toISOString().split("T")[0],
       transactionContext: body.transactionContext || "Dealer Estimate",
       marketContext: body.marketContext || "Wholesale",
       originalCurrency: (body.originalCurrency || priceCurrency || currency || "LKR").toUpperCase(),
-      originalPrice: Number(body.originalPrice) || Number(referencePrice) || 0,
-      originalCaratWeight: Number(body.originalCaratWeight) || Number(caratWeight) || 0,
+      originalPrice: Number(body.originalPrice) || Number(referencePrice),
+      originalCaratWeight: Number(body.originalCaratWeight) || Number(caratWeight),
       treatmentEvidence: body.treatmentEvidence || "",
       originEvidence: body.originEvidence || "",
-      reviewer: body.reviewer || "CAGS Admin",
+      reviewer: body.reviewer || access.user?.name || "CAGS Admin",
       reviewDate: body.reviewDate || new Date().toISOString().split("T")[0],
     });
 

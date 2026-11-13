@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 
 import { connectToDatabase } from "@/lib/mongodb";
-import User from "@/models/User";
+import User, { toSafeUserDTO } from "@/models/User";
 import { createSessionToken } from "@/lib/auth/session";
 
 export async function POST(request: Request) {
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
 
     await connectToDatabase();
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("+passwordHash");
 
     if (!user) {
       return Response.json(
@@ -34,10 +34,10 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!user.isActive) {
+    if (!user.isActive || user.status === "SUSPENDED") {
       return Response.json(
         {
-          error: "This account is inactive.",
+          error: "This account is inactive or suspended.",
         },
         { status: 403 }
       );
@@ -74,13 +74,7 @@ export async function POST(request: Request) {
 
     return Response.json({
       message: "Login successful.",
-      user: {
-        id: user._id.toString(),
-        name: user.name,
-        email: user.email,
-        category: user.category,
-        role: user.role,
-      },
+      user: toSafeUserDTO(user),
     });
   } catch (error) {
     console.error("Login failed:", error);
