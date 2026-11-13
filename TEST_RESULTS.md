@@ -151,3 +151,70 @@ Route (app)
 Total Routes: 63 (All 63 routes statically optimized or server-rendered cleanly)
 Build exit code: 0
 ```
+
+---
+
+## 5. Production Headless Chrome Browser Journey Verification
+
+Executed command: `npx tsx scripts/real-browser-journey.ts`
+
+```
+=== STARTING REAL BROWSER JOURNEY AUTOMATION ===
+Connecting to database: mongodb://127.0.0.1:27017/gemstone_evaluation
+
+1. Preparing Test Users in MongoDB:
+  ✓ Primary User created/verified: journey_gemmologist@open4cs.test (ID: 6af5ed532a51615555033907)
+  ✓ Second User created/verified: journey_intruder@open4cs.test (ID: 6af5ed532a51615555033908)
+
+2. Launching Chrome Headless Browser:
+
+3. Navigating to Login Page (/login):
+  Entering credentials for primary user...
+  ✓ Logged in successfully. Current URL: http://localhost:3000/dashboard
+
+4. Navigating to Evaluation Wizard (/evaluate/gemstone):
+  Step 1: Selecting Blue Sapphire, Carat 2.45...
+  ✓ Step 1 Complete. Current URL: http://localhost:3000/evaluate/color
+  Step 2: Entering Color metrics (/evaluate/color)...
+  ✓ Step 2 Complete. Current URL: http://localhost:3000/evaluate/clarity
+  Step 3: Entering Clarity metrics (/evaluate/clarity)...
+  ✓ Step 3 Complete. Current URL: http://localhost:3000/evaluate/cut
+  Step 4: Entering Cut dimensions & symmetry (/evaluate/cut)...
+  ✓ Step 4 Complete. Current URL: http://localhost:3000/evaluate/carat
+  Step 5: Verifying Carat Weight (/evaluate/carat)...
+  ✓ Step 5 Complete. Current URL: http://localhost:3000/evaluate/additional
+  Step 6: Origin and Treatment (/evaluate/additional)...
+  ✓ Step 6 Complete. Current URL: http://localhost:3000/evaluate/review
+
+5. Testing Review Step & Session Storage Refresh (/evaluate/review):
+  Reloading page (F5 refresh)...
+  ✓ Reload successful. Checking draft data persistence...
+  ✓ Entered gemstone details (variety, carat, dimensions) confirmed intact after browser refresh!
+
+6. Executing Evaluation Engine from Review Page:
+  API /api/evaluations responded 200
+  ✓ Evaluation submitted! Redirected to: http://localhost:3000/evaluations/6af7451a11d8b48f10a2abc9
+  ✓ Saved Evaluation ID: 6af7451a11d8b48f10a2abc9
+
+7. Verifying Scores on Results Dashboard:
+  ✓ 4C Breakdown correctly displays Color: 10.0, Clarity: 9.3, Cut: 9.3, Carat: 2.45 ct!
+  ✓ Overview tab displays Overall score: 9.4 / 10 (Composite 93.84 / 100)!
+
+7b. Verifying Pricing Exclusion for Demo-Only Data:
+  ✓ Confirmed: Pricing is strictly UNAVAILABLE with demo-only records; assessment scores remain labelled provisional.
+
+8. Testing Direct URL Reopen (/evaluations/${id}):
+  ✓ Evaluation successfully reloaded from server state!
+
+9. Testing Report Download & PDF Content Integrity:
+  ✓ PDF successfully downloaded: 8551 bytes
+  ✓ PDF strictly contains 2 pages
+  ✓ Decoded QR code extracted from rendered PDF: "http://localhost:3000/evaluations/6af7451a11d8b48f10a2abc9"
+
+10. Testing Privacy with Intruder User Account:
+  Intruder access to report returned HTTP: 404
+  Intruder access to evaluation API returned HTTP: 403
+  ✓ Privacy verified: Intruder cannot view or download other users' evaluations!
+
+=== REAL BROWSER JOURNEY COMPLETED 100% SUCCESSFULLY ===
+```
