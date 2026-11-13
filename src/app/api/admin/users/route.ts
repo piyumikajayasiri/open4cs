@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { getCurrentUser } from "@/lib/auth/currentUser";
 import { connectToDatabase } from "@/lib/mongodb";
-import User from "@/models/User";
+import User, { toSafeUserDTO } from "@/models/User";
 import AuditLog from "@/models/AuditLog";
 
 export async function GET(request?: NextRequest) {
@@ -14,10 +14,12 @@ export async function GET(request?: NextRequest) {
 
     await connectToDatabase();
 
-    const users = await User.find()
-      .select("-password")
+    const rawUsers = await User.find()
+      .select("-passwordHash -password")
       .sort({ createdAt: -1 })
       .lean();
+
+    const users = rawUsers.map(toSafeUserDTO);
 
     return NextResponse.json({
       success: true,
@@ -31,7 +33,7 @@ export async function GET(request?: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const admin = await getCurrentUser();
+    const admin = await getCurrentUser(request);
     if (!admin || admin.role !== "CAGS_ADMIN") {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
@@ -64,10 +66,11 @@ export async function POST(request: NextRequest) {
     const newUser = await User.create({
       name: String(name).trim(),
       email: cleanEmail,
-      password: hashedPassword,
+      passwordHash: hashedPassword,
       category: category || "Professional",
       role: role === "CAGS_ADMIN" ? "CAGS_ADMIN" : "USER",
       status: "ACTIVE",
+      isActive: true,
     });
 
     await AuditLog.create({
@@ -86,16 +89,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        message: `User ${newUser.name} created successfully. Temporary credentials provisioned.`,
-        user: {
-          id: newUser._id,
-          name: newUser.name,
-          email: newUser.email,
-          category: newUser.category,
-          role: newUser.role,
-          status: newUser.status,
-        },
-        temporaryPassword: password ? undefined : tempPassword,
+        message: `User ${newUser.name} created successfully.`,
+        user: toSafeUserDTO(newUser),
       },
       { status: 201 }
     );

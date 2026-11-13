@@ -244,34 +244,16 @@ export function EvaluationDraftProvider({ children }: { children: ReactNode }) {
     };
 
     try {
-      // Step 1: Save gemstone record
-      const gemRes = await fetch("/api/gemstones", {
+      // Atomic 4Cs evaluation and specimen persistence
+      const evalRes = await fetch("/api/evaluations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      const gemData = await gemRes.json();
-      if (!gemRes.ok) {
-        const errMsg = gemData.message || "Failed to save gemstone record.";
-        setSubmitError(errMsg);
-        setIsSubmitting(false);
-        return { success: false, error: errMsg };
-      }
-
-      // Step 2: Trigger 4Cs evaluation engine
-      const evalRes = await fetch("/api/evaluations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...payload,
-          gemstoneId: gemData.gemstone?._id,
-        }),
-      });
-
       const evalData = await evalRes.json();
       if (!evalRes.ok) {
-        const errMsg = evalData.message || "Evaluation calculation failed.";
+        const errMsg = evalData.message || evalData.error || "Evaluation calculation failed.";
         setSubmitError(errMsg);
         setIsSubmitting(false);
         return { success: false, error: errMsg };

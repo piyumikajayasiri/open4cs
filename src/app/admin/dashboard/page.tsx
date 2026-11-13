@@ -1,163 +1,77 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   GitFork,
   Plus,
   Layers,
   Gem,
-  TrendingUp,
   Scale,
   LayoutGrid,
-  PenLine,
   FileText,
   Users,
   X,
   CheckCircle2,
-  AlertCircle,
-  Clock,
-  ArrowRight,
-  ShieldCheck,
+  Loader2,
+  Save,
 } from "lucide-react";
 import ToastNotification, {
   ToastMessage,
   ToastType,
 } from "@/components/ui/ToastNotification";
 
-interface PendingApproval {
-  id: string;
-  code: string;
-  title: string;
-  category: string;
-  subtitle: string;
-  status: "Pending" | "Approved" | "Revision Requested";
-  submittedBy: string;
-  submittedAt: string;
-  impact: string;
-  rationale: string;
-  details: string;
+interface AuditLogItem {
+  _id: string;
+  action: string;
+  performedBy?: {
+    name?: string;
+    email?: string;
+  };
+  summary: string;
+  createdAt: string;
 }
 
-interface RecentActivityItem {
-  id: string;
-  title: string;
-  subtitle: string;
-  icon: React.ReactNode;
-  iconBg: string;
+interface RuleVersionItem {
+  _id: string;
+  version: string;
+  name: string;
+  description: string;
+  status: "DRAFT" | "ACTIVE" | "ARCHIVED";
+  createdAt: string;
 }
 
-const INITIAL_PENDING_APPROVALS: PendingApproval[] = [
-  {
-    id: "pa-1",
-    code: "PM-4.3",
-    title: "PM-4.3 unheated premiur",
-    category: "Pricing",
-    subtitle: "Pricing · needs 2nd reviewer",
-    status: "Pending",
-    submittedBy: "Dr. K. Mendis",
-    submittedAt: "Today, 10:14 AM",
-    impact: "+4.5% base price tier for Ceylon unheated cornflower blue sapphires",
-    rationale:
-      "Recent Colombo auction lots indicate persistent premium divergence between heated and verified natural unheated corundum.",
-    details:
-      "Adjusts Rule PR-UNHEAT-01 multiplier from 1.35x to 1.41x for stones >= 2.00 ct with accredited laboratory spectrographic proof.",
-  },
-  {
-    id: "pa-2",
-    code: "TRT-02",
-    title: "TRT-02 diffusion modifier",
-    category: "Treatment",
-    subtitle: "Treatment · lab evidence attached",
-    status: "Pending",
-    submittedBy: "Prof. S. Wickramasinghe",
-    submittedAt: "Yesterday, 4:30 PM",
-    impact: "-15% additional valuation penalty on beryllium lattice diffusion",
-    rationale:
-      "Consumer market acceptance for surface and lattice diffusion has dropped sharply in international B2B exchanges.",
-    details:
-      "Enforces mandatory deep lattice diffusion penalty across all corundum varieties regardless of face-up color saturation score.",
-  },
-  {
-    id: "pa-3",
-    code: "CAT-STAR",
-    title: "Star sapphire support s",
-    category: "Catalogue",
-    subtitle: "Catalogue · field study Q4",
-    status: "Pending",
-    submittedBy: "Data Desk (E. Alwis)",
-    submittedAt: "Oct 28, 2026",
-    impact: "Introduces Asterism rating parameters (6-ray sharpness & centering)",
-    rationale:
-      "Ratnapura field study completed with 140 benchmark star sapphire lots now classified and photographed.",
-    details:
-      "Adds asterism sub-tier into the 4C Evaluation Rules with ray straightness and dome symmetry coefficients.",
-  },
-  {
-    id: "pa-4",
-    code: "REC-11",
-    title: "REC-11 recut wording",
-    category: "Recommendations",
-    subtitle: "Recommendations · ready",
-    status: "Pending",
-    submittedBy: "Master Cutter N. Perera",
-    submittedAt: "Oct 26, 2026",
-    impact: "Refined advisory warnings for stones with heavy belly bulge (>72% depth)",
-    rationale:
-      "Clarifies trader vs student instructions when windowed stones could recover up to +18% value via pavilion re-proportioning.",
-    details:
-      "Updates recommendation engine output message template for excessive depth penalties to give actionable recut yield estimates.",
-  },
-];
-
-const RECENT_ACTIVITIES: RecentActivityItem[] = [
-  {
-    id: "act-1",
-    title: "Rule COL-03 saturation band widened",
-    subtitle: "Dr. Mendis · 2h ago",
-    icon: <PenLine className="w-4 h-4 text-blue-600" />,
-    iconBg: "bg-blue-50",
-  },
-  {
-    id: "act-2",
-    title: "12 Ceylon blue references added",
-    subtitle: "Data desk · Yesterday",
-    icon: <Gem className="w-4 h-4 text-emerald-600" />,
-    iconBg: "bg-emerald-50",
-  },
-  {
-    id: "act-3",
-    title: "PM-4.2 heated modifier - 4% approved",
-    subtitle: "Pricing board · Sep 22",
-    icon: <FileText className="w-4 h-4 text-amber-600" />,
-    iconBg: "bg-amber-50",
-  },
-  {
-    id: "act-4",
-    title: "34 new student accounts",
-    subtitle: "System · Sep 21",
-    icon: <Users className="w-4 h-4 text-indigo-600" />,
-    iconBg: "bg-indigo-50",
-  },
-];
+interface DashboardMetrics {
+  varietiesCount: number;
+  referencesCount: number;
+  pendingReferencesCount: number;
+  usersCount: number;
+  auditLogsCount: number;
+  activeRuleset: string;
+}
 
 export default function AdminDashboardPage() {
-  const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>(
-    INITIAL_PENDING_APPROVALS
-  );
-  const [selectedApproval, setSelectedApproval] =
-    useState<PendingApproval | null>(null);
+  const [metrics, setMetrics] = useState<DashboardMetrics>({
+    varietiesCount: 0,
+    referencesCount: 0,
+    pendingReferencesCount: 0,
+    usersCount: 0,
+    auditLogsCount: 0,
+    activeRuleset: "v4.2 Production Locked",
+  });
+  const [recentAuditLogs, setRecentAuditLogs] = useState<AuditLogItem[]>([]);
+  const [ruleVersions, setRuleVersions] = useState<RuleVersionItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Modals state
   const [showProposeModal, setShowProposeModal] = useState(false);
   const [showRuleVersionsModal, setShowRuleVersionsModal] = useState(false);
 
   // Propose rule change form
-  const [proposalCategory, setProposalCategory] = useState("Pricing");
-  const [proposalCode, setProposalCode] = useState("");
-  const [proposalTitle, setProposalTitle] = useState("");
-  const [proposalRationale, setProposalRationale] = useState("");
-  const [proposalImpact, setProposalImpact] = useState("");
+  const [proposalVersion, setProposalVersion] = useState("");
+  const [proposalName, setProposalName] = useState("");
+  const [proposalDescription, setProposalDescription] = useState("");
+  const [submittingProposal, setSubmittingProposal] = useState(false);
 
   // Toast feedback
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -166,87 +80,88 @@ export default function AdminDashboardPage() {
     setToasts((prev) => [...prev, { id: String(Date.now()), message, type }]);
   };
 
-  const dismissToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+  const dismissToast = (id: string) => setToasts((prev) => prev.filter((t) => t.id !== id));
+
+  const fetchDashboardData = async () => {
+    try {
+      const res = await fetch("/api/admin/status");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.metrics) setMetrics(data.metrics);
+        if (Array.isArray(data.recentAuditLogs)) setRecentAuditLogs(data.recentAuditLogs);
+        if (Array.isArray(data.ruleVersions)) setRuleVersions(data.ruleVersions);
+      }
+    } catch (err) {
+      console.error("Failed to load admin dashboard data:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Approval handlers
-  const handleApprove = (approvalId: string) => {
-    setPendingApprovals((prev) =>
-      prev.filter((item) => item.id !== approvalId)
-    );
-    showToast(
-      `Approval signed off for ${selectedApproval?.code || "item"}. CAGS Board sign-off recorded.`,
-      "success"
-    );
-    setSelectedApproval(null);
-  };
+  useEffect(() => {
+    let ignore = false;
+    async function loadData() {
+      try {
+        const res = await fetch("/api/admin/status");
+        if (res.ok && !ignore) {
+          const data = await res.json();
+          if (data.metrics) setMetrics(data.metrics);
+          if (Array.isArray(data.recentAuditLogs)) setRecentAuditLogs(data.recentAuditLogs);
+          if (Array.isArray(data.ruleVersions)) setRuleVersions(data.ruleVersions);
+        }
+      } catch (err) {
+        if (!ignore) console.error("Failed to load admin dashboard data:", err);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+    loadData();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
-  const handleRequestRevision = (approvalId: string) => {
-    setPendingApprovals((prev) =>
-      prev.map((item) =>
-        item.id === approvalId
-          ? { ...item, status: "Revision Requested", subtitle: `${item.category} · revision requested` }
-          : item
-      )
-    );
-    showToast(
-      `Revision request dispatched to author for ${selectedApproval?.code || "item"}.`,
-      "info"
-    );
-    setSelectedApproval(null);
-  };
-
-  const handleReject = (approvalId: string) => {
-    setPendingApprovals((prev) =>
-      prev.filter((item) => item.id !== approvalId)
-    );
-    showToast(
-      `Proposal ${selectedApproval?.code || ""} rejected and archived.`,
-      "error"
-    );
-    setSelectedApproval(null);
-  };
-
-  // Submit proposal
-  const handleSubmitProposal = (e: React.FormEvent) => {
+  // Submit proposal to real API
+  const handleSubmitProposal = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!proposalTitle.trim() || !proposalCode.trim()) {
-      showToast("Please provide both a Rule Code and Title.", "error");
+    if (!proposalVersion.trim() || !proposalName.trim() || !proposalDescription.trim()) {
+      showToast("Please provide Rule Version identifier, Name, and Description.", "error");
       return;
     }
 
-    const newApproval: PendingApproval = {
-      id: `pa-${Date.now()}`,
-      code: proposalCode.trim().toUpperCase(),
-      title: `${proposalCode.trim().toUpperCase()} ${proposalTitle.trim()}`,
-      category: proposalCategory,
-      subtitle: `${proposalCategory} · board review queued`,
-      status: "Pending",
-      submittedBy: "CAGS Admin",
-      submittedAt: "Just now",
-      impact: proposalImpact || "Rule parameter modification",
-      rationale: proposalRationale || "Standard administrative update.",
-      details: proposalRationale || "Proposed rule change pending board review.",
-    };
+    setSubmittingProposal(true);
+    try {
+      const res = await fetch("/api/admin/rule-versions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          version: proposalVersion.trim(),
+          name: proposalName.trim(),
+          description: proposalDescription.trim(),
+          status: "DRAFT",
+        }),
+      });
 
-    setPendingApprovals((prev) => [newApproval, ...prev]);
-    showToast(
-      `Rule change proposal ${newApproval.code} submitted successfully for Board sign-off!`,
-      "success"
-    );
-
-    // Reset form
-    setProposalCode("");
-    setProposalTitle("");
-    setProposalRationale("");
-    setProposalImpact("");
-    setShowProposeModal(false);
+      const data = await res.json();
+      if (res.ok) {
+        showToast(
+          `Rule version draft ${proposalVersion.trim().toUpperCase()} recorded successfully for research governance.`,
+          "success"
+        );
+        setProposalVersion("");
+        setProposalName("");
+        setProposalDescription("");
+        setShowProposeModal(false);
+        fetchDashboardData();
+      } else {
+        showToast(data.error || "Failed to create rule version draft.", "error");
+      }
+    } catch {
+      showToast("Network error submitting rule proposal.", "error");
+    } finally {
+      setSubmittingProposal(false);
+    }
   };
-
-  const pendingCount = pendingApprovals.filter(
-    (a) => a.status === "Pending"
-  ).length;
 
   return (
     <div className="p-6 lg:p-10 space-y-8 max-w-7xl mx-auto">
@@ -260,7 +175,7 @@ export default function AdminDashboardPage() {
             CAGS Administration
           </h1>
           <p className="mt-1 text-xs sm:text-sm text-slate-500">
-            Rule integrity, reference data health and pending approvals at a glance
+            Real-time database metrics, reference health, and audit trail at a glance
           </p>
         </div>
 
@@ -271,7 +186,7 @@ export default function AdminDashboardPage() {
             className="inline-flex items-center gap-2 rounded-xl border border-slate-200/90 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-slate-300 transition cursor-pointer"
           >
             <GitFork className="w-4 h-4 text-slate-500" />
-            <span>Rule Versions</span>
+            <span>Rule Versions ({ruleVersions.length})</span>
           </button>
 
           <button
@@ -280,437 +195,233 @@ export default function AdminDashboardPage() {
             className="inline-flex items-center gap-2 rounded-xl bg-[#0B1528] hover:bg-slate-800 text-white px-4 py-2.5 text-xs sm:text-sm font-semibold shadow-xs transition duration-150 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>Propose Rule Change</span>
+            <span>Propose Rule Version Draft</span>
           </button>
         </div>
       </div>
 
-      {/* ================= METRICS CARDS (5 Across) ================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {/* Card 1: Supported Varieties */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-2 hover:border-blue-200 hover:shadow-xs transition">
-          <div className="w-9 h-9 rounded-xl bg-blue-50/80 border border-blue-100/70 flex items-center justify-center">
-            <Layers className="w-4 h-4 text-blue-600" />
-          </div>
-          <div className="pt-1">
-            <div className="text-2xl font-extrabold text-slate-900 tracking-tight">
-              5
-            </div>
-            <div className="text-xs font-semibold text-slate-500 mt-0.5">
-              Supported Varieties
-            </div>
-          </div>
-          <div className="pt-1">
-            <Link
-              href="/admin/gemstones"
-              className="text-xs text-emerald-600 font-medium hover:underline inline-block"
-            >
-              1 pending review
-            </Link>
-          </div>
+      {loading ? (
+        <div className="p-12 text-center text-slate-400">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-blue-600" />
+          <p className="text-sm">Loading live database status...</p>
         </div>
-
-        {/* Card 2: Reference Gemstones */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-2 hover:border-blue-200 hover:shadow-xs transition">
-          <div className="w-9 h-9 rounded-xl bg-blue-50/80 border border-blue-100/70 flex items-center justify-center">
-            <Gem className="w-4 h-4 text-blue-600" />
-          </div>
-          <div className="pt-1">
-            <div className="text-2xl font-extrabold text-slate-900 tracking-tight">
-              594
-            </div>
-            <div className="text-xs font-semibold text-slate-500 mt-0.5">
-              Reference Gemstones
-            </div>
-          </div>
-          <div className="pt-1">
-            <span className="text-xs text-emerald-600 font-medium">
-              +18 this month
-            </span>
-          </div>
-        </div>
-
-        {/* Card 3: Historical Records */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-2 hover:border-blue-200 hover:shadow-xs transition">
-          <div className="w-9 h-9 rounded-xl bg-blue-50/80 border border-blue-100/70 flex items-center justify-center">
-            <TrendingUp className="w-4 h-4 text-blue-600" />
-          </div>
-          <div className="pt-1">
-            <div className="text-2xl font-extrabold text-slate-900 tracking-tight">
-              1,204
-            </div>
-            <div className="text-xs font-semibold text-slate-500 mt-0.5">
-              Historical Records
-            </div>
-          </div>
-          <div className="pt-1">
-            <Link
-              href="/admin/historical-pricing"
-              className="text-xs text-blue-600 font-medium hover:underline inline-block"
-            >
-              Across 5 varieties
-            </Link>
-          </div>
-        </div>
-
-        {/* Card 4: Active Eval. Rules */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-2 hover:border-blue-200 hover:shadow-xs transition">
-          <div className="w-9 h-9 rounded-xl bg-blue-50/80 border border-blue-100/70 flex items-center justify-center">
-            <Scale className="w-4 h-4 text-blue-600" />
-          </div>
-          <div className="pt-1">
-            <div className="text-2xl font-extrabold text-slate-900 tracking-tight">
-              32
-            </div>
-            <div className="text-xs font-semibold text-slate-500 mt-0.5">
-              Active Eval. Rules
-            </div>
-          </div>
-          <div className="pt-1">
-            <span className="text-xs text-emerald-600 font-medium">
-              v4.2 in force
-            </span>
-          </div>
-        </div>
-
-        {/* Card 5: Active Pricing Rules */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-2 hover:border-blue-200 hover:shadow-xs transition">
-          <div className="w-9 h-9 rounded-xl bg-blue-50/80 border border-blue-100/70 flex items-center justify-center">
-            <LayoutGrid className="w-4 h-4 text-blue-600" />
-          </div>
-          <div className="pt-1">
-            <div className="text-2xl font-extrabold text-slate-900 tracking-tight">
-              18
-            </div>
-            <div className="text-xs font-semibold text-slate-500 mt-0.5">
-              Active Pricing Rules
-            </div>
-          </div>
-          <div className="pt-1">
-            <span className="text-xs text-emerald-600 font-medium">
-              PM-4.2 in force
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* ================= LOWER TWO-COLUMN GRID ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Card: Pending approvals (lg:col-span-7) */}
-        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-5">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-slate-900">
-              Pending approvals
-            </h2>
-            <span className="bg-amber-50 text-amber-800 border border-amber-200/80 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
-              {pendingCount} awaiting board sign-off
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            {pendingApprovals.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center space-y-2">
-                <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
-                <p className="text-sm font-semibold text-slate-800">
-                  All approvals clear!
-                </p>
-                <p className="text-xs text-slate-500">
-                  No pending rules awaiting board sign-off at this time.
-                </p>
+      ) : (
+        <>
+          {/* ================= METRICS CARDS (5 Across) ================= */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {/* Card 1: Supported Varieties */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-2 hover:border-blue-200 hover:shadow-xs transition">
+              <div className="w-9 h-9 rounded-xl bg-blue-50/80 border border-blue-100/70 flex items-center justify-center">
+                <Layers className="w-4 h-4 text-blue-600" />
               </div>
-            ) : (
-              pendingApprovals.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-slate-50/70 hover:bg-slate-50/90 rounded-xl p-3.5 sm:p-4 border border-slate-100/90 flex items-center justify-between gap-4 transition"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span
-                      className={`text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-md shrink-0 ${
-                        item.status === "Pending"
-                          ? "bg-amber-100 text-amber-800"
-                          : item.status === "Approved"
-                          ? "bg-emerald-100 text-emerald-800"
-                          : "bg-blue-100 text-blue-800"
-                      }`}
-                    >
-                      {item.status}
-                    </span>
-
-                    <div className="min-w-0">
-                      <h3 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
-                        {item.title}
-                      </h3>
-                      <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 truncate">
-                        {item.subtitle}
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setSelectedApproval(item)}
-                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer shrink-0"
-                  >
-                    Review
-                  </button>
+              <div className="pt-1">
+                <div className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                  {metrics.varietiesCount}
                 </div>
-              ))
-            )}
+                <div className="text-xs font-semibold text-slate-500 mt-0.5">
+                  Supported Varieties
+                </div>
+              </div>
+              <div className="pt-1">
+                <Link
+                  href="/admin/gemstones"
+                  className="text-xs text-blue-600 font-medium hover:underline inline-block"
+                >
+                  View Catalogue →
+                </Link>
+              </div>
+            </div>
+
+            {/* Card 2: Reference Gemstones */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-2 hover:border-blue-200 hover:shadow-xs transition">
+              <div className="w-9 h-9 rounded-xl bg-blue-50/80 border border-blue-100/70 flex items-center justify-center">
+                <Gem className="w-4 h-4 text-blue-600" />
+              </div>
+              <div className="pt-1">
+                <div className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                  {metrics.referencesCount}
+                </div>
+                <div className="text-xs font-semibold text-slate-500 mt-0.5">
+                  Reference Gemstones
+                </div>
+              </div>
+              <div className="pt-1">
+                <span className="text-xs text-amber-600 font-medium">
+                  {metrics.pendingReferencesCount} pending verification
+                </span>
+              </div>
+            </div>
+
+            {/* Card 3: Registered Users */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-2 hover:border-blue-200 hover:shadow-xs transition">
+              <div className="w-9 h-9 rounded-xl bg-blue-50/80 border border-blue-100/70 flex items-center justify-center">
+                <Users className="w-4 h-4 text-blue-600" />
+              </div>
+              <div className="pt-1">
+                <div className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                  {metrics.usersCount}
+                </div>
+                <div className="text-xs font-semibold text-slate-500 mt-0.5">
+                  Registered Accounts
+                </div>
+              </div>
+              <div className="pt-1">
+                <Link
+                  href="/admin/users"
+                  className="text-xs text-blue-600 font-medium hover:underline inline-block"
+                >
+                  Manage Users →
+                </Link>
+              </div>
+            </div>
+
+            {/* Card 4: Active Eval. Rules */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-2 hover:border-blue-200 hover:shadow-xs transition">
+              <div className="w-9 h-9 rounded-xl bg-blue-50/80 border border-blue-100/70 flex items-center justify-center">
+                <Scale className="w-4 h-4 text-blue-600" />
+              </div>
+              <div className="pt-1">
+                <div className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                  4C
+                </div>
+                <div className="text-xs font-semibold text-slate-500 mt-0.5">
+                  Active Weighting
+                </div>
+              </div>
+              <div className="pt-1">
+                <span className="text-xs text-emerald-600 font-medium">
+                  35/25/20/20 in force
+                </span>
+              </div>
+            </div>
+
+            {/* Card 5: Audit Log Trail */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-2 hover:border-blue-200 hover:shadow-xs transition">
+              <div className="w-9 h-9 rounded-xl bg-blue-50/80 border border-blue-100/70 flex items-center justify-center">
+                <LayoutGrid className="w-4 h-4 text-blue-600" />
+              </div>
+              <div className="pt-1">
+                <div className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                  {metrics.auditLogsCount}
+                </div>
+                <div className="text-xs font-semibold text-slate-500 mt-0.5">
+                  Recorded Audit Events
+                </div>
+              </div>
+              <div className="pt-1">
+                <Link
+                  href="/admin/audit"
+                  className="text-xs text-blue-600 font-medium hover:underline inline-block"
+                >
+                  View Audit Trail →
+                </Link>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Right Card: Recent activity (lg:col-span-5) */}
-        <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-5">
-          <h2 className="text-base font-bold text-slate-900">
-            Recent activity
-          </h2>
-
-          <div className="space-y-4">
-            {RECENT_ACTIVITIES.map((act) => (
-              <div key={act.id} className="flex items-start gap-3">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${act.iconBg}`}
-                >
-                  {act.icon}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-xs sm:text-sm font-semibold text-slate-900 leading-snug">
-                    {act.title}
-                  </h3>
-                  <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
-                    {act.subtitle}
+          {/* ================= LOWER TWO-COLUMN GRID ================= */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left Card: Rule Versions (lg:col-span-7) */}
+            <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-base font-bold text-slate-900">
+                    Rule Governance & Draft Versions
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    Production evaluation engine is locked to v4.2. Research drafts require code-level publication.
                   </p>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ================= REVIEW APPROVAL MODAL ================= */}
-      {selectedApproval && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6"
-        >
-          <div className="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl p-6 sm:p-7 space-y-5 animate-in fade-in-0 zoom-in-95">
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-md">
-                    {selectedApproval.status}
-                  </span>
-                  <span className="text-xs text-slate-400 font-medium">
-                    {selectedApproval.category} Rule
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-slate-900">
-                  {selectedApproval.title}
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Submitted by {selectedApproval.submittedBy} ·{" "}
-                  {selectedApproval.submittedAt}
-                </p>
+                <span className="bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                  v4.2 Production Locked
+                </span>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setSelectedApproval(null)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Impact Box */}
-            <div className="rounded-xl bg-blue-50/70 border border-blue-100 p-4 space-y-1">
-              <h4 className="text-[11px] font-bold text-blue-900 uppercase tracking-wider">
-                System Impact
-              </h4>
-              <p className="text-xs text-blue-800 font-medium leading-relaxed">
-                {selectedApproval.impact}
-              </p>
-            </div>
-
-            {/* Rationale & Details */}
-            <div className="space-y-3">
-              <div>
-                <h4 className="text-xs font-bold text-slate-700">Rationale</h4>
-                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                  {selectedApproval.rationale}
-                </p>
-              </div>
-
-              <div>
-                <h4 className="text-xs font-bold text-slate-700">
-                  Engine Implementation Details
-                </h4>
-                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                  {selectedApproval.details}
-                </p>
+              <div className="space-y-3">
+                {ruleVersions.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center space-y-2">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
+                    <p className="text-sm font-semibold text-slate-800">
+                      Standard Governance Active
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      The core evaluation engine operates on the verified v4.2 production ruleset. No unreviewed drafts pending.
+                    </p>
+                  </div>
+                ) : (
+                  ruleVersions.map((item) => (
+                    <div
+                      key={item._id}
+                      className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 space-y-2 hover:bg-slate-50 transition"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-900">
+                          {item.version} — {item.name}
+                        </span>
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                            item.status === "ACTIVE"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : "bg-amber-100 text-amber-800"
+                          }`}
+                        >
+                          {item.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600">{item.description}</p>
+                      <p className="text-[10px] text-slate-400">
+                        Recorded on {new Date(item.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
-            {/* Modal Actions */}
-            <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => handleReject(selectedApproval.id)}
-                className="text-xs font-semibold text-red-600 hover:text-red-700 px-3 py-2 rounded-xl transition"
-              >
-                Reject & Archive
-              </button>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleRequestRevision(selectedApproval.id)}
-                  className="rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+            {/* Right Card: Recent Live Audit Activity (lg:col-span-5) */}
+            <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-5">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-bold text-slate-900">
+                  Recent Database Audit Trail
+                </h2>
+                <Link
+                  href="/admin/audit"
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
                 >
-                  Request Revisions
-                </button>
+                  Full audit trail →
+                </Link>
+              </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleApprove(selectedApproval.id)}
-                  className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-xs font-bold transition shadow-xs flex items-center gap-1.5"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Approve Sign-off</span>
-                </button>
+              <div className="space-y-4">
+                {recentAuditLogs.length === 0 ? (
+                  <div className="p-6 text-center text-xs text-slate-400 border border-dashed border-slate-200 rounded-xl">
+                    No recent audit activity recorded.
+                  </div>
+                ) : (
+                  recentAuditLogs.map((act) => (
+                    <div key={act._id} className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100/70 flex items-center justify-center shrink-0 mt-0.5">
+                        <FileText className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-xs sm:text-sm font-semibold text-slate-900 leading-snug">
+                          {act.summary}
+                        </h3>
+                        <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
+                          {act.performedBy?.name || "System"} ·{" "}
+                          {new Date(act.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
 
-      {/* ================= PROPOSE RULE CHANGE MODAL ================= */}
-      {showProposeModal && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6"
-        >
-          <div className="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl p-6 sm:p-7 space-y-5 animate-in fade-in-0 zoom-in-95">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">
-                  Propose Rule Change
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Submit a parameter adjustment for CAGS Board peer review
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowProposeModal(false)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmitProposal} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Rule Category
-                  </label>
-                  <select
-                    value={proposalCategory}
-                    onChange={(e) => setProposalCategory(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  >
-                    <option value="Pricing">Pricing Matrix</option>
-                    <option value="Color">Color Evaluation</option>
-                    <option value="Clarity">Clarity Standards</option>
-                    <option value="Cut">Cut Proportions</option>
-                    <option value="Treatment">Treatment Modifier</option>
-                    <option value="Origin">Origin Premium</option>
-                    <option value="Catalogue">Catalogue Variety</option>
-                    <option value="Recommendations">Recommendations</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Rule Code / ID
-                  </label>
-                  <input
-                    type="text"
-                    value={proposalCode}
-                    onChange={(e) => setProposalCode(e.target.value)}
-                    placeholder="e.g. PM-4.4 or COL-05"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Change Title
-                </label>
-                <input
-                  type="text"
-                  value={proposalTitle}
-                  onChange={(e) => setProposalTitle(e.target.value)}
-                  placeholder="e.g. Unheated Padparadscha benchmark tier update"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Target Impact / Adjustment
-                </label>
-                <input
-                  type="text"
-                  value={proposalImpact}
-                  onChange={(e) => setProposalImpact(e.target.value)}
-                  placeholder="e.g. +6% premium adjustment for Certified Natural stones"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Market Justification & Rationale
-                </label>
-                <textarea
-                  value={proposalRationale}
-                  onChange={(e) => setProposalRationale(e.target.value)}
-                  rows={3}
-                  placeholder="Explain why this rule change is warranted and reference supporting trade lot data..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setShowProposeModal(false)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-xl bg-[#0B1528] hover:bg-slate-800 text-white px-5 py-2 text-xs font-bold transition shadow-xs"
-                >
-                  Submit Proposal
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ================= RULE VERSIONS QUICK VIEW MODAL ================= */}
+      {/* ================= RULE VERSIONS MODAL ================= */}
       {showRuleVersionsModal && (
         <div
           role="dialog"
@@ -718,100 +429,154 @@ export default function AdminDashboardPage() {
           className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6"
         >
           <div className="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl p-6 sm:p-7 space-y-5 animate-in fade-in-0 zoom-in-95">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-bold text-slate-900">
-                  Active Rule Engine Versions
+                  Governed Rule Versions
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  CAGS verified rule sets currently in production force
+                  Published and research draft rule configurations in MongoDB
                 </p>
               </div>
-
               <button
                 type="button"
                 onClick={() => setShowRuleVersionsModal(false)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg transition"
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-3">
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-bold text-slate-900">
-                    Evaluation Engine Core
-                  </div>
-                  <div className="text-[11px] text-slate-500">
-                    Color, Clarity, Cut & Carat scoring algorithms
-                  </div>
+            <div className="max-h-80 overflow-y-auto space-y-3">
+              <div className="p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-xl space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-emerald-900">
+                    v4.2 — Production Authoritative
+                  </span>
+                  <span className="text-[10px] font-bold bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-md">
+                    ACTIVE
+                  </span>
                 </div>
-                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs px-2.5 py-0.5 rounded-md">
-                  v4.2 in force
-                </span>
+                <p className="text-xs text-emerald-800">
+                  Color 35% · Clarity 25% · Cut 20% · Carat 20%. Fixed deterministic weighting engine.
+                </p>
               </div>
 
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-bold text-slate-900">
-                    Pricing Matrix Engine
+              {ruleVersions.map((rv) => (
+                <div key={rv._id} className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-900">
+                      {rv.version} — {rv.name}
+                    </span>
+                    <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md">
+                      {rv.status}
+                    </span>
                   </div>
-                  <div className="text-[11px] text-slate-500">
-                    Colombo benchmark B2B curve & origin modifiers
-                  </div>
+                  <p className="text-xs text-slate-600">{rv.description}</p>
                 </div>
-                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs px-2.5 py-0.5 rounded-md">
-                  PM-4.2 in force
-                </span>
-              </div>
-
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-bold text-slate-900">
-                    Color Spectrum Standard (Rule COL-03)
-                  </div>
-                  <div className="text-[11px] text-slate-500">
-                    Tone 5-6 vivid saturation +9% premium
-                  </div>
-                </div>
-                <span className="bg-blue-50 text-blue-700 border border-blue-200 font-bold text-xs px-2.5 py-0.5 rounded-md">
-                  Active
-                </span>
-              </div>
-
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-bold text-slate-900">
-                    Treatment Modifier Table (Rule TRT-04)
-                  </div>
-                  <div className="text-[11px] text-slate-500">
-                    Laboratory verified unheated natural premium
-                  </div>
-                </div>
-                <span className="bg-blue-50 text-blue-700 border border-blue-200 font-bold text-xs px-2.5 py-0.5 rounded-md">
-                  Active
-                </span>
-              </div>
+              ))}
             </div>
 
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-              <Link
-                href="/admin/evaluation-rules"
-                className="text-xs font-bold text-blue-600 hover:text-blue-700 inline-flex items-center gap-1"
-              >
-                <span>View Full Rule Table</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-
+            <div className="flex justify-end pt-2">
               <button
                 type="button"
                 onClick={() => setShowRuleVersionsModal(false)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                className="px-5 py-2 text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl"
               >
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= PROPOSE RULE VERSION DRAFT MODAL ================= */}
+      {showProposeModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6"
+        >
+          <div className="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl p-6 sm:p-7 space-y-5 animate-in fade-in-0 zoom-in-95">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">
+                  Propose Rule Version Draft
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Record a formal research draft. Production engine remains v4.2 until code publish.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowProposeModal(false)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitProposal} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Version Identifier (e.g. v4.3-draft)
+                </label>
+                <input
+                  type="text"
+                  value={proposalVersion}
+                  onChange={(e) => setProposalVersion(e.target.value)}
+                  placeholder="v4.3-draft"
+                  required
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-800"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Proposal Name
+                </label>
+                <input
+                  type="text"
+                  value={proposalName}
+                  onChange={(e) => setProposalName(e.target.value)}
+                  placeholder="2026 Corundum Refinement Proposal"
+                  required
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-800"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Description & Gemmological Rationale
+                </label>
+                <textarea
+                  value={proposalDescription}
+                  onChange={(e) => setProposalDescription(e.target.value)}
+                  placeholder="Document the proposed research revisions and supporting references..."
+                  rows={4}
+                  required
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-800 resize-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowProposeModal(false)}
+                  className="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingProposal}
+                  className="inline-flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 text-xs sm:text-sm font-semibold disabled:opacity-50"
+                >
+                  {submittingProposal ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span>Save Draft</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

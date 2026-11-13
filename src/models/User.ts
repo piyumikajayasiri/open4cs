@@ -19,6 +19,7 @@ const UserSchema = new Schema(
     passwordHash: {
       type: String,
       required: true,
+      select: false,
     },
 
     category: {
@@ -81,5 +82,51 @@ const UserSchema = new Schema(
 const User =
   mongoose.models.User ||
   mongoose.model("User", UserSchema);
+
+export interface SafeUserDTO {
+  id: string;
+  name: string;
+  email: string;
+  category: string;
+  organization?: string;
+  preferredLanguage?: string;
+  reportCurrency?: string;
+  role: "USER" | "CAGS_ADMIN";
+  status: "ACTIVE" | "SUSPENDED";
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export function toSafeUserDTO(user: {
+  _id?: unknown;
+  id?: unknown;
+  name?: string;
+  email?: string;
+  category?: string;
+  organization?: string;
+  preferredLanguage?: string;
+  reportCurrency?: string;
+  role?: string;
+  status?: string;
+  isActive?: boolean;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+}): SafeUserDTO {
+  return {
+    id: user._id ? String(user._id) : String(user.id || ""),
+    name: user.name || "",
+    email: user.email || "",
+    category: user.category || "Professional",
+    organization: user.organization || "",
+    preferredLanguage: user.preferredLanguage || "English",
+    reportCurrency: user.reportCurrency || "LKR — Sri Lankan Rupee",
+    role: (user.role as "USER" | "CAGS_ADMIN") || "USER",
+    status: (user.status as "ACTIVE" | "SUSPENDED") || "ACTIVE",
+    isActive: user.isActive !== false,
+    createdAt: user.createdAt ? new Date(user.createdAt).toISOString() : undefined,
+    updatedAt: user.updatedAt ? new Date(user.updatedAt).toISOString() : undefined,
+  };
+}
 
 export default User;

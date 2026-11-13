@@ -3,6 +3,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 export type GemstoneStatus = "ACTIVE" | "INACTIVE";
 
 export interface IGemstone extends Document {
+  userId?: mongoose.Types.ObjectId | string;
   code?: string;
   name?: string;
   species?: string;
@@ -64,6 +65,12 @@ export interface IGemstone extends Document {
 
 const gemstoneSchema = new Schema<IGemstone>(
   {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      index: true,
+      default: null,
+    },
     code: {
       type: String,
       trim: true,
@@ -165,6 +172,8 @@ const gemstoneSchema = new Schema<IGemstone>(
     timestamps: true,
   }
 );
+
+gemstoneSchema.index({ userId: 1, createdAt: -1 });
 
 const Gemstone: Model<IGemstone> =
   mongoose.models.Gemstone ||

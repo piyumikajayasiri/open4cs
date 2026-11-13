@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { AlertCircle } from "lucide-react";
 
 export type ReferencePriceRecord = {
   id: string;
@@ -92,8 +93,25 @@ export default function HistoricalPricingView({
         </div>
       </div>
 
-      {/* Main 2-Column Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {recordsCount === 0 ? (
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-10 text-center space-y-4 shadow-2xs">
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <h2 className="text-lg font-bold text-slate-900">
+            Historical Wholesale Clearing Trend Unavailable
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 max-w-lg mx-auto">
+            No verified multi-month transaction clearing series exists for this specific gemstone grade band. To prevent market misinformation, fictional clearing charts are suppressed in accordance with Open 4Cs evidence guidelines.
+          </p>
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-600 max-w-md mx-auto">
+            <p className="font-semibold text-slate-700">Data Requirement Policy:</p>
+            <p className="mt-0.5">Indicative wholesale clearing series requires at least 3 verified completed dealer transactions within the 12-month observation window.</p>
+          </div>
+        </div>
+      ) : (
+        /* Main 2-Column Grid */
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Left Column: Historical Chart & 3 Cards (8 cols) */}
         <div className="lg:col-span-8 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-6">
@@ -212,6 +230,7 @@ export default function HistoricalPricingView({
         </div>
 
       </div>
+      )}
     </div>
   );
 }

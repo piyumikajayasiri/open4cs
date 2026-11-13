@@ -65,6 +65,39 @@ export type ReportData = {
   disclaimer: string;
 };
 
+export function isSafeExternalImageUrl(urlString: string): boolean {
+  try {
+    const parsed = new URL(urlString);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
+    const hostname = parsed.hostname.toLowerCase();
+
+    // Disallow private/internal loopback addresses and cloud metadata endpoints to prevent SSRF
+    if (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "::1" ||
+      hostname === "0.0.0.0" ||
+      hostname === "169.254.169.254" ||
+      hostname.startsWith("10.") ||
+      hostname.startsWith("192.168.") ||
+      hostname.startsWith("172.16.") ||
+      hostname.startsWith("172.17.") ||
+      hostname.startsWith("172.18.") ||
+      hostname.startsWith("172.19.") ||
+      hostname.startsWith("172.2") ||
+      hostname.startsWith("172.30.") ||
+      hostname.startsWith("172.31.") ||
+      hostname.endsWith(".internal") ||
+      hostname.endsWith(".local")
+    ) {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
 
@@ -221,15 +254,28 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
           imageBytes = Buffer.from(rawPhoto.replace(/^data:image\/(jpeg|jpg);base64,/, ""), "base64");
           isPng = false;
         } else if (rawPhoto.startsWith("http://") || rawPhoto.startsWith("https://")) {
-          try {
-            const imgRes = await fetch(rawPhoto);
-            if (imgRes.ok) {
-              const arrayBuf = await imgRes.arrayBuffer();
-              imageBytes = Buffer.from(arrayBuf);
-              isPng = rawPhoto.toLowerCase().includes(".png") || (imgRes.headers.get("content-type")?.includes("png") ?? false);
+          if (isSafeExternalImageUrl(rawPhoto)) {
+            try {
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 3000);
+              const imgRes = await fetch(rawPhoto, { signal: controller.signal });
+              clearTimeout(timeoutId);
+
+              if (imgRes.ok) {
+                const contentLength = Number(imgRes.headers.get("content-length") || 0);
+                if (contentLength <= 5 * 1024 * 1024) {
+                  const arrayBuf = await imgRes.arrayBuffer();
+                  if (arrayBuf.byteLength <= 5 * 1024 * 1024) {
+                    imageBytes = Buffer.from(arrayBuf);
+                    isPng =
+                      rawPhoto.toLowerCase().includes(".png") ||
+                      (imgRes.headers.get("content-type")?.includes("png") ?? false);
+                  }
+                }
+              }
+            } catch {
+              // Ignore network fetch error; fallback to placeholder
             }
-          } catch {
-            // Ignore network fetch error; fallback to placeholder
           }
         }
 

@@ -28,6 +28,7 @@ type EvaluationCompleteDashboardProps = {
   pricePerCarat?: string;
   comparablesCount?: number;
   evaluationId?: string;
+  priceStatus?: string;
   initialTab?: "overview" | "breakdown" | "comparables" | "pricing" | "b2b_price" | "recommendations" | "statement";
   onDownloadPdf?: () => void;
   onCompare?: () => void;
@@ -53,6 +54,7 @@ export default function EvaluationCompleteDashboard({
   pricePerCarat = "580K – 686K",
   comparablesCount = 7,
   evaluationId,
+  priceStatus = "UNAVAILABLE",
   initialTab = "overview",
   onDownloadPdf,
   onCompare,
@@ -176,9 +178,9 @@ export default function EvaluationCompleteDashboard({
           stoneCategory={`Heated ${variety.replace("Sapphire", "").trim()} 2.0–3.0 ct`}
           currencyUnit="LKR per carat"
           timeframe={`12 months to ${evaluationDate.split(" ").slice(-2).join(" ") || "Sep 2026"}`}
-          recordsCount={14}
-          referenceRangeMin="545K"
-          referenceRangeMax="640K"
+          recordsCount={priceStatus === "COMPLETED" && priceRangeMin !== "Unavailable" ? 14 : 0}
+          referenceRangeMin={priceRangeMin}
+          referenceRangeMax={priceRangeMax}
           yourPositionMin="580K"
           yourPositionMax="686K"
           twelveMonthMovement="+8.4%"
@@ -191,10 +193,14 @@ export default function EvaluationCompleteDashboard({
           snapshotDate={evaluationDate}
           priceRangeMin={priceRangeMin}
           priceRangeMax={priceRangeMax}
-          pricePerCaratMin={pricePerCarat.split("–")[0]?.trim() || "580K"}
-          pricePerCaratMax={pricePerCarat.split("–")[1]?.trim() || "686K"}
+          pricePerCaratMin={pricePerCarat.split("–")[0]?.trim() || "Unavailable"}
+          pricePerCaratMax={pricePerCarat.split("–")[1]?.trim() || "Unavailable"}
           caratWeight={caratScore.toFixed(2)}
-          finalRangeText={`LKR ${priceRangeMin} – ${priceRangeMax}`}
+          finalRangeText={
+            priceStatus === "COMPLETED" && priceRangeMin !== "Unavailable"
+              ? `LKR ${priceRangeMin} – ${priceRangeMax}`
+              : "Unavailable"
+          }
         />
       ) : activeTab === "recommendations" ? (
         <RecommendationsView
@@ -333,19 +339,31 @@ export default function EvaluationCompleteDashboard({
               SUGGESTED B2B MARKET PRICE RANGE
             </p>
 
-            <p className="text-2xl sm:text-3xl font-black text-slate-900 mt-3 tracking-tight">
-              LKR {priceRangeMin} – {priceRangeMax}
-            </p>
-
-            <p className="text-xs text-slate-500 font-medium mt-1">
-              LKR {pricePerCarat} per carat
-            </p>
+            {priceRangeMin === "Unavailable" || priceStatus !== "COMPLETED" ? (
+              <div className="mt-3 space-y-1.5">
+                <p className="text-xl sm:text-2xl font-black text-amber-700 tracking-tight">
+                  Price Unavailable
+                </p>
+                <p className="text-xs text-slate-500 font-medium">
+                  Insufficient verified market evidence (requires min 3 real transactions).
+                </p>
+              </div>
+            ) : (
+              <div className="mt-3">
+                <p className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                  LKR {priceRangeMin} – {priceRangeMax}
+                </p>
+                <p className="text-xs text-slate-500 font-medium mt-1">
+                  LKR {pricePerCarat} per carat
+                </p>
+              </div>
+            )}
           </div>
 
           <button
             type="button"
-            onClick={() => setActiveTab("pricing")}
-            className="w-full bg-[#1A4545] hover:bg-[#133838] text-white text-xs sm:text-sm font-bold py-2.5 rounded-xl shadow-xs transition mt-6 text-center"
+            onClick={() => setActiveTab("b2b_price")}
+            className="w-full bg-[#1A4545] hover:bg-[#133838] text-white text-xs sm:text-sm font-bold py-2.5 rounded-xl shadow-xs transition mt-6 text-center cursor-pointer"
           >
             See price breakdown
           </button>

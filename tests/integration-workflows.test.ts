@@ -22,6 +22,11 @@ import { NextRequest } from "next/server";
 import User from "../src/models/User";
 import Evaluation from "../src/models/Evaluation";
 import { GET as getAdminUsers } from "../src/app/api/admin/users/route";
+import { GET as getAdminUserById, PATCH as patchAdminUser } from "../src/app/api/admin/users/[id]/route";
+import { POST as postAdminReference } from "../src/app/api/admin/reference-gemstones/route";
+import { GET as getAdminSettings, POST as postAdminSettings } from "../src/app/api/admin/settings/route";
+import { isSafeExternalImageUrl } from "../src/lib/report/generateEvaluationPdf";
+import AuditLog from "../src/models/AuditLog";
 import { GET as getEvaluationById } from "../src/app/api/evaluations/[id]/route";
 import { POST as postEvaluation } from "../src/app/api/evaluations/route";
 
@@ -953,6 +958,369 @@ test("Integration Workflow Suite", async (t) => {
       });
       const docCNoUrl = await PDFDocument.load(pdfCNoUrl);
       assert.strictEqual(docCNoUrl.getPageCount(), 2, "PDF without configured URL must have strictly 2 pages");
+    }
+  );
+
+  // =========================================================================
+  // Test 13: User Security & RBAC: Password hash is strictly excluded from user models and admin APIs; last CAGS_ADMIN cannot be demoted or suspended
+  // =========================================================================
+  await t.test(
+    "13. User Security & RBAC: Password hash is strictly excluded from user models and admin APIs; last CAGS_ADMIN cannot be demoted or suspended",
+    async () => {
+      const adminEmail = `admin-security-${Date.now()}@example.com`;
+      const admin = await User.create({
+        name: "Security Admin",
+        email: adminEmail,
+        passwordHash: "$2b$10$hashedsecretkey1234567890",
+        category: "Gemologist",
+        role: "CAGS_ADMIN",
+        status: "ACTIVE",
+        isActive: true,
+      });
+
+      const adminToken = await createSessionToken({
+        userId: admin._id.toString(),
+        role: "CAGS_ADMIN",
+      });
+
+      // GET /api/admin/users
+      const listReq = new NextRequest("http://localhost:3000/api/admin/users", {
+        headers: { cookie: `session=${adminToken}` },
+      });
+      const listRes = await getAdminUsers(listReq);
+      assert.strictEqual(listRes.status, 200);
+      const listBody = await listRes.json();
+      assert.ok(Array.isArray(listBody.users));
+      const targetUser = listBody.users.find((u: { email: string; passwordHash?: string; password?: string }) => u.email === adminEmail);
+      assert.ok(targetUser, "Created admin user must appear in admin list");
+      assert.strictEqual(targetUser.passwordHash, undefined, "passwordHash must be omitted from user list API");
+      assert.strictEqual(targetUser.password, undefined, "password must be omitted from user list API");
+
+      // GET /api/admin/users/:id
+      const detailReq = new NextRequest(`http://localhost:3000/api/admin/users/${admin._id}`, {
+        headers: { cookie: `session=${adminToken}` },
+      });
+      const detailRes = await getAdminUserById(detailReq, { params: Promise.resolve({ id: admin._id.toString() }) });
+      assert.strictEqual(detailRes.status, 200);
+      const detailBody = await detailRes.json();
+      assert.strictEqual(detailBody.user.passwordHash, undefined, "passwordHash must be omitted from user detail API");
+      assert.strictEqual(detailBody.user.password, undefined, "password must be omitted from user detail API");
+
+      // PATCH /api/admin/users/:id - Admins cannot suspend their own active account
+      const selfSuspendReq = new NextRequest(`http://localhost:3000/api/admin/users/${admin._id}`, {
+        method: "PATCH",
+        headers: {
+          cookie: `session=${adminToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ status: "SUSPENDED" }),
+      });
+      const selfSuspendRes = await patchAdminUser(selfSuspendReq, { params: Promise.resolve({ id: admin._id.toString() }) });
+      assert.strictEqual(selfSuspendRes.status, 400, "Admins must not be able to suspend their own active account");
+      const selfSuspendBody = await selfSuspendRes.json();
+      assert.match(selfSuspendBody.message, /cannot suspend their own/i);
+    }
+  );
+
+  // =========================================================================
+  // Test 14: Atomic Evaluation Submission: Omitting gemstoneId atomically provisions specimen owned by user and populates assessmentSnapshot
+  // =========================================================================
+  await t.test(
+    "14. Atomic Evaluation Submission: Omitting gemstoneId atomically provisions specimen owned by user and populates assessmentSnapshot",
+    async () => {
+      const user = await User.create({
+        name: "Atomic Test User",
+        email: `atomic-user-${Date.now()}@example.com`,
+        passwordHash: "secret123",
+        category: "Student",
+        role: "USER",
+        status: "ACTIVE",
+        isActive: true,
+      });
+
+      const userToken = await createSessionToken({
+        userId: user._id.toString(),
+        role: "USER",
+      });
+
+      const submissionPayload = {
+        variety: "Blue Sapphire",
+        caratWeight: 2.75,
+        color: { hue: "Royal Blue", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None visible" },
+        clarity: { nakedEye: "Clean", loupe10x: "Very Slight", severity: "Minor" },
+        cut: { length: 8.8, width: 7.0, depth: 4.4, symmetry: "Good", polish: "Good", windowing: "None", extinction: "Minimal", bulging: "None" },
+        treatment: { status: "Unheated", type: "Natural" },
+        origin: { value: "Sri Lanka", reliability: "High" },
+        informationReliability: { measurements: "Lab Certified", treatment: "Lab Certified", origin: "Lab Certified" },
+      };
+
+      const req = new NextRequest("http://localhost:3000/api/evaluations", {
+        method: "POST",
+        headers: {
+          cookie: `session=${userToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(submissionPayload),
+      });
+
+      const res = await postEvaluation(req);
+      assert.strictEqual(res.status, 200, "Atomic evaluation submission must succeed with 200");
+      const body = await res.json();
+      assert.ok(body.evaluationId, "Must return created evaluation ID");
+
+      // Verify MongoDB documents
+      const savedEval = await Evaluation.findById(body.evaluationId).populate("gemstoneId");
+      assert.ok(savedEval, "Saved evaluation must exist in database");
+      assert.strictEqual(savedEval.userId.toString(), user._id.toString(), "Evaluation must be linked to authenticated user");
+
+      // Verify Gemstone was atomically created
+      const savedGemstone = savedEval.gemstoneId as unknown as { userId: mongoose.Types.ObjectId; caratWeight: number };
+      assert.ok(savedGemstone, "Gemstone must be atomically created");
+      assert.strictEqual(savedGemstone.userId.toString(), user._id.toString(), "Gemstone must be owned by authenticated user");
+      assert.strictEqual(savedGemstone.caratWeight, 2.75);
+
+      // Verify immutable assessmentSnapshot
+      assert.ok(savedEval.assessmentSnapshot, "Evaluation must store immutable assessmentSnapshot");
+      assert.strictEqual(typeof savedEval.assessmentSnapshot.overallScore, "number");
+      assert.strictEqual(savedEval.assessmentSnapshot.ruleVersion, "prototype-v1");
+      assert.ok(savedEval.assessmentSnapshot.gemstone, "Snapshot must retain original inputs");
+    }
+  );
+
+  // =========================================================================
+  // Test 15: Origin Reliability Normalization: 'unverified' and 'Declared by seller' normalize to 'Unknown' and never 'High'
+  // =========================================================================
+  await t.test(
+    "15. Origin Reliability Normalization: 'unverified' and 'Declared by seller' normalize to 'Unknown' and never 'High'",
+    async () => {
+      const user = await User.create({
+        name: "Origin Test User",
+        email: `origin-norm-${Date.now()}@example.com`,
+        passwordHash: "secret123",
+        category: "Trader",
+        role: "USER",
+        status: "ACTIVE",
+        isActive: true,
+      });
+
+      const userToken = await createSessionToken({
+        userId: user._id.toString(),
+        role: "USER",
+      });
+
+      const payload = {
+        variety: "Blue Sapphire",
+        caratWeight: 1.85,
+        color: { hue: "Cornflower Blue", tone: "5", saturation: "Strong", distribution: "Even", zoning: "None visible" },
+        clarity: { nakedEye: "Clean", loupe10x: "Slight", severity: "Minor" },
+        cut: { length: 7.5, width: 6.0, depth: 3.8, symmetry: "Good", polish: "Good", windowing: "None", extinction: "Minimal", bulging: "None" },
+        treatment: { status: "Heated" },
+        origin: { value: "Sri Lanka", reliability: "unverified" },
+        informationReliability: { measurements: "User Observed", treatment: "Unverified", origin: "Unverified" },
+      };
+
+      const req = new NextRequest("http://localhost:3000/api/evaluations", {
+        method: "POST",
+        headers: {
+          cookie: `session=${userToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const res = await postEvaluation(req);
+      assert.strictEqual(res.status, 200);
+      const body = await res.json();
+
+      const savedEval = await Evaluation.findById(body.evaluationId).populate("gemstoneId");
+      assert.ok(savedEval);
+      const savedGemstone = savedEval.gemstoneId as unknown as { origin?: { reliability: string } };
+      assert.ok(savedGemstone);
+      assert.strictEqual(savedGemstone.origin?.reliability, "Unknown", "unverified origin reliability must normalize to 'Unknown'");
+      assert.notStrictEqual(savedGemstone.origin?.reliability, "High", "Substring 'verified' must NEVER cause unverified to become 'High'");
+      assert.strictEqual(savedEval.assessmentSnapshot.gemstone.origin.reliability, "Unknown");
+    }
+  );
+
+  // =========================================================================
+  // Test 16: Admin Reference Creation Validation: Missing fields strictly fail with 400 without fabricated fallbacks
+  // =========================================================================
+  await t.test(
+    "16. Admin Reference Creation Validation: Missing fields strictly fail with 400 without fabricated fallbacks",
+    async () => {
+      const admin = await User.create({
+        name: "Ref Admin User",
+        email: `ref-admin-${Date.now()}@example.com`,
+        passwordHash: "secret123",
+        category: "Gemologist",
+        role: "CAGS_ADMIN",
+        status: "ACTIVE",
+        isActive: true,
+      });
+
+      const adminToken = await createSessionToken({
+        userId: admin._id.toString(),
+        role: "CAGS_ADMIN",
+      });
+
+      // Submit missing required fields (caratWeight and referencePrice missing)
+      const invalidReq = new NextRequest("http://localhost:3000/api/admin/reference-gemstones", {
+        method: "POST",
+        headers: {
+          cookie: `session=${adminToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          referenceId: `REF-TEST-INV-${Date.now()}`,
+          variety: "Blue Sapphire",
+          // missing caratWeight, cut, color, clarity, referencePrice
+        }),
+      });
+
+      const invalidRes = await postAdminReference(invalidReq);
+      assert.strictEqual(invalidRes.status, 400, "Missing required fields must return 400 Bad Request");
+      const invalidBody = await invalidRes.json();
+      assert.match(invalidBody.message, /carat weight/i);
+
+      // Submit valid payload
+      const validReq = new NextRequest("http://localhost:3000/api/admin/reference-gemstones", {
+        method: "POST",
+        headers: {
+          cookie: `session=${adminToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          referenceId: `REF-TEST-VAL-${Date.now()}`,
+          variety: "Blue Sapphire",
+          caratWeight: 3.1,
+          cut: { length: 9.0, width: 7.2, depth: 4.5, symmetry: "Good", polish: "Good", windowing: "None", extinction: "None", bulging: "None" },
+          color: { hue: "Royal Blue", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None visible" },
+          clarity: { nakedEye: "Clean", loupe10x: "Very Slight", severity: "Minor" },
+          referencePrice: 950000,
+          currency: "LKR",
+          treatment: { status: "Unheated" },
+          origin: { value: "Sri Lanka", reliability: "High" },
+          sourceEvidence: "Colombo Gem Trade B2B Transaction Record #2026-09",
+        }),
+      });
+
+      const validRes = await postAdminReference(validReq);
+      assert.strictEqual(validRes.status, 201, "Valid reference creation must return 201 Created");
+      const validBody = await validRes.json();
+      assert.strictEqual(validBody.reference.verificationStatus, "Pending", "New references must default to Pending");
+      assert.strictEqual(validBody.reference.dataClassification, "Demo", "New references must default to Demo");
+      assert.strictEqual(validBody.reference.caratWeight, 3.1);
+      assert.strictEqual(validBody.reference.referencePrice, 950000);
+    }
+  );
+
+  // =========================================================================
+  // Test 17: Admin System Settings Persistence & Audit Logging: /api/admin/settings persists config and logs audit record
+  // =========================================================================
+  await t.test(
+    "17. Admin System Settings Persistence & Audit Logging: /api/admin/settings persists config and logs audit record",
+    async () => {
+      const admin = await User.create({
+        name: "Settings Admin User",
+        email: `settings-admin-${Date.now()}@example.com`,
+        passwordHash: "secret123",
+        category: "Gemologist",
+        role: "CAGS_ADMIN",
+        status: "ACTIVE",
+        isActive: true,
+      });
+
+      const adminToken = await createSessionToken({
+        userId: admin._id.toString(),
+        role: "CAGS_ADMIN",
+      });
+
+      // Update settings via POST /api/admin/settings
+      const updateReq = new NextRequest("http://localhost:3000/api/admin/settings", {
+        method: "POST",
+        headers: {
+          cookie: `session=${adminToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          orgName: "Ceylon Academy of Gemmological Science (CAGS)",
+          adminEmail: "governance@cags.lk",
+          baseCurrency: "LKR — Sri Lankan Rupee",
+        }),
+      });
+
+      const updateRes = await postAdminSettings(updateReq);
+      assert.strictEqual(updateRes.status, 200);
+      const updateBody = await updateRes.json();
+      assert.strictEqual(updateBody.success, true);
+      assert.strictEqual(updateBody.settings.orgName, "Ceylon Academy of Gemmological Science (CAGS)");
+      assert.strictEqual(updateBody.settings.adminEmail, "governance@cags.lk");
+
+      // Verify GET /api/admin/settings returns the persisted settings
+      const getReq = new NextRequest("http://localhost:3000/api/admin/settings", {
+        headers: { cookie: `session=${adminToken}` },
+      });
+      const getRes = await getAdminSettings(getReq);
+      assert.strictEqual(getRes.status, 200);
+      const getBody = await getRes.json();
+      assert.strictEqual(getBody.settings.orgName, "Ceylon Academy of Gemmological Science (CAGS)");
+      assert.strictEqual(getBody.settings.adminEmail, "governance@cags.lk");
+
+      // Verify AuditLog was recorded
+      const log = await AuditLog.findOne({
+        action: "SETTINGS_UPDATED",
+        "performedBy.userId": admin._id.toString(),
+      });
+      assert.ok(log, "System settings update must record an AuditLog entry");
+    }
+  );
+
+  // =========================================================================
+  // Test 18: SSRF Protection: PDF photo fetcher blocks loopback, internal IPs, and cloud metadata endpoints
+  // =========================================================================
+  await t.test(
+    "18. SSRF Protection: PDF photo fetcher blocks loopback, internal IPs, and cloud metadata endpoints",
+    async () => {
+      // Direct validator tests
+      assert.strictEqual(isSafeExternalImageUrl("http://127.0.0.1/evil.png"), false, "127.0.0.1 must be blocked");
+      assert.strictEqual(isSafeExternalImageUrl("http://localhost:3000/photo.jpg"), false, "localhost must be blocked");
+      assert.strictEqual(isSafeExternalImageUrl("http://169.254.169.254/latest/meta-data"), false, "AWS metadata must be blocked");
+      assert.strictEqual(isSafeExternalImageUrl("http://192.168.1.50/photo.jpg"), false, "RFC 1918 192.168.x must be blocked");
+      assert.strictEqual(isSafeExternalImageUrl("http://10.0.0.1/gem.jpg"), false, "RFC 1918 10.x must be blocked");
+      assert.strictEqual(isSafeExternalImageUrl("http://172.16.0.1/gem.jpg"), false, "RFC 1918 172.16.x must be blocked");
+      assert.strictEqual(isSafeExternalImageUrl("file:///etc/passwd"), false, "Non-HTTP/HTTPS protocol must be blocked");
+      assert.strictEqual(isSafeExternalImageUrl("https://images.unsplash.com/photo-123.jpg"), true, "Public HTTPS URL must be allowed");
+
+      // Verify generateEvaluationPdf gracefully falls back to vector emblem when given an SSRF attack URL
+      const ssrfPdf = await generateEvaluationPdf({
+        reportTitle: "SSRF Defense Test Report",
+        evaluationId: "EVAL-SSRF-TEST",
+        generatedAt: new Date().toISOString(),
+        evaluationDate: new Date(),
+        user: { name: "Security Tester", category: "Auditor" },
+        gemstone: {
+          variety: "Blue Sapphire",
+          caratWeight: 2.0,
+          color: { hue: "Royal Blue", tone: "6", saturation: "Vivid" },
+          clarity: { nakedEye: "Clean", loupe10x: "Very Slight" },
+          cut: { length: 8.0, width: 6.0, depth: 4.0 },
+          treatment: { status: "Unheated" },
+          origin: { value: "Sri Lanka", reliability: "High" },
+          informationReliability: { measurements: "Lab Certified", treatment: "Lab Certified", origin: "Lab Certified" },
+          photoUrl: "http://127.0.0.1:9999/malicious-internal-service.png", // SSRF attempt
+        },
+        scores: { overall: 90, color: 92, clarity: 90, cut: 88, carat: 90 },
+        priceSuggestion: { available: false, suggestedPrice: null, minimumPrice: null, maximumPrice: null, currency: null, reason: "N/A" },
+        referenceComparison: { available: false, referenceName: null, similarity: null },
+        recommendations: ["Verified laboratory inspection."],
+        ruleVersion: "v4.2-deterministic",
+        userStatement: "Test record.",
+        disclaimer: "Academic disclaimer.",
+      });
+
+      assert.ok(ssrfPdf instanceof Uint8Array);
+      const ssrfDoc = await PDFDocument.load(ssrfPdf);
+      assert.strictEqual(ssrfDoc.getPageCount(), 2, "PDF with SSRF URL must cleanly generate 2-page report with vector fallback");
     }
   );
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { AlertCircle } from "lucide-react";
 
 export type PriceBreakdownRow = {
   label: string;
@@ -109,8 +110,27 @@ export default function SuggestedB2BPriceView({
         </div>
       </div>
 
-      {/* Hero Banner: Dark Container with Headline Price Range */}
-      <div className="rounded-2xl bg-[#0B1528] text-white p-8 sm:p-10 text-center shadow-md space-y-3">
+      {priceRangeMin === "Unavailable" || finalRangeText.includes("Unavailable") ? (
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-10 text-center space-y-4 shadow-2xs">
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900">
+            Market Price Suggestion: Unavailable — insufficient verified market evidence.
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto">
+            In accordance with Open 4Cs market evidence standards, commercial wholesale price suggestions require a minimum of 3 verified real-market transaction references. Demonstration and synthetic dealer estimates are strictly excluded from pricing calculations.
+          </p>
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-600 max-w-lg mx-auto text-left space-y-1.5">
+            <p className="font-semibold text-slate-800">4C Quality Assessment Status:</p>
+            <p className="text-emerald-700 font-medium">✓ 4C Quality Assessment is fully completed and operational.</p>
+            <p className="text-slate-500">Your gemstone scores, proportion analysis, and laboratory recommendations remain available and documented in your evaluation report.</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Hero Banner: Dark Container with Headline Price Range */}
+          <div className="rounded-2xl bg-[#0B1528] text-white p-8 sm:p-10 text-center shadow-md space-y-3">
         <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
           ESTIMATED B2B MARKET PRICE RANGE
         </span>
@@ -256,6 +276,8 @@ export default function SuggestedB2BPriceView({
         </div>
 
       </div>
+      </>
+      )}
     </div>
   );
 }
