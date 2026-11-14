@@ -23,6 +23,7 @@ export default function AdditionalStepPage() {
     value: string
   ) => {
     updateDraft({
+      originReliability: field === "origin" ? value : draft.originReliability,
       informationReliability: {
         ...draft.informationReliability,
         [field]: value as InformationReliabilityType,

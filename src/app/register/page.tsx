@@ -4,46 +4,6 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const USER_CATEGORIES = [
-  {
-    id: "Student",
-    label: "Student",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 14l9-5-9-5-9 5 9 5z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-      </svg>
-    ),
-  },
-  {
-    id: "Trader",
-    label: "Trader",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h4m-4 0V11m0 0h4m-4 0H9m4 0V7m0 0h4m-4 0H9" />
-      </svg>
-    ),
-  },
-  {
-    id: "Gemologist",
-    label: "Gemologist",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L5.595 15.12a2 2 0 00-1.8 1.48L3 20h18l-1.572-4.572zM12 11a4 4 0 100-8 4 4 0 000 8z" />
-      </svg>
-    ),
-  },
-  {
-    id: "Professional",
-    label: "Professional",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
-    ),
-  },
-];
-
 export default function RegisterPage() {
   const router = useRouter();
 
@@ -51,7 +11,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [category, setCategory] = useState("Student");
+  const category = "Student";
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -146,7 +106,7 @@ export default function RegisterPage() {
             Create your account
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Statements and guidance adapt to your category.
+            Sign up to evaluate gemstones using calibrated gemmological standards.
           </p>
         </div>
 
@@ -267,35 +227,6 @@ export default function RegisterPage() {
               <span>✓</span>
               <span>12+ characters with a number and symbol</span>
             </p>
-          </div>
-
-          {/* User Category Selection */}
-          <div className="pt-2">
-            <label className="block text-xs font-semibold text-slate-700 mb-2">
-              User Category
-            </label>
-            <div className="grid grid-cols-4 gap-2">
-              {USER_CATEGORIES.map((cat) => {
-                const isSelected = category === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setCategory(cat.id)}
-                    className={`flex flex-col items-center justify-center p-3 rounded-2xl transition duration-150 text-center ${
-                      isSelected
-                        ? "border-2 border-[#0B132B] bg-slate-50/80 shadow-xs text-slate-900 font-bold"
-                        : "border border-slate-200 hover:border-slate-300 hover:bg-slate-50/50 text-slate-500 font-medium"
-                    }`}
-                  >
-                    <div className={`mb-1.5 ${isSelected ? "text-[#0B132B]" : "text-slate-400"}`}>
-                      {cat.icon}
-                    </div>
-                    <span className="text-xs">{cat.label}</span>
-                  </button>
-                );
-              })}
-            </div>
           </div>
 
           {/* Submit Button */}

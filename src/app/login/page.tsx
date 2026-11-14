@@ -14,6 +14,7 @@ export default function LoginPage() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showContactAdmin, setShowContactAdmin] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -156,17 +157,32 @@ export default function LoginPage() {
                   <span>Remember me</span>
                 </label>
 
-                <a
-                  href="#forgot-password"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    alert("Please contact your system administrator or CAGS panel to reset your password.");
-                  }}
-                  className="font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+                <button
+                  type="button"
+                  onClick={() => setShowContactAdmin(true)}
+                  className="font-semibold text-blue-600 hover:text-blue-700 transition cursor-pointer"
                 >
-                  Forgot Password?
-                </a>
+                  Contact administrator
+                </button>
               </div>
+
+              {showContactAdmin && (
+                <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 space-y-2 text-xs text-blue-900">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold">Password Reset & Account Assistance</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowContactAdmin(false)}
+                      className="text-slate-400 hover:text-slate-700 font-bold"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <p className="leading-relaxed">
+                    To maintain strict laboratory security and student privacy, passwords can be reset by a certified CAGS administrator. Please email <strong>admin@open4cs.app</strong> with your registered email and institution ID.
+                  </p>
+                </div>
+              )}
 
               {/* Error Message */}
               {error && (

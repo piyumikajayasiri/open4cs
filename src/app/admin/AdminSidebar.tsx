@@ -2,20 +2,13 @@
 
 import Link from "next/link";
 import {
-  Beaker,
-  BookOpen,
   Clock3,
-  Database,
   Gem,
-  GitFork,
-  History,
   LayoutDashboard,
   LogOut,
-  Settings,
   ShieldCheck,
   SlidersHorizontal,
   Star,
-  Layers,
   Users,
 } from "lucide-react";
 
@@ -39,59 +32,24 @@ const navigation = [
     icon: Gem,
   },
   {
-    label: "4C Evaluation Rules",
-    href: "/admin/evaluation-rules",
-    icon: SlidersHorizontal,
-  },
-  {
-    label: "Pricing Matrix",
-    href: "/admin/pricing",
-    icon: Layers,
-  },
-  {
-    label: "Reference Gemstones",
+    label: "Market Evidence",
     href: "/admin/reference-gemstones",
     icon: Star,
   },
   {
-    label: "Historical Pricing",
-    href: "/admin/historical-pricing",
-    icon: History,
+    label: "Rules & Versions",
+    href: "/admin/evaluation-rules",
+    icon: SlidersHorizontal,
   },
   {
-    label: "Treatment Data",
-    href: "/admin/treatment-data",
-    icon: Beaker,
-  },
-  {
-    label: "Origin Data",
-    href: "/admin/origin-data",
-    icon: Database,
-  },
-  {
-    label: "Recommendation Rules",
-    href: "/admin/recommendations",
-    icon: BookOpen,
-  },
-  {
-    label: "Rule Versions",
-    href: "/admin/rule-versions",
-    icon: GitFork,
-  },
-  {
-    label: "Audit History",
-    href: "/admin/audit",
-    icon: Clock3,
-  },
-  {
-    label: "Users",
+    label: "Users & Access",
     href: "/admin/users",
     icon: Users,
   },
   {
-    label: "Settings",
-    href: "/admin/settings",
-    icon: Settings,
+    label: "Audit Log",
+    href: "/admin/audit",
+    icon: Clock3,
   },
 ];
 

@@ -227,25 +227,34 @@ export default function ReferenceGemstonesPage() {
     try {
       const target = records.find((r) => r.id === recordId);
       const queryId = target?.id || recordId;
+      const verifyDate = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
-      await fetch(`/api/admin/reference-gemstones/${queryId}`, {
+      const res = await fetch(`/api/admin/reference-gemstones/${queryId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           verificationStatus: "Verified",
-          verifiedBy: "Dr. K. Mendis",
-          verifiedAt: "Just now",
+          verifiedBy: "CAGS Pricing Board",
+          verifiedAt: verifyDate,
         }),
       });
 
-      setRecords((prev) =>
-        prev.map((r) =>
-          r.id === recordId ? { ...r, status: "Verified" as const, verifiedBy: "Dr. K. Mendis", verifiedAt: "Just now" } : r
-        )
-      );
-      showToast(`Record ${inspectingRecord?.recordId || recordId} marked as Verified and enabled for pricing comparison.`, "success");
+      if (res.ok) {
+        const data = await res.json();
+        const verifier = data.reference?.verifiedBy || "CAGS Pricing Board";
+        const verifiedTime = data.reference?.verifiedAt || verifyDate;
+
+        setRecords((prev) =>
+          prev.map((r) =>
+            r.id === recordId ? { ...r, status: "Verified" as const, verifiedBy: verifier, verifiedAt: verifiedTime } : r
+          )
+        );
+        showToast(`Record ${inspectingRecord?.recordId || recordId} marked as Verified.`, "success");
+      } else {
+        showToast("Server rejected verification request.", "error");
+      }
     } catch {
-      showToast("Updated local state; persistence failed.", "info");
+      showToast("Network error updating verification status.", "error");
     } finally {
       setInspectingRecord(null);
     }
@@ -329,22 +338,13 @@ export default function ReferenceGemstonesPage() {
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <button
-            type="button"
-            onClick={() => setShowBulkImportModal(true)}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200/90 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 transition"
-          >
-            <Upload className="w-4 h-4 text-slate-500" />
-            <span>Bulk Import</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowAddModal(true)}
+          <Link
+            href="/admin/reference-gemstones/new"
             className="inline-flex items-center gap-2 rounded-xl bg-[#0B1528] hover:bg-slate-800 text-white px-4 py-2.5 text-xs sm:text-sm font-semibold shadow-xs transition"
           >
             <Plus className="w-4 h-4" />
-            <span>Add Record</span>
-          </button>
+            <span>Add Evidence Record</span>
+          </Link>
         </div>
       </div>
 
@@ -483,27 +483,6 @@ export default function ReferenceGemstonesPage() {
                   <CheckCircle2 className="w-3.5 h-3.5" /><span>Sign Off as Verified</span>
                 </button>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Bulk Import Modal */}
-      {showBulkImportModal && (
-        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl p-6 sm:p-7 space-y-4 animate-in fade-in-0 zoom-in-95">
-            <div className="flex items-start justify-between gap-4">
-              <div><h3 className="text-lg font-bold text-slate-900">Bulk Import Benchmark Records</h3><p className="text-xs text-slate-500 mt-0.5">Import CSV / JSON benchmark trade observations</p></div>
-              <button type="button" onClick={() => setShowBulkImportModal(false)} className="text-slate-400 hover:text-slate-600 p-1"><X className="w-5 h-5" /></button>
-            </div>
-            <div className="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center space-y-2 bg-slate-50/50">
-              <FileSpreadsheet className="w-10 h-10 text-slate-400 mx-auto" />
-              <p className="text-xs sm:text-sm font-bold text-slate-800">Drag and drop benchmark CSV or JSON files here</p>
-              <button type="button" onClick={() => showToast("Sample CSV template downloaded.", "info")} className="text-xs text-blue-600 font-bold hover:underline">Download Template</button>
-            </div>
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-2 text-xs">
-              <button type="button" onClick={() => setShowBulkImportModal(false)} className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
-              <button type="button" onClick={() => { showToast("Parsed 18 benchmark records.", "success"); setShowBulkImportModal(false); }} className="rounded-xl bg-[#0B1528] text-white px-5 py-2 font-bold shadow-xs">Start Ingestion</button>
             </div>
           </div>
         </div>

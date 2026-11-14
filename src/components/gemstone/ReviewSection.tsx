@@ -58,7 +58,7 @@ export default function ReviewSection({
   onRunEvaluation,
   loading = false,
 }: ReviewSectionProps) {
-  const displayVariety = variety || "Blue Sapphire";
+  const displayVariety = variety || "Not entered";
   const hasCarat = Boolean(caratWeight && Number(caratWeight) > 0);
   const hasDimensions = Boolean(
     length && Number(length) > 0 &&
@@ -72,26 +72,49 @@ export default function ReviewSection({
   const lwRatio = hasDimensions && wVal > 0 ? (lVal / wVal).toFixed(2) : null;
   const depthPercent = hasDimensions && wVal > 0 ? ((dVal / wVal) * 100).toFixed(1) : null;
 
+  const colorParts = [
+    hue ? `${hue}` : null,
+    tone ? `Tone ${tone}` : null,
+    saturation ? `${saturation}` : null,
+    distribution ? `Dist: ${distribution}` : null,
+    zoning ? `Zoning: ${zoning}` : null,
+  ].filter(Boolean);
+  const colorSubtitle = colorParts.length > 0 ? colorParts.join(" · ") : "Not entered";
+
+  const clarityParts = [
+    nakedEye ? `Naked eye: ${nakedEye}` : null,
+    loupe10x ? `10× loupe: ${loupe10x}` : null,
+    inclusionType ? `Inclusions: ${inclusionType}` : null,
+    severity ? `Severity: ${severity}` : null,
+  ].filter(Boolean);
+  const claritySubtitle = clarityParts.length > 0 ? clarityParts.join(" · ") : "Not entered";
+
+  const treatOriginParts = [
+    treatmentStatus ? `Treatment: ${treatmentStatus}` : "Treatment: Not entered",
+    originValue ? `Origin: ${originValue} (${originReliability || "Unverified"})` : "Origin: Not entered",
+  ];
+  const treatOriginSubtitle = treatOriginParts.join(" · ");
+
   // Review Items for the 7 stages
   const reviewCards = [
     {
       id: "gemstone",
       title: "1. Gemstone Category & Origin Nature",
-      subtitle: `${displayVariety} · Natural Corundum · Faceted Oval / Mixed Cut`,
-      iconType: "check",
+      subtitle: variety ? `${variety} · Natural Corundum` : "Not entered",
+      iconType: variety ? "check" : "warning",
       step: 1,
     },
     {
       id: "color",
       title: "2. Color Observation",
-      subtitle: `${saturation || "Vivid"} ${hue || "Blue"} · Tone ${tone || "6"} · Distribution ${distribution || "Even"} · Zoning ${zoning || "None"}`,
+      subtitle: colorSubtitle,
       iconType: hue && tone && saturation ? "check" : "warning",
       step: 2,
     },
     {
       id: "clarity",
       title: "3. Clarity Assessment",
-      subtitle: `${nakedEye || "Eye-clean"} · 10× loupe: ${loupe10x || "Very slight"} ${inclusionType ? `(${inclusionType})` : ""} · Relief: ${severity || "Minor"}`,
+      subtitle: claritySubtitle,
       iconType: nakedEye && loupe10x ? "check" : "warning",
       step: 3,
     },
@@ -99,8 +122,8 @@ export default function ReviewSection({
       id: "cut",
       title: "4. Cut & Proportions",
       subtitle: hasDimensions
-        ? `${length} × ${width} × ${depth} mm · L:W ${lwRatio} · Depth ${depthPercent}% · Symmetry ${symmetry || "Good"} · Polish ${polish || "Good"}`
-        : "Dimensions incomplete — length, width, and depth required",
+        ? `${length} × ${width} × ${depth} mm · L:W ${lwRatio} · Depth ${depthPercent}% · Symmetry: ${symmetry || "Not entered"}`
+        : "Dimensions incomplete — length, width, and depth required (Not entered)",
       iconType: hasDimensions ? "check" : "warning",
       step: 4,
     },
@@ -109,15 +132,15 @@ export default function ReviewSection({
       title: "5. Carat Weight",
       subtitle: hasCarat
         ? `${caratWeight} ct calibrated electronic scale weight`
-        : "Carat weight required",
+        : "Carat weight required (Not entered)",
       iconType: hasCarat ? "check" : "warning",
       step: 5,
     },
     {
       id: "treatment_origin",
       title: "6. Treatment & Geographic Origin",
-      subtitle: `${treatmentStatus || "Heated"} · Origin: ${originValue || "Sri Lanka"} (${originReliability || "Unverified evidence"})`,
-      iconType: "check",
+      subtitle: treatOriginSubtitle,
+      iconType: treatmentStatus && originValue ? "check" : "warning",
       step: 6,
     },
   ];

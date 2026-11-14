@@ -51,25 +51,60 @@ function CompareContent() {
         if (res.ok) {
           const raw = await res.json();
           if (Array.isArray(raw)) {
-            const mapped: GemstoneCompareItem[] = raw.map((item: EvaluationApiItem) => {
+            const idsParam = searchParams.get("ids");
+            const requestedIds = idsParam
+              ? idsParam.split(",").map((s) => s.trim()).filter(Boolean)
+              : [];
+
+            let filteredList = raw;
+            if (requestedIds.length > 0) {
+              const matched = raw.filter((item: EvaluationApiItem) =>
+                requestedIds.includes(item._id)
+              );
+              if (matched.length > 0) {
+                filteredList = matched;
+              }
+            }
+
+            const mapped: GemstoneCompareItem[] = filteredList.map((item: EvaluationApiItem) => {
               const gem = item.gemstoneId || {};
               const resObj = item.result || {};
-              const price = item.priceSuggestion || {};
+              const price = item.priceSuggestion as {
+                status?: string;
+                available?: boolean;
+                currency?: string;
+                min?: number;
+                max?: number;
+                minimumPrice?: number;
+                maximumPrice?: number;
+                priceRangeLkr?: { minimum?: number; maximum?: number };
+              } || {};
 
               const colorScore = resObj.color?.score ? (resObj.color.score / 10).toFixed(1) : "—";
               const clarityScore = resObj.clarity?.score ? (resObj.clarity.score / 10).toFixed(1) : "—";
               const cutScore = resObj.cut?.score ? (resObj.cut.score / 10).toFixed(1) : "—";
+              const caratSc = resObj.carat?.score ? (resObj.carat.score / 10).toFixed(1) : "—";
+              const caratPts = resObj.carat?.score ? Math.round(resObj.carat.score > 10 ? resObj.carat.score : resObj.carat.score * 10) : null;
               const overallScore = resObj.overall4C?.score ? (resObj.overall4C.score / 10).toFixed(1) : "—";
 
-              let rangeText = "Unavailable (No Real Market Evidence)";
-              if (price.status === "COMPLETED" && price.min && price.max) {
-                rangeText = `${price.currency || "LKR"} ${Math.round(price.min).toLocaleString()} – ${Math.round(price.max).toLocaleString()}`;
+              const minVal = price.priceRangeLkr?.minimum ?? price.minimumPrice ?? price.min ?? null;
+              const maxVal = price.priceRangeLkr?.maximum ?? price.maximumPrice ?? price.max ?? null;
+              let rangeText = "Unavailable (Insufficient Market Evidence)";
+              if (
+                (price.status === "COMPLETED" || price.available === true) &&
+                typeof minVal === "number" &&
+                typeof maxVal === "number"
+              ) {
+                rangeText = `${price.currency || "LKR"} ${Math.round(minVal).toLocaleString()} – ${Math.round(maxVal).toLocaleString()}`;
               }
+
+              const weightNum = gem.caratWeight ? Number(gem.caratWeight) : null;
 
               return {
                 id: item._id,
                 variety: gem.variety || "Natural Sapphire",
-                carat: `${gem.caratWeight || "—"} ct`,
+                carat: weightNum ? `${weightNum.toFixed(2)} ct` : "—",
+                caratScore: caratPts ? `${caratSc} (${caratPts}/100)` : "—",
                 origin: `${gem.origin?.value || "Unknown"} (${gem.origin?.reliability || "unverified"})`,
                 color: `${colorScore} ${gem.color?.hue || ""}`,
                 colorSimilarity: item.bestReferenceMatch?.similarity

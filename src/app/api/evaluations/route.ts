@@ -420,7 +420,10 @@ export async function POST(request: NextRequest) {
 
     // Strict Data Traceability: Filter eligible real market records BEFORE counting, matching, and calculating prices
     const realCompletedReferences = referenceComparisons.filter(
-      (r) => r.dataClassification === "Real" && r.transactionContext === "Completed Sale"
+      (r) =>
+        r.dataClassification === "Real" &&
+        r.transactionContext === "Completed Sale" &&
+        (r.marketContext || "Wholesale") === "Wholesale"
     );
 
     const eligibleRealComparables = realCompletedReferences.filter(

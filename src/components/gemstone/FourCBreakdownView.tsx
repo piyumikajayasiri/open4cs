@@ -21,11 +21,25 @@ type FourCBreakdownViewProps = {
   ratio?: string | number;
   depthPercentage?: string | number;
   colorSimilarity?: number;
+  hue?: string;
+  tone?: string;
+  saturation?: string;
+  distribution?: string;
+  zoning?: string;
+  nakedEye?: string;
+  loupe10x?: string;
+  inclusionType?: string;
+  severity?: string;
+  symmetry?: string;
+  polish?: string;
+  windowing?: string;
+  extinction?: string;
+  bulging?: string;
 };
 
 export default function FourCBreakdownView({
   stoneId = "CEY-2026-0847",
-  ruleVersion = "v4.2",
+  ruleVersion = "prototype-v1",
   colorScore = 8.6,
   colorLabel = "Vivid Blue",
   clarityScore = 7.9,
@@ -36,12 +50,26 @@ export default function FourCBreakdownView({
   caratAssessmentScore = 85,
   caratWeight = 2.45,
   caratLabel = "Liquid band",
-  length = "8.42",
-  width = "6.31",
-  depth = "4.55",
-  ratio = "1.33",
-  depthPercentage = "72.1",
-  colorSimilarity = 91,
+  length,
+  width,
+  depth,
+  ratio: propRatio,
+  depthPercentage: propDepthPercentage,
+  colorSimilarity,
+  hue,
+  tone,
+  saturation,
+  distribution,
+  zoning,
+  nakedEye,
+  loupe10x,
+  inclusionType,
+  severity,
+  symmetry,
+  polish,
+  windowing,
+  extinction,
+  bulging,
 }: FourCBreakdownViewProps) {
   const [expandedSections, setExpandedSections] = useState<{
     color: boolean;
@@ -62,6 +90,21 @@ export default function FourCBreakdownView({
     }));
   };
 
+  const lenNum = typeof length === "number" ? length : parseFloat(String(length || ""));
+  const widNum = typeof width === "number" ? width : parseFloat(String(width || ""));
+  const depNum = typeof depth === "number" ? depth : parseFloat(String(depth || ""));
+
+  const hasDimensions = !isNaN(lenNum) && lenNum > 0 && !isNaN(widNum) && widNum > 0 && !isNaN(depNum) && depNum > 0;
+
+  const calculatedRatio = propRatio ?? (hasDimensions ? (lenNum / widNum).toFixed(2) : null);
+  const calculatedDepthPercent = propDepthPercentage ?? (hasDimensions ? ((depNum / widNum) * 100).toFixed(1) : null);
+
+  const displayLength = hasDimensions ? lenNum.toFixed(2) : length ? String(length) : "Not assessed";
+  const displayWidth = hasDimensions ? widNum.toFixed(2) : width ? String(width) : "Not assessed";
+  const displayDepth = hasDimensions ? depNum.toFixed(2) : depth ? String(depth) : "Not assessed";
+
+  const actualWeight = typeof caratWeight === "number" && caratWeight > 0 ? caratWeight : 2.45;
+
   return (
     <div className="space-y-6">
       {/* Top Header */}
@@ -71,7 +114,7 @@ export default function FourCBreakdownView({
             4C Evaluation Breakdown
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            {stoneId} · Each score cites the rule, factors and reference percentile
+            {stoneId} · Each score cites the rule, observed metrics, and reference factors
           </p>
         </div>
 
@@ -92,7 +135,7 @@ export default function FourCBreakdownView({
               COLOR — {colorScore.toFixed(1)}
             </h3>
             <span className="text-sm font-bold text-slate-900">
-              {colorLabel}
+              {colorLabel || (hue ? `${hue}${saturation ? ` (${saturation})` : ""}` : "Not assessed")}
             </span>
           </div>
 
@@ -112,14 +155,21 @@ export default function FourCBreakdownView({
                 Positive factors
               </span>
               <ul className="space-y-1.5 text-xs text-slate-800 font-medium">
-                <li className="flex items-start gap-1.5">
-                  <span className="text-emerald-600 font-bold">+</span>
-                  <span>Vivid saturation band (+)</span>
-                </li>
-                <li className="flex items-start gap-1.5">
-                  <span className="text-emerald-600 font-bold">+</span>
-                  <span>Even distribution (+)</span>
-                </li>
+                {saturation ? (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-emerald-600 font-bold">+</span>
+                    <span>{saturation} saturation band (+)</span>
+                  </li>
+                ) : null}
+                {distribution ? (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-emerald-600 font-bold">+</span>
+                    <span>{distribution} distribution (+)</span>
+                  </li>
+                ) : null}
+                {!saturation && !distribution && (
+                  <li className="text-slate-400 italic">Not assessed</li>
+                )}
               </ul>
             </div>
 
@@ -129,41 +179,63 @@ export default function FourCBreakdownView({
                 Watch factors
               </span>
               <ul className="space-y-1.5 text-xs text-slate-800 font-medium">
-                <li className="flex items-start gap-1.5">
-                  <span className="text-amber-600 font-bold">−</span>
-                  <span>Tone 6 borderline dark (−)</span>
-                </li>
+                {tone && Number(tone) >= 6 ? (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-amber-600 font-bold">−</span>
+                    <span>Tone {tone} borderline deep/dark (−)</span>
+                  </li>
+                ) : tone && Number(tone) <= 4 ? (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-amber-600 font-bold">−</span>
+                    <span>Tone {tone} slightly light (−)</span>
+                  </li>
+                ) : null}
+                {zoning && zoning.toLowerCase() !== "none" ? (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-amber-600 font-bold">−</span>
+                    <span>Zoning: {zoning} (−)</span>
+                  </li>
+                ) : null}
+                {(!tone || Number(tone) === 5) && (!zoning || zoning.toLowerCase() === "none") && (
+                  <li className="text-slate-500 font-normal">None noted</li>
+                )}
               </ul>
             </div>
           </div>
 
-          {/* Color Similarity Bar */}
-          <div className="rounded-xl bg-slate-50/80 border border-slate-200/60 p-3 space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-medium text-slate-600">Color similarity</span>
-              <span className="font-bold text-blue-600">{colorSimilarity}%</span>
+          {/* Color Similarity Bar if available */}
+          {typeof colorSimilarity === "number" && colorSimilarity > 0 ? (
+            <div className="rounded-xl bg-slate-50/80 border border-slate-200/60 p-3 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-medium text-slate-600">Color similarity to reference</span>
+                <span className="font-bold text-blue-600">{Math.round(colorSimilarity)}%</span>
+              </div>
+              <div className="w-full bg-slate-200/80 h-1.5 rounded-full overflow-hidden">
+                <div
+                  className="bg-blue-600 h-full rounded-full"
+                  style={{ width: `${Math.min(100, colorSimilarity)}%` }}
+                />
+              </div>
             </div>
-            <div className="w-full bg-slate-200/80 h-1.5 rounded-full overflow-hidden">
-              <div
-                className="bg-blue-600 h-full rounded-full"
-                style={{ width: `${colorSimilarity}%` }}
-              />
+          ) : (
+            <div className="rounded-xl bg-slate-50/60 border border-slate-100 p-2.5 text-[11px] text-slate-500">
+              Color similarity: Standalone observation score (no active benchmark stone selected).
             </div>
-          </div>
+          )}
 
           {/* Collapsible Section */}
           <div className="pt-1">
             <button
               type="button"
               onClick={() => toggleSection("color")}
-              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition"
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition cursor-pointer"
             >
               <span>{expandedSections.color ? "▴" : "▾"}</span>
               <span>Why did this result occur?</span>
             </button>
             {expandedSections.color && (
               <p className="mt-2 text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
-                Rule COL-03 applied: Ceylon blue sapphires with saturated vivid hue scores at tone 5–6 receive high baseline liquidity multipliers, with minor deduction for slightly deeper tone.
+                Rule COL-01/COL-02: Hue ({hue || "Not assessed"}), Tone ({tone || "Not assessed"}), Saturation ({saturation || "Not assessed"}), Distribution ({distribution || "Not assessed"}), and Zoning ({zoning || "Not assessed"}). Evaluated deterministically with locked factor weights (Hue 25%, Tone 20%, Saturation 25%, Distribution 15%, Zoning 15%).
               </p>
             )}
           </div>
@@ -176,7 +248,7 @@ export default function FourCBreakdownView({
               CLARITY — {clarityScore.toFixed(1)}
             </h3>
             <span className="text-sm font-bold text-slate-900">
-              {clarityLabel}
+              {clarityLabel || nakedEye || "Not assessed"}
             </span>
           </div>
 
@@ -196,14 +268,21 @@ export default function FourCBreakdownView({
                 Positive factors
               </span>
               <ul className="space-y-1.5 text-xs text-slate-800 font-medium">
-                <li className="flex items-start gap-1.5">
-                  <span className="text-emerald-600 font-bold">+</span>
-                  <span>Eye-clean face-up (+)</span>
-                </li>
-                <li className="flex items-start gap-1.5">
-                  <span className="text-emerald-600 font-bold">+</span>
-                  <span>Inclusions off-table (+)</span>
-                </li>
+                {nakedEye ? (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-emerald-600 font-bold">+</span>
+                    <span>Naked eye: {nakedEye} (+)</span>
+                  </li>
+                ) : null}
+                {loupe10x && loupe10x.toLowerCase() !== "not examined" ? (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-emerald-600 font-bold">+</span>
+                    <span>10× loupe: {loupe10x} (+)</span>
+                  </li>
+                ) : null}
+                {!nakedEye && !loupe10x && (
+                  <li className="text-slate-400 italic">Not assessed</li>
+                )}
               </ul>
             </div>
 
@@ -213,10 +292,21 @@ export default function FourCBreakdownView({
                 Watch factors
               </span>
               <ul className="space-y-1.5 text-xs text-slate-800 font-medium">
-                <li className="flex items-start gap-1.5">
-                  <span className="text-amber-600 font-bold">−</span>
-                  <span>Fine silk at 10x (−)</span>
-                </li>
+                {inclusionType ? (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-amber-600 font-bold">−</span>
+                    <span>{inclusionType} ({severity || "Severity noted"}) (−)</span>
+                  </li>
+                ) : null}
+                {loupe10x && loupe10x.toLowerCase() === "not examined" ? (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-amber-600 font-bold">−</span>
+                    <span>10× examination pending</span>
+                  </li>
+                ) : null}
+                {!inclusionType && loupe10x?.toLowerCase() !== "not examined" && (
+                  <li className="text-slate-500 font-normal">None noted</li>
+                )}
               </ul>
             </div>
           </div>
@@ -226,14 +316,14 @@ export default function FourCBreakdownView({
             <button
               type="button"
               onClick={() => toggleSection("clarity")}
-              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition"
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition cursor-pointer"
             >
               <span>{expandedSections.clarity ? "▴" : "▾"}</span>
               <span>Why did this result occur?</span>
             </button>
             {expandedSections.clarity && (
               <p className="mt-2 text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
-                Rule CLA-02 applied: Eye-clean grade requires zero visible inclusions under standard diffused overhead classroom lighting. 10× loupe detects minor rutile silk, confirming natural corundum origin without compromising brilliance.
+                Rule CLA-01: Naked-eye observation ({nakedEye || "Not assessed"}), 10× loupe ({loupe10x || "Not assessed"}), Inclusions ({inclusionType || "None"}), Severity ({severity || "Not assessed"}). Graded using locked factor weights (Naked Eye 40%, 10× Loupe 35%, Severity 25%).
               </p>
             )}
           </div>
@@ -266,14 +356,27 @@ export default function FourCBreakdownView({
                 Positive factors
               </span>
               <ul className="space-y-1.5 text-xs text-slate-800 font-medium">
-                <li className="flex items-start gap-1.5">
-                  <span className="text-emerald-600 font-bold">+</span>
-                  <span>Excellent polish (+)</span>
-                </li>
-                <li className="flex items-start gap-1.5">
-                  <span className="text-emerald-600 font-bold">+</span>
-                  <span>L:W {ratio} in tolerance (+)</span>
-                </li>
+                {polish ? (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-emerald-600 font-bold">+</span>
+                    <span>{polish} polish (+)</span>
+                  </li>
+                ) : null}
+                {symmetry ? (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-emerald-600 font-bold">+</span>
+                    <span>{symmetry} symmetry (+)</span>
+                  </li>
+                ) : null}
+                {calculatedRatio ? (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-emerald-600 font-bold">+</span>
+                    <span>L:W {calculatedRatio} in ratio tolerance (+)</span>
+                  </li>
+                ) : null}
+                {!polish && !symmetry && !calculatedRatio && (
+                  <li className="text-slate-400 italic">Not assessed</li>
+                )}
               </ul>
             </div>
 
@@ -283,21 +386,38 @@ export default function FourCBreakdownView({
                 Watch factors
               </span>
               <ul className="space-y-1.5 text-xs text-slate-800 font-medium">
-                <li className="flex items-start gap-1.5">
-                  <span className="text-amber-600 font-bold">−</span>
-                  <span>Depth {depthPercentage}% deep (−2%)</span>
-                </li>
-                <li className="flex items-start gap-1.5">
-                  <span className="text-amber-600 font-bold">−</span>
-                  <span>Minimal extinction (−)</span>
-                </li>
+                {calculatedDepthPercent && Number(calculatedDepthPercent) > 70 ? (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-amber-600 font-bold">−</span>
+                    <span>Depth {calculatedDepthPercent}% deep pavilion (−)</span>
+                  </li>
+                ) : null}
+                {extinction && extinction.toLowerCase() !== "none" ? (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-amber-600 font-bold">−</span>
+                    <span>Extinction: {extinction} (−)</span>
+                  </li>
+                ) : null}
+                {windowing && windowing.toLowerCase() !== "none" ? (
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-amber-600 font-bold">−</span>
+                    <span>Windowing: {windowing} (−)</span>
+                  </li>
+                ) : null}
+                {!calculatedDepthPercent && !extinction && !windowing && (
+                  <li className="text-slate-500 font-normal">None noted</li>
+                )}
               </ul>
             </div>
           </div>
 
           {/* Dimensions Pill Bar */}
           <div className="rounded-xl bg-slate-50 border border-slate-100 px-3 py-2 text-xs text-slate-600 font-medium">
-            {length} × {width} × {depth} mm · L:W {ratio} · Depth {depthPercentage}% · Rule CUT-02
+            {hasDimensions ? (
+              `${displayLength} × ${displayWidth} × ${displayDepth} mm · L:W ${calculatedRatio || "—"} · Depth ${calculatedDepthPercent || "—"}% · Rule CUT-01`
+            ) : (
+              `Dimensions: ${displayLength} × ${displayWidth} × ${displayDepth} mm (Incomplete)`
+            )}
           </div>
 
           {/* Collapsible Section */}
@@ -305,14 +425,14 @@ export default function FourCBreakdownView({
             <button
               type="button"
               onClick={() => toggleSection("cut")}
-              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition"
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition cursor-pointer"
             >
               <span>{expandedSections.cut ? "▴" : "▾"}</span>
               <span>Why did this result occur?</span>
             </button>
             {expandedSections.cut && (
               <p className="mt-2 text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
-                Rule CUT-02 applied: Standard oval ratio tolerance is 1.20–1.40 (current: {ratio}). Total depth percentage exceeds 70% benchmark, resulting in slight pavilion bulge penalty while retaining solid face-up brilliance.
+                Rule CUT-01: Proportions evaluated from actual physical measurements ({displayLength} × {displayWidth} × {displayDepth} mm), symmetry ({symmetry || "Not assessed"}), polish ({polish || "Not assessed"}), windowing ({windowing || "None"}), extinction ({extinction || "None"}), and bulging ({bulging || "None"}).
               </p>
             )}
           </div>
@@ -342,7 +462,7 @@ export default function FourCBreakdownView({
             <div className="flex items-center gap-2">
               <span className="font-semibold text-slate-500">Weight:</span>
               <span className="text-slate-900 font-bold">
-                {(caratWeight ?? (caratScore > 10 ? 2.45 : caratScore)).toFixed(2)} ct
+                {actualWeight.toFixed(2)} ct
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -366,11 +486,11 @@ export default function FourCBreakdownView({
               <ul className="space-y-1.5 text-xs text-slate-800 font-medium">
                 <li className="flex items-start gap-1.5">
                   <span className="text-emerald-600 font-bold">+</span>
-                  <span>True face-up weight (+)</span>
+                  <span>Face-up calibrated weight ({actualWeight.toFixed(2)} ct) (+)</span>
                 </li>
                 <li className="flex items-start gap-1.5">
                   <span className="text-emerald-600 font-bold">+</span>
-                  <span>2–3 ct demand band (+)</span>
+                  <span>{actualWeight >= 2.0 ? "2.00+ ct market demand band" : "Standard commercial weight band"} (+)</span>
                 </li>
               </ul>
             </div>
@@ -383,7 +503,7 @@ export default function FourCBreakdownView({
               <ul className="space-y-1.5 text-xs text-slate-800 font-medium">
                 <li className="flex items-start gap-1.5">
                   <span className="text-amber-600 font-bold">−</span>
-                  <span>Upper-band softening (−)</span>
+                  <span>Size assessment {caratAssessmentScore ?? 85}/100 based on weight tier</span>
                 </li>
               </ul>
             </div>
@@ -394,14 +514,14 @@ export default function FourCBreakdownView({
             <button
               type="button"
               onClick={() => toggleSection("carat")}
-              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition"
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition cursor-pointer"
             >
               <span>{expandedSections.carat ? "▴" : "▾"}</span>
               <span>Why did this result occur?</span>
             </button>
             {expandedSections.carat && (
               <p className="mt-2 text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
-                Rule CAR-01 applied: Commercial corundum market exhibits step-function price jumps at 1.00 ct, 2.00 ct, and 3.00 ct boundaries. Weight of {caratScore.toFixed(2)} ct sits comfortably in the highly liquid 2.00–2.99 ct bracket.
+                Rule CAR-01 applied: Calibrated electronic scale weight of {actualWeight.toFixed(2)} ct evaluated for physical weight tier rarity and spread consistency.
               </p>
             )}
           </div>

@@ -41,6 +41,7 @@ export default function ClaritySection({
     { label: "Minor (VS)", value: "Very Slight" },
     { label: "Noticeable (SI)", value: "Slight" },
     { label: "Obvious (I)", value: "Noticeable" },
+    { label: "Not examined at 10×", value: "Not examined" },
   ];
 
   return (
@@ -103,7 +104,7 @@ export default function ClaritySection({
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {loupeOptions.map((opt) => {
             const isSelected =
               loupe10x === opt.value ||
@@ -114,7 +115,7 @@ export default function ClaritySection({
                 key={opt.value}
                 type="button"
                 onClick={() => onLoupe10xChange(opt.value)}
-                className={`px-4 py-3 rounded-xl text-xs sm:text-sm font-semibold transition border text-center ${
+                className={`px-3 py-3 rounded-xl text-xs font-semibold transition border text-center ${
                   isSelected
                     ? "bg-[#0F172A] text-white border-[#0F172A] shadow-xs"
                     : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50/50"
@@ -125,6 +126,15 @@ export default function ClaritySection({
             );
           })}
         </div>
+
+        {loupe10x === "Not examined" && (
+          <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 flex items-start gap-2">
+            <span className="font-bold text-amber-600">⚠️ Notice:</span>
+            <span>
+              10× magnification was not performed. The clarity score uses a provisional neutral estimate based on unaided eye observation. Commercial valuation requires 10× loupe confirmation.
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Card 3: Inclusions Description, Location & Severity */}

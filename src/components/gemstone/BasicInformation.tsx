@@ -19,7 +19,7 @@ export const GEMSTONE_VARIETIES: GemstoneCardItem[] = [
     name: "Blue Sapphire",
     species: "Natural Corundum",
     subtext: "Royal Blue & Cornflower Blue grading rules in force",
-    image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
     isSupported: true,
     colorBand: "bg-blue-900",
   },

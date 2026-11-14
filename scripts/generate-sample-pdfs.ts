@@ -34,7 +34,7 @@ async function generateSamplePdfs() {
     user: { name: "Kasun Perera", category: "Professional Gemmologist" },
     gemstone: {
       ...inputA,
-      photoUrl: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80",
+      photoUrl: "",
     },
     scores: {
       overall: evalA.overall4C.score!,
@@ -60,7 +60,7 @@ async function generateSamplePdfs() {
         isAvailable: true,
       },
       isRealMarketData: true,
-      marketLevel: "Indicative Wholesale Market Range (Verified Commercial References)",
+      marketLevel: "Indicative Wholesale Range (Traceable Reference Sales)",
     },
     referenceComparison: { available: true, referenceName: "Colombo B2B Dealer Parcel REF-1207", similarity: 82.4 },
     recommendations: [
@@ -68,7 +68,7 @@ async function generateSamplePdfs() {
       "Maintain unheated certification record from an accredited laboratory.",
       "Pavilion proportions produce minimal extinction and excellent light return.",
     ],
-    ruleVersion: "v4.2-deterministic",
+    ruleVersion: evalA.ruleVersion,
     userStatement: "Private record generated for Kasun Perera, registered as Professional Gemmologist.",
     disclaimer: "Academic decision-support output. Not an independent laboratory certificate or guaranteed market valuation.",
   };
@@ -116,7 +116,7 @@ async function generateSamplePdfs() {
       "Specimen color balance observed within delicate pinkish-orange corundum hue range.",
       "Request treatment assessment from a qualified gemmological laboratory.",
     ],
-    ruleVersion: "v4.2-deterministic",
+    ruleVersion: evalB.ruleVersion,
     userStatement: "Private record generated for Amara Silva, registered as Student Researcher.",
     disclaimer: "Academic decision-support output. Not an independent laboratory certificate or guaranteed market valuation.",
   };
@@ -164,7 +164,7 @@ async function generateSamplePdfs() {
       "Treatment status unverified: Request treatment assessment from a qualified gemmological laboratory.",
       "Origin unverified: Geographical provenance should not be declared without laboratory spectroscopic confirmation.",
     ],
-    ruleVersion: "v4.2-deterministic",
+    ruleVersion: evalC.ruleVersion,
     userStatement: "Private record generated for University Student.",
     disclaimer: "Academic decision-support output. Not an independent laboratory certificate.",
   };
@@ -187,6 +187,15 @@ async function generateSamplePdfs() {
   fs.writeFileSync(path.join(workspaceDir, "sample-report-scenario-a.pdf"), pdfA);
   fs.writeFileSync(path.join(workspaceDir, "sample-report-scenario-b.pdf"), pdfB);
   fs.writeFileSync(path.join(workspaceDir, "sample-report-scenario-c.pdf"), pdfC);
+
+  // Write to public/sample-reports directory for static browser serving
+  const publicDir = path.join(process.cwd(), "public", "sample-reports");
+  if (!fs.existsSync(publicDir)) {
+    fs.mkdirSync(publicDir, { recursive: true });
+  }
+  fs.writeFileSync(path.join(publicDir, "sample-report-scenario-a.pdf"), pdfA);
+  fs.writeFileSync(path.join(publicDir, "sample-report-scenario-b.pdf"), pdfB);
+  fs.writeFileSync(path.join(publicDir, "sample-report-scenario-c.pdf"), pdfC);
 
   console.log("Successfully generated all 3 sample PDFs:");
   console.log("- Scenario A (Complete + Market Evidence):", pdfA.byteLength, "bytes");
