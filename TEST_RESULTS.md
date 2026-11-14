@@ -1,10 +1,11 @@
 # Open 4Cs Quality Assurance — Final Test Results Report
 
-**Document Date:** 2026-11-13  
+**Document Date:** 2026-11-14  
 **System Tested:** Open 4Cs Gemstone Evaluation & Price Suggestion System (Engine v4.2)  
 **Execution Environment:** Node.js v22.18.0 / Windows 11 / MongoDB v7.0.12  
 **Test Runner:** `tsx --test tests/**/*.test.ts`  
-**Overall Result:** **ALL 42 TESTS PASSED (100% SUCCESS RATE)**  
+**Overall Result:** **ALL 43 TESTS PASSED (100% SUCCESS RATE, ZERO FAILURES)**  
+**Tested Commit:** `91e4b883f730215fabd016141f8d230e99f837e5`
 
 ---
 
@@ -13,12 +14,13 @@
 | Verification Suite | Target | Tests Executed | Passed | Failed | Status |
 |:---|:---|:---:|:---:|:---:|:---:|
 | **Engine Quality & Math Suite** | `tests/evaluation-engine.test.ts` | 23 | 23 | 0 | **PASSED** |
-| **Integration & Security Suite** | `tests/integration-workflows.test.ts` | 18 | 18 | 0 | **PASSED** |
+| **Integration, Rollback & Security Suite** | `tests/integration-workflows.test.ts` | 19 | 19 | 0 | **PASSED** |
 | **PDF Stream & QR Verification** | `scripts/test-pdf-qr-extraction.ts` | 1 | 1 | 0 | **PASSED** |
+| **Full Browser Journey Suite** | `scripts/real-browser-journey.ts` | 10 Steps | 10 | 0 | **PASSED (Exit 0)** |
 | **TypeScript Static Typecheck** | `npx tsc --noEmit` | Project Root | Clean | 0 errors | **PASSED** |
 | **ESLint Static Code Audit** | `npm run lint` | Project Root | Clean | 0 errors | **PASSED** |
 | **Next.js Production Build** | `npm run build` | All 63 Routes | Clean | 0 errors | **PASSED** |
-| **Total Automated Tests** | All Suites Combined | **42** | **42** | **0** | **100% PASS** |
+| **Total Automated Unit/Integration Tests** | All Automated Tests | **43** | **43** | **0** | **100% PASS** |
 
 ---
 
@@ -95,32 +97,41 @@ ok 23 - 23. Currency normalization converts USD reference prices accurately and 
     ok 16 - 16. Admin Reference Creation Validation: Missing fields strictly fail with 400 without fabricated fallbacks
     ok 17 - 17. Admin System Settings Persistence & Audit Logging: /api/admin/settings persists config and logs audit record
     ok 18 - 18. SSRF Protection: PDF photo fetcher blocks loopback, internal IPs, and cloud metadata endpoints
+    ok 19 - 19. Atomic Rollback: Failed evaluation persistence does not leave orphaned gemstone records
 ok 24 - Integration Workflow Suite
 
-# tests 42
+1..24
+# tests 43
 # suites 0
-# pass 42
+# pass 43
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 3492.77
+# duration_ms 3687.59
 ```
 
 ---
 
 ## 3. PDF Embedded Image & QR Extraction Verification
 
-Executed command: `npx tsx scripts/test-pdf-qr-extraction.ts`
+Executed command: `npx tsx scripts/verify-sample-pdfs.ts`
 
 ```
-PDF loaded successfully. Page count: 2
-Found Embedded Image in PDF: Width=800, Height=1200, Filter=/DCTDecode, Size=210706 bytes
-Found Embedded Image in PDF: Width=150, Height=150, Filter=/FlateDecode, Size=2174 bytes
-Decompressed raster bytes: 67500 for 150x150
->>> SUCCESS: Decoded QR code extracted from PDF: "http://localhost:3000/evaluations/EVAL-TEST-JOURNEY-001"
+Verifying sample-reports/sample-report-scenario-a.pdf:
+  Page count: 2 (Enforced 2 pages: true)
+  File size: 219483 bytes
+  ✓ Decoded embedded QR URL: "http://localhost:3000/evaluations/EVAL-SCENARIO-A"
 
-Verified: The QR code inside the rendered PDF is 100% readable and points to http://localhost:3000/evaluations/EVAL-TEST-JOURNEY-001
+Verifying sample-reports/sample-report-scenario-b.pdf:
+  Page count: 2 (Enforced 2 pages: true)
+  File size: 8544 bytes
+  ✓ Decoded embedded QR URL: "http://localhost:3000/evaluations/EVAL-SCENARIO-B"
+
+Verifying sample-reports/sample-report-scenario-c.pdf:
+  Page count: 2 (Enforced 2 pages: true)
+  File size: 8473 bytes
+  ✓ Decoded embedded QR URL: "http://localhost:3000/evaluations/EVAL-SCENARIO-C"
 ```
 
 ---
@@ -131,16 +142,18 @@ Executed command: `npm run build`
 
 ```
 ▲ Next.js 16.3.6 (Turbopack)
-✓ Running next.config.ts took 40ms
+✓ Running next.config.ts took 39ms
   Creating an optimized production build ...
-✓ Compiled successfully in 1667ms
+✓ Compiled successfully in 3.2s
   Running TypeScript ...
-  Finished TypeScript in 4.8s ...
+  Finished TypeScript in 6.3s ...
   Collecting page data using 7 workers ...
-✓ Generating static pages using 7 workers (63/63) in 894ms
+✓ Generating static pages using 7 workers (63/63) in 1249ms
   Finalizing page optimization ...
+
 Route (app)
 ├ ○ /
+├ ○ /_not-found
 ├ ƒ /admin/dashboard
 ├ ƒ /admin/settings
 ├ ƒ /api/evaluations
@@ -156,10 +169,15 @@ Build exit code: 0
 
 ## 5. Production Headless Chrome Browser Journey Verification
 
-Executed command: `npx tsx scripts/real-browser-journey.ts`
+Executed command: `npx tsx scripts/real-browser-journey.ts`  
+Tested Commit: `91e4b883f730215fabd016141f8d230e99f837e5`  
+Exit Code: `0`
 
 ```
 === STARTING REAL BROWSER JOURNEY AUTOMATION ===
+Git Commit Tested: 91e4b883f730215fabd016141f8d230e99f837e5
+Execution Start: 2026-11-14T07:11:47.537Z
+Target Base URL: http://localhost:3000
 Connecting to database: mongodb://127.0.0.1:27017/gemstone_evaluation
 
 1. Preparing Test Users in MongoDB:
@@ -171,15 +189,18 @@ Connecting to database: mongodb://127.0.0.1:27017/gemstone_evaluation
 3. Navigating to Login Page (/login):
   Entering credentials for primary user...
   ✓ Logged in successfully. Current URL: http://localhost:3000/dashboard
+  📸 Captured screenshot: 01-desktop-dashboard.png (saved to workspace & artifact)
 
 4. Navigating to Evaluation Wizard (/evaluate/gemstone):
   Step 1: Selecting Blue Sapphire, Carat 2.45...
   ✓ Step 1 Complete. Current URL: http://localhost:3000/evaluate/color
   Step 2: Entering Color metrics (/evaluate/color)...
+  📸 Captured screenshot: 02-desktop-wizard-color.png (saved to workspace & artifact)
   ✓ Step 2 Complete. Current URL: http://localhost:3000/evaluate/clarity
   Step 3: Entering Clarity metrics (/evaluate/clarity)...
   ✓ Step 3 Complete. Current URL: http://localhost:3000/evaluate/cut
   Step 4: Entering Cut dimensions & symmetry (/evaluate/cut)...
+  📸 Captured screenshot: 03-mobile-wizard-cut.png (saved to workspace & artifact)
   ✓ Step 4 Complete. Current URL: http://localhost:3000/evaluate/carat
   Step 5: Verifying Carat Weight (/evaluate/carat)...
   ✓ Step 5 Complete. Current URL: http://localhost:3000/evaluate/additional
@@ -190,14 +211,20 @@ Connecting to database: mongodb://127.0.0.1:27017/gemstone_evaluation
   Reloading page (F5 refresh)...
   ✓ Reload successful. Checking draft data persistence...
   ✓ Entered gemstone details (variety, carat, dimensions) confirmed intact after browser refresh!
+  📸 Captured screenshot: 04-desktop-wizard-review.png (saved to workspace & artifact)
 
 6. Executing Evaluation Engine from Review Page:
   API /api/evaluations responded 200
-  ✓ Evaluation submitted! Redirected to: http://localhost:3000/evaluations/6af7451a11d8b48f10a2abc9
-  ✓ Saved Evaluation ID: 6af7451a11d8b48f10a2abc9
+  ✓ Evaluation submitted! Redirected to: http://localhost:3000/evaluations/6af809c3883750479c16e665
+  ✓ Saved Evaluation ID: 6af809c3883750479c16e665
 
 7. Verifying Scores on Results Dashboard:
+  Captured API scores: Overall=93.84, Color=100, Clarity=92.75, Cut=93.25, Carat=85, PriceStatus=UNAVAILABLE
   ✓ 4C Breakdown correctly displays Color: 10.0, Clarity: 9.3, Cut: 9.3, Carat: 2.45 ct!
+  📸 Captured screenshot: 05-desktop-results-breakdown.png (saved to workspace & artifact)
+  📸 Captured screenshot: 06-mobile-results.png (saved to workspace & artifact)
+  Clicking Overview element: "Overview"
+  Overview button found and clicked: true
   ✓ Overview tab displays Overall score: 9.4 / 10 (Composite 93.84 / 100)!
 
 7b. Verifying Pricing Exclusion for Demo-Only Data:
@@ -207,14 +234,39 @@ Connecting to database: mongodb://127.0.0.1:27017/gemstone_evaluation
   ✓ Evaluation successfully reloaded from server state!
 
 9. Testing Report Download & PDF Content Integrity:
-  ✓ PDF successfully downloaded: 8551 bytes
+  ✓ PDF successfully downloaded: 8594 bytes
   ✓ PDF strictly contains 2 pages
-  ✓ Decoded QR code extracted from rendered PDF: "http://localhost:3000/evaluations/6af7451a11d8b48f10a2abc9"
+  ✓ Decoded QR code extracted from rendered PDF: "http://localhost:3000/evaluations/6af809c3883750479c16e665"
 
 10. Testing Privacy with Intruder User Account:
   Intruder access to report returned HTTP: 404
   Intruder access to evaluation API returned HTTP: 403
   ✓ Privacy verified: Intruder cannot view or download other users' evaluations!
+  📸 Captured screenshot: 07-intruder-access-blocked.png (saved to workspace & artifact)
 
 === REAL BROWSER JOURNEY COMPLETED 100% SUCCESSFULLY ===
 ```
+
+### Captured Screenshot Artifacts
+1. `screenshots/01-desktop-dashboard.png` (8,501 bytes, 1280×900)
+2. `screenshots/02-desktop-wizard-color.png` (217,237 bytes, 1280×900)
+3. `screenshots/03-mobile-wizard-cut.png` (210,017 bytes, 375×812)
+4. `screenshots/04-desktop-wizard-review.png` (142,887 bytes, 1280×900)
+5. `screenshots/05-desktop-results-breakdown.png` (130,267 bytes, 1280×900)
+6. `screenshots/06-mobile-results.png` (56,598 bytes, 375×812)
+7. `screenshots/07-intruder-access-blocked.png` (11,872 bytes, 1280×900)
+
+---
+
+## 6. Mathematical Recalculation Table
+
+Derivation executed automatically by `scripts/generate-scenario-tables.ts` from production engine `evaluateGemstone(input)`:
+
+| Scenario | Variety | Color Score (35%) | Clarity Score (25%) | Cut Score (20%) | Carat Score (20%) | Exact Sum Formula | Final Composite Score |
+|:---|:---|:---:|:---:|:---:|:---:|:---|:---:|
+| **Scenario A** | Blue Sapphire (2.45 ct) | 100.00 | 92.75 | 98.75 | 85.00 | $100(0.35) + 92.75(0.25) + 98.75(0.20) + 85.00(0.20) = 94.9375$ | **94.94** |
+| **Scenario B** | Padparadscha (1.95 ct) | 97.50 | 92.75 | 95.75 | 75.00 | $97.5(0.35) + 92.75(0.25) + 95.75(0.20) + 75.00(0.20) = 91.4625$ | **91.46** |
+| **Scenario C** | Ruby (1.50 ct) | 100.00 | 92.75 | 93.25 | 75.00 | $100(0.35) + 92.75(0.25) + 93.25(0.20) + 75.00(0.20) = 91.8375$ | **91.84** |
+
+> **Audit Note on Historical Prose Approximations:**  
+> The previous text draft listed hypothetical rounded subscores (Scenario A: $94 \times 0.35 + 93.5 \times 0.25 + 94 \times 0.2 + 97.5 \times 0.2 = 94.58$; Scenario B: $92 \times 0.35 + 90 \times 0.25 + 87.5 \times 0.2 + 95 \times 0.2 = 91.20$; Scenario C: $96 \times 0.35 + 92.75 \times 0.25 + 93.25 \times 0.2 + 75 \times 0.2 = 90.44$). Those numbers resulted from manual typing of hypothetical subscores. The table above displays the actual production engine scores calculated directly from the gemological observation parameters.

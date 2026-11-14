@@ -84,10 +84,10 @@ npm run dev
 
 ## 🧪 Comprehensive Verification & Testing
 
-The system includes a 42-test automated suite covering scoring mathematics, currency conversions, role-based security, atomic creation, and PDF verification:
+The system includes a 43-test automated suite covering scoring mathematics, currency conversions, role-based security, atomic creation and rollback, PDF verification, and headless browser journeys:
 
 ```bash
-# Execute full automated test suite (42 passed)
+# Execute full automated test suite (43 passed)
 npm test
 
 # Static TypeScript typecheck (0 errors)
@@ -99,8 +99,11 @@ npm run lint
 # Next.js production build (63 routes compiled)
 npm run build
 
+# Headless Chrome browser journey automation
+npx tsx scripts/real-browser-journey.ts
+
 # Verify PDF embedded image and QR code extraction
-npx tsx scripts/test-pdf-qr-extraction.ts
+npx tsx scripts/verify-sample-pdfs.ts
 
 # Generate deliverable sample PDF reports
 npx tsx scripts/generate-sample-pdfs.ts
