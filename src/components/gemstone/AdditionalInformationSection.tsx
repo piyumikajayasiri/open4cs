@@ -26,18 +26,20 @@ type AdditionalInformationSectionProps = {
 export default function AdditionalInformationSection({
   treatmentStatus,
   originValue,
+  originReliability,
   informationReliability,
   onTreatmentStatusChange,
   onOriginValueChange,
+  onOriginReliabilityChange,
   onInformationReliabilityChange,
 }: AdditionalInformationSectionProps) {
   const [recutPotential, setRecutPotential] = useState("Not recommended — good spread");
   const [otherCharacteristics, setOtherCharacteristics] = useState("No colour zoning · No window");
 
-  const currentTreatment = treatmentStatus || "Heated (H) — mild";
-  const currentOrigin = originValue || "Sri Lanka (Ceylon)";
-  const treatmentVerification = informationReliability.treatment || "Laboratory Verified";
-  const originVerification = informationReliability.origin || "Seller Provided";
+  const currentTreatment = treatmentStatus || "Unknown";
+  const currentOrigin = originValue || "Unknown";
+  const treatmentVerification = informationReliability.treatment || "Unverified";
+  const originVerification = originReliability || informationReliability.origin || "Unverified";
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -59,8 +61,9 @@ export default function AdditionalInformationSection({
                 value={currentTreatment}
                 onValueChange={onTreatmentStatusChange}
                 options={[
-                  "Heated (H) — mild",
+                  "Unknown",
                   "Untreated / Natural",
+                  "Heated (H) — mild",
                   "Heated (Standard)",
                   "Beryllium Treated",
                   "Glass Filled",
@@ -74,7 +77,7 @@ export default function AdditionalInformationSection({
                 htmlFor="treatment-verification-select"
                 className="block text-xs font-semibold text-slate-700 mb-2"
               >
-                Treatment Verification
+                Treatment Verification / Evidence
               </label>
               <ShadcnSelect
                 id="treatment-verification-select"
@@ -83,10 +86,10 @@ export default function AdditionalInformationSection({
                   onInformationReliabilityChange("treatment", val)
                 }
                 options={[
+                  "Unverified",
                   "Laboratory Verified",
                   "Seller Provided",
                   "User Observed",
-                  "Unverified",
                 ]}
               />
             </div>
@@ -97,18 +100,19 @@ export default function AdditionalInformationSection({
                 htmlFor="origin-select"
                 className="block text-xs font-semibold text-slate-700 mb-2"
               >
-                Origin
+                Geographic Origin
               </label>
               <ShadcnSelect
                 id="origin-select"
                 value={currentOrigin}
                 onValueChange={onOriginValueChange}
                 options={[
+                  "Unknown",
                   "Sri Lanka (Ceylon)",
                   "Madagascar",
                   "Myanmar (Burma)",
                   "Kashmir",
-                  "Unknown / Undetermined",
+                  "Other",
                 ]}
               />
             </div>
@@ -119,19 +123,20 @@ export default function AdditionalInformationSection({
                 htmlFor="origin-verification-select"
                 className="block text-xs font-semibold text-slate-700 mb-2"
               >
-                Origin Verification
+                Origin Verification / Evidence
               </label>
               <ShadcnSelect
                 id="origin-verification-select"
                 value={originVerification}
-                onValueChange={(val) =>
-                  onInformationReliabilityChange("origin", val)
-                }
+                onValueChange={(val) => {
+                  onInformationReliabilityChange("origin", val);
+                  if (onOriginReliabilityChange) onOriginReliabilityChange(val);
+                }}
                 options={[
-                  "Seller Provided",
-                  "Laboratory Verified",
-                  "User Observed",
                   "Unverified",
+                  "Laboratory Verified",
+                  "Seller Provided",
+                  "User Observed",
                 ]}
               />
             </div>

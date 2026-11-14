@@ -121,34 +121,49 @@ export default function SettingsPage() {
     }
   };
 
-  const handleExportData = () => {
-    const exportData = {
-      profile: { name, email, organization, category },
-      preferences: { preferredLanguage, reportCurrency },
-      notifications: {
-        evaluationComplete,
-        referenceDataUpdates,
-        ruleVersionChanges,
-        weeklyMarketDigest,
-      },
-      exportedAt: new Date().toISOString(),
-    };
+  const handleExportData = async () => {
+    try {
+      let evaluations = [];
+      try {
+        const res = await fetch("/api/evaluations");
+        if (res.ok) {
+          const data = await res.json();
+          evaluations = data.evaluations || data || [];
+        }
+      } catch {
+        // Continue with profile export if evaluations fetch fails
+      }
 
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `open4cs-user-data-${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+      const exportData = {
+        profile: { name, email, organization, category },
+        preferences: { preferredLanguage, reportCurrency },
+        notifications: {
+          evaluationComplete,
+          referenceDataUpdates,
+          ruleVersionChanges,
+        },
+        evaluations,
+        exportedAt: new Date().toISOString(),
+      };
 
-    showToast("User evaluations and profile data exported successfully.", "info");
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `open4cs-export-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      showToast("Profile and evaluations exported successfully.", "info");
+    } catch {
+      showToast("Failed to export complete user records.", "error");
+    }
   };
 
   const handleDeleteAccount = () => {
-    showToast("Account deletion requires supervisor or CAGS Administrator approval.", "error");
+    showToast("To request account deletion, please contact the administrator at support@cags.lk.", "info");
   };
 
   const initials = name
@@ -335,25 +350,8 @@ export default function SettingsPage() {
               </button>
             </div>
 
-            {/* Language & Currency Dropdowns */}
+            {/* Currency Preference */}
             <div className="space-y-4 pt-1">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Preferred Language
-                </label>
-                <ShadcnSelect
-                  value={preferredLanguage}
-                  onValueChange={setPreferredLanguage}
-                  options={[
-                    "English",
-                    "Sinhala (සිංහල)",
-                    "Tamil (தமிழ்)",
-                    "Chinese (中文)",
-                    "French (Français)",
-                  ]}
-                />
-              </div>
-
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Report Currency
@@ -480,28 +478,6 @@ export default function SettingsPage() {
                     />
                   </button>
                 </div>
-
-                {/* 4. Weekly market digest */}
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-slate-800">
-                    Weekly market digest
-                  </span>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={weeklyMarketDigest}
-                    onClick={() => setWeeklyMarketDigest(!weeklyMarketDigest)}
-                    className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
-                      weeklyMarketDigest ? "bg-emerald-600" : "bg-slate-200"
-                    }`}
-                  >
-                    <span
-                      className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform shadow-sm ${
-                        weeklyMarketDigest ? "right-1" : "left-1"
-                      }`}
-                    />
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -509,20 +485,20 @@ export default function SettingsPage() {
             <div className="rounded-xl bg-[#FEF2F2] border border-[#FEE2E2] p-4 space-y-3 mt-4">
               <div>
                 <p className="text-xs font-bold text-red-700">
-                  Danger zone
+                  Data &amp; Privacy
                 </p>
                 <p className="text-[11px] text-red-600/90 leading-relaxed mt-0.5 font-normal">
-                  Export or delete your evaluations and reports.
+                  Export or request deletion of your evaluations and account.
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 pt-1">
+              <div className="flex flex-wrap items-center gap-2 pt-1">
                 <button
                   type="button"
                   onClick={handleExportData}
                   className="rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs cursor-pointer"
                 >
-                  Export data
+                  Export profile and evaluations
                 </button>
 
                 <button
@@ -530,7 +506,7 @@ export default function SettingsPage() {
                   onClick={handleDeleteAccount}
                   className="rounded-lg bg-[#B91C1C] hover:bg-[#991B1B] px-3.5 py-1.5 text-xs font-semibold text-white transition shadow-xs cursor-pointer"
                 >
-                  Delete account
+                  Request account deletion
                 </button>
               </div>
             </div>

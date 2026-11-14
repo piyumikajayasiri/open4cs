@@ -30,17 +30,19 @@ export default function Home() {
                   href="/evaluate/gemstone"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0B1530] px-6 py-3.5 font-semibold text-white hover:bg-slate-800 transition shadow-sm"
                 >
-                  Start Evaluation
+                  Start evaluation
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
                 </Link>
 
                 <a
-                  href="#how-it-works"
+                  href="/sample-reports/sample-report-scenario-a.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3.5 font-semibold text-slate-800 hover:bg-slate-50 transition"
                 >
-                  Learn How It Works
+                  View sample report
                 </a>
               </div>
 
@@ -69,12 +71,12 @@ export default function Home() {
                 {/* Header Badge */}
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-slate-800">Evaluation Preview</span>
+                    <span className="font-semibold text-slate-800">Sample assessment</span>
                     <span className="text-slate-400">•</span>
                     <span className="text-slate-500">CEY-2026-0847</span>
                   </div>
                   <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 font-semibold text-emerald-700 text-[11px] border border-emerald-200">
-                    Rule v4.2
+                    prototype-v1
                   </span>
                 </div>
 

@@ -86,12 +86,32 @@ export default function ColorSection({
   const [localSecTone, setLocalSecTone] = useState(secondaryTone);
   const [localUniformity, setLocalUniformity] = useState(uniformity);
 
+  const missingObservations: string[] = [];
+  if (!hue) missingObservations.push("Primary Hue");
+  if (!tone) missingObservations.push("Tone");
+  if (!saturation) missingObservations.push("Saturation");
+
   return (
     <div className="space-y-6">
+      {/* Observation Completeness Status Banner */}
+      {missingObservations.length > 0 ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-xs text-amber-900 flex items-start gap-2.5">
+          <span className="font-bold text-amber-700 shrink-0 mt-0.5">⚠️ Observation needed:</span>
+          <div>
+            Please record <span className="font-semibold">{missingObservations.join(", ")}</span> to enable calibrated color scoring.
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4 text-xs text-emerald-900 flex items-center gap-2.5">
+          <span className="font-bold text-emerald-700">✓ Color Observations Complete:</span>
+          <div>Primary hue, tone, and saturation recorded for deterministic evaluation.</div>
+        </div>
+      )}
+
       {/* CARD 1: HUE & MODIFIERS */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5">
         <div>
-          <div className="flex items-center justify-between mb-2.5">
+          <div className="flex items-center justify-between mb-1">
             <label className="block text-xs font-bold text-slate-800">
               Primary Hue ({variety})
             </label>
@@ -99,6 +119,9 @@ export default function ColorSection({
               Category-specific standard
             </span>
           </div>
+          <p className="text-[11px] text-slate-500 mb-3">
+            Primary spectral color sensation characteristic of Sri Lankan corundum varieties.
+          </p>
           <div className="flex flex-wrap gap-2.5">
             {hueOptions.map((hOption) => {
               const isSelected = currentHue === hOption;
@@ -177,6 +200,9 @@ export default function ColorSection({
               Selected: {currentTone}
             </span>
           </div>
+          <p className="text-[11px] text-slate-500">
+            Measures relative lightness or darkness on the GIA scale; medium tones (5–6) optimize brilliance and color expression.
+          </p>
 
           <div className="grid grid-cols-9 gap-1.5 pt-1">
             {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((tNum) => {
@@ -209,6 +235,9 @@ export default function ColorSection({
               Selected: {currentSat}
             </span>
           </div>
+          <p className="text-[11px] text-slate-500">
+            Measures hue saturation and freedom from grey or brown masks; vivid saturation commands peak market premiums.
+          </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1">
             {SATURATION_OPTIONS.map((satOpt) => {

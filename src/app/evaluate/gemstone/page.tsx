@@ -1,15 +1,31 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEvaluationDraft } from "@/context/EvaluationDraftContext";
 import BasicInformation, { GEMSTONE_VARIETIES } from "@/components/gemstone/BasicInformation";
-import { ArrowRight, AlertTriangle } from "lucide-react";
+import { ArrowRight, RotateCcw, Play } from "lucide-react";
 
-export default function GemstoneStepPage() {
+function GemstoneStepContent() {
   const router = useRouter();
-  const { draft, updateDraft } = useEvaluationDraft();
+  const searchParams = useSearchParams();
+  const { draft, updateDraft, resetDraft } = useEvaluationDraft();
+
+  // If URL has ?variety=..., preselect that variety (e.g. from Gemstone Guide)
+  useEffect(() => {
+    const varietyParam = searchParams.get("variety");
+    if (varietyParam) {
+      const lower = varietyParam.toLowerCase();
+      if (lower.includes("ruby")) {
+        updateDraft({ variety: "Ruby" });
+      } else if (lower.includes("pad")) {
+        updateDraft({ variety: "Padparadscha" });
+      } else if (lower.includes("blue")) {
+        updateDraft({ variety: "Blue Sapphire" });
+      }
+    }
+  }, [searchParams, updateDraft]);
 
   const isSupportedVariety = useMemo(() => {
     const found = GEMSTONE_VARIETIES.find(
@@ -23,11 +39,20 @@ export default function GemstoneStepPage() {
     return found ? found.isSupported : false;
   }, [draft.variety]);
 
+  const hasExistingDraft = Boolean(draft.variety && (draft.caratWeight || draft.hue || draft.length));
+
+  const handleStartNew = () => {
+    resetDraft();
+  };
+
   const handleContinue = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isSupportedVariety) {
       alert("Evaluation is currently supported only for Blue Sapphire, Padparadscha, and Ruby.");
       return;
+    }
+    if (!draft.naturalStatus) {
+      updateDraft({ naturalStatus: "Natural" });
     }
     router.push("/evaluate/color");
   };
@@ -48,10 +73,21 @@ export default function GemstoneStepPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          {hasExistingDraft && (
+            <button
+              type="button"
+              onClick={handleStartNew}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition shadow-2xs cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
+              <span>Start New</span>
+            </button>
+          )}
+
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            Draft auto-saved
+            Draft active
           </span>
         </div>
       </div>
@@ -94,5 +130,13 @@ export default function GemstoneStepPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function GemstoneStepPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-slate-500">Loading gemstone selection...</div>}>
+      <GemstoneStepContent />
+    </Suspense>
   );
 }

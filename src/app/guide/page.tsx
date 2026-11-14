@@ -200,7 +200,7 @@ export default function GemstoneGuidePage() {
                 <div className="text-xs text-amber-900 space-y-1">
                   <p className="font-bold">Honest Coverage Policy</p>
                   <p>
-                    Open 4Cs only computes automated scores for categories with calibrated, board-evidenced rules (currently loose faceted Blue Sapphire, Padparadscha, and Ruby). Other sapphire colors are not subjected to arbitrary blue-sapphire rules. Diamonds, emeralds, and spinels are excluded from the corundum evaluation engine.
+                    Open 4Cs only computes automated scores for categories with calibrated gemmological research rules (currently loose faceted Blue Sapphire, Padparadscha, and Ruby). Other sapphire colors are not subjected to arbitrary blue-sapphire rules. Diamonds, emeralds, and spinels are excluded from the corundum evaluation engine.
                   </p>
                 </div>
               </div>

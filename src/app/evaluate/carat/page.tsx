@@ -26,10 +26,10 @@ export default function CaratStepPage() {
 
   const weightTier = useMemo(() => {
     if (!caratNum || caratNum <= 0) return null;
-    if (caratNum >= 3.0) return { label: "Major Rarity (≥ 3.00 ct)", color: "text-purple-700 bg-purple-50 border-purple-200" };
-    if (caratNum >= 2.0) return { label: "Premium Investment (2.00 – 2.99 ct)", color: "text-blue-700 bg-blue-50 border-blue-200" };
-    if (caratNum >= 1.0) return { label: "Fine Commercial (1.00 – 1.99 ct)", color: "text-emerald-700 bg-emerald-50 border-emerald-200" };
-    return { label: "Calibrated Commercial (< 1.00 ct)", color: "text-slate-700 bg-slate-50 border-slate-200" };
+    if (caratNum >= 3.0) return { label: "3.00+ ct weight band", color: "text-purple-700 bg-purple-50 border-purple-200" };
+    if (caratNum >= 2.0) return { label: "2.00–2.99 ct weight band", color: "text-blue-700 bg-blue-50 border-blue-200" };
+    if (caratNum >= 1.0) return { label: "1.00–1.99 ct weight band", color: "text-emerald-700 bg-emerald-50 border-emerald-200" };
+    return { label: "< 1.00 ct weight band", color: "text-slate-700 bg-slate-50 border-slate-200" };
   }, [caratNum]);
 
   const caratScore = useMemo(() => {

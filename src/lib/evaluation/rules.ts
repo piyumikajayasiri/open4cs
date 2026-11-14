@@ -147,6 +147,7 @@ export const CLARITY_RULES = {
     slight: 75,
     noticeable: 55,
     obvious: 35,
+    notExamined: 75,
   },
 
   severity: {

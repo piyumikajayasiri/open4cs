@@ -227,11 +227,11 @@ export function EvaluationDraftProvider({ children }: { children: ReactNode }) {
         bulging: draft.bulging || "None",
       },
       treatment: {
-        status: draft.treatmentStatus || "Heated",
+        status: draft.treatmentStatus || "Unknown",
         type: draft.treatmentType || "Unverified",
       },
       origin: {
-        value: draft.originValue || "Sri Lanka",
+        value: draft.originValue || "Unknown",
         reliability: draft.originReliability || "Unverified",
       },
       informationReliability: {

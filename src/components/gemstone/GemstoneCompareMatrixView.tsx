@@ -9,6 +9,7 @@ export type GemstoneCompareItem = {
   id: string;
   variety: string;
   carat: string;
+  caratScore?: string;
   origin: string;
   color: string;
   colorSimilarity: string;
@@ -99,9 +100,25 @@ export default function GemstoneCompareMatrixView({
       ),
     },
     {
+      key: "carat",
+      label: "WEIGHT (CARAT)",
+      highlight: false,
+      render: (s: GemstoneCompareItem) => (
+        <span className="font-bold text-slate-900">{s.carat}</span>
+      ),
+    },
+    {
+      key: "caratScore",
+      label: "SIZE ASSESSMENT (SCORE)",
+      highlight: true,
+      render: (s: GemstoneCompareItem) => (
+        <span className="text-slate-800 font-semibold">{s.caratScore || "—"}</span>
+      ),
+    },
+    {
       key: "origin",
       label: "ORIGIN",
-      highlight: true,
+      highlight: false,
       render: (s: GemstoneCompareItem) => (
         <span className="text-slate-800 font-medium">{s.origin}</span>
       ),
