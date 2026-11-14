@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEvaluationDraft } from "@/context/EvaluationDraftContext";
 import LiveScoreSidebar from "@/components/gemstone/LiveScoreSidebar";
+import { evaluateCarat } from "@/lib/evaluation/evaluateCarat";
 import { Scale, Info, CheckCircle2, AlertTriangle, ArrowRight, ArrowLeft } from "lucide-react";
 
 export default function CaratStepPage() {
@@ -30,6 +31,23 @@ export default function CaratStepPage() {
     if (caratNum >= 1.0) return { label: "Fine Commercial (1.00 – 1.99 ct)", color: "text-emerald-700 bg-emerald-50 border-emerald-200" };
     return { label: "Calibrated Commercial (< 1.00 ct)", color: "text-slate-700 bg-slate-50 border-slate-200" };
   }, [caratNum]);
+
+  const caratScore = useMemo(() => {
+    if (caratNum > 0 && lenNum > 0 && widNum > 0 && depNum > 0) {
+      try {
+        const res = evaluateCarat({
+          caratWeight: caratNum,
+          length: lenNum,
+          width: widNum,
+          depth: depNum,
+        });
+        return typeof res.score === "number" ? res.score : null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }, [caratNum, lenNum, widNum, depNum]);
 
   const handleContinue = (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,6 +139,37 @@ export default function CaratStepPage() {
                   <p className="text-xs text-slate-500 leading-relaxed">
                     Corundum exhibits geometric per-carat price jumps at significant benchmark boundaries (1.00 ct, 2.00 ct, 3.00 ct, 5.00 ct) due to natural crystal rarity in secondary alluvial gravels.
                   </p>
+                </div>
+              )}
+
+              {/* Carat & Size Assessment Live Score Display */}
+              {typeof caratScore === "number" ? (
+                <div className="p-4 rounded-xl bg-blue-50/80 border border-blue-200/90 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800">Carat Evaluation Score</span>
+                    <span className="text-sm font-black text-blue-900 font-mono">
+                      {caratScore} <span className="text-xs font-normal text-slate-500">/ 100</span>
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
+                    <span className="font-semibold text-slate-700">
+                      Weight: <strong className="text-slate-900">{caratNum.toFixed(2)} ct</strong>
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span className="font-semibold text-slate-700">
+                      Size assessment: <strong className="text-slate-900 font-mono">{caratScore}/100</strong>
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Calculated by combining absolute weight rarity tier ({weightTier?.label || "Calibrated"}) with 3D face-up volume spread index ({spreadRatio} mm³/ct).
+                  </p>
+                </div>
+              ) : (
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 flex items-center justify-between">
+                  <span>Size assessment score:</span>
+                  <span className="font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 text-[11px]">
+                    {caratNum > 0 ? "Pending dimensions from Cut step" : "Enter carat weight"}
+                  </span>
                 </div>
               )}
 

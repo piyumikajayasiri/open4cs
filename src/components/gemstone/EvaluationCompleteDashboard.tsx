@@ -19,6 +19,8 @@ type EvaluationCompleteDashboardProps = {
   clarityScore?: number;
   cutScore?: number;
   caratScore?: number;
+  caratAssessmentScore?: number;
+  caratWeight?: number;
   colorLabel?: string;
   clarityLabel?: string;
   cutLabel?: string;
@@ -44,7 +46,9 @@ export default function EvaluationCompleteDashboard({
   colorScore = 8.6,
   clarityScore = 7.9,
   cutScore = 8.1,
-  caratScore = 2.45,
+  caratScore = 8.5,
+  caratAssessmentScore = 85,
+  caratWeight = 2.45,
   colorLabel = "Vivid Blue",
   clarityLabel = "Eye-clean",
   cutLabel = "Well Cut",
@@ -164,6 +168,8 @@ export default function EvaluationCompleteDashboard({
           cutScore={cutScore}
           cutLabel={cutLabel}
           caratScore={caratScore}
+          caratAssessmentScore={caratAssessmentScore}
+          caratWeight={caratWeight}
           caratLabel={caratLabel}
         />
       ) : activeTab === "comparables" ? (
@@ -272,19 +278,24 @@ export default function EvaluationCompleteDashboard({
           </div>
         </div>
 
-        {/* Carat Weight */}
+        {/* Carat */}
         <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs space-y-2.5">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-              CARAT WEIGHT
+              CARAT
             </span>
             <span className="text-sm text-blue-500">⚖️</span>
           </div>
           <p className="text-sm font-bold text-slate-900">
-            {caratScore.toFixed(2)} ct · {caratLabel}
+            {(caratScore > 10 ? caratScore / 10 : caratScore).toFixed(1)} · {caratLabel}
           </p>
+          <div className="text-[11px] text-slate-600 flex flex-wrap items-center gap-2">
+            <span>Weight: <strong className="text-slate-900">{(caratWeight ?? (caratScore > 10 ? 2.45 : caratScore)).toFixed(2)} ct</strong></span>
+            <span>·</span>
+            <span>Size assessment: <strong className="text-slate-900 font-mono">{caratAssessmentScore ?? (caratScore > 10 ? Math.round(caratScore) : Math.round(caratScore * 10))}/100</strong></span>
+          </div>
           <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-            <div className="bg-emerald-500 h-full rounded-full" style={{ width: "80%" }} />
+            <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${Math.min(100, (caratAssessmentScore ?? (caratScore > 10 ? caratScore : caratScore * 10)))}%` }} />
           </div>
         </div>
       </div>

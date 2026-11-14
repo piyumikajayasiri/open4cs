@@ -224,6 +224,19 @@ async function runRealBrowserJourney() {
     await page.keyboard.up('Control');
     await page.keyboard.press('Backspace');
     await page.keyboard.type('2.45');
+    await new Promise((r) => setTimeout(r, 600));
+
+    // Verify Carat page displays both Weight and Size assessment score
+    const caratStepText = await page.evaluate(() => document.body.innerText);
+    assert.ok(
+      caratStepText.includes("Weight:") && caratStepText.includes("2.45 ct"),
+      "Carat step must display Weight: 2.45 ct"
+    );
+    assert.ok(
+      caratStepText.includes("Size assessment:") && caratStepText.includes("85/100"),
+      "Carat step must display Size assessment: 85/100"
+    );
+    console.log("  ✓ Carat step displays Weight: 2.45 ct and Size assessment: 85/100!");
 
     await Promise.all([
       page.waitForNavigation({ waitUntil: "networkidle2" }),
@@ -325,13 +338,12 @@ async function runRealBrowserJourney() {
     assert.ok(bodyText.includes("COLOR — 10.0") || bodyText.includes("10.0"), "Color score 10.0 must appear");
     assert.ok(bodyText.includes("CLARITY — 9.3") || bodyText.includes("9.3"), "Clarity score 9.3 must appear");
     assert.ok(bodyText.includes("CUT — 9.3") || bodyText.includes("9.3"), "Cut score 9.3 must appear");
-    assert.ok(bodyText.includes("2.45"), "Carat weight 2.45 must appear");
-    console.log("  ✓ 4C Breakdown correctly displays Color: 10.0, Clarity: 9.3, Cut: 9.3, Carat: 2.45 ct!");
+    assert.ok(bodyText.includes("CARAT — 8.5") || bodyText.includes("8.5"), "Carat score 8.5 must appear");
+    assert.ok(bodyText.includes("Weight:") && bodyText.includes("2.45 ct"), "Carat weight 2.45 ct must appear");
+    assert.ok(bodyText.includes("Size assessment:") && bodyText.includes("85/100"), "Size assessment 85/100 must appear");
+    console.log("  ✓ 4C Breakdown displays Color: 10.0, Clarity: 9.3, Cut: 9.3, and Carat: Weight: 2.45 ct · Size assessment: 85/100 (8.5/10)!");
 
     await saveScreenshot(page, "05-desktop-results-breakdown.png");
-    await page.setViewport({ width: 375, height: 812, isMobile: true });
-    await saveScreenshot(page, "06-mobile-results.png");
-    await page.setViewport({ width: 1280, height: 900, isMobile: false });
 
     // Switch to Overview tab to verify overall composite score
     const allClickables = await page.$$("button, a, [role='tab'], span");
@@ -346,18 +358,20 @@ async function runRealBrowserJourney() {
       }
     }
     console.log(`  Overview button found and clicked: ${clickedOverview}`);
-    if (!clickedOverview) {
-      const clickablesList = await Promise.all(allClickables.map(b => b.evaluate(el => el.textContent?.trim() || "")));
-      console.log("  Sample Clickable texts:", clickablesList.filter(t => t.length > 0 && t.length < 25).slice(0, 20));
-    }
-    await new Promise((r) => setTimeout(r, 1500));
+    await new Promise((r) => setTimeout(r, 1200));
     const overviewText = await page.evaluate(() => document.body.innerText);
-    console.log("  Overview text snippet:", overviewText.slice(0, 200).replace(/\n/g, " "));
     assert.ok(
       overviewText.includes("9.4") || overviewText.includes("OVERALL") || overviewText.includes("Top 12%"),
       "Overview tab must display composite score 9.4 or OVERALL evaluation"
     );
     console.log("  ✓ Overview tab displays Overall score: 9.4 / 10 (Composite 93.84 / 100)!");
+
+    // Capture mobile viewport of results
+    await page.setViewport({ width: 375, height: 812, isMobile: true });
+    await new Promise((r) => setTimeout(r, 500));
+    await saveScreenshot(page, "06-mobile-results.png");
+    await page.setViewport({ width: 1280, height: 900, isMobile: false });
+    await new Promise((r) => setTimeout(r, 500));
 
     // Verify Demo Data Price Exclusion
     console.log("\n7b. Verifying Pricing Exclusion for Demo-Only Data:");
