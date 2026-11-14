@@ -169,6 +169,7 @@ export default function EvaluationResultPage({
   const colorSc = res?.color?.score ?? 86;
   const claritySc = res?.clarity?.score ?? 79;
   const cutSc = res?.cut?.score ?? 81;
+  const caratSc = res?.carat?.score ?? 85;
   const caratWeight = gem?.caratWeight ?? 2.45;
 
   const minVal = pricing?.min ?? pricing?.minimumPrice ?? null;
@@ -234,7 +235,9 @@ export default function EvaluationResultPage({
             colorScore={colorSc > 10 ? Number((colorSc / 10).toFixed(1)) : colorSc}
             clarityScore={claritySc > 10 ? Number((claritySc / 10).toFixed(1)) : claritySc}
             cutScore={cutSc > 10 ? Number((cutSc / 10).toFixed(1)) : cutSc}
-            caratScore={caratWeight}
+            caratScore={caratSc > 10 ? Number((caratSc / 10).toFixed(1)) : caratSc}
+            caratAssessmentScore={Math.round(caratSc)}
+            caratWeight={caratWeight}
             colorLabel={gem?.color?.saturation ? `${gem.color.saturation} Blue` : "Vivid Blue"}
             clarityLabel={gem?.clarity?.nakedEye || "Eye-clean"}
             cutLabel="Well Cut"

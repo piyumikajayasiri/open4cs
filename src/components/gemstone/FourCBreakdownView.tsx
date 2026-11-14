@@ -12,6 +12,8 @@ type FourCBreakdownViewProps = {
   cutScore?: number;
   cutLabel?: string;
   caratScore?: number;
+  caratAssessmentScore?: number;
+  caratWeight?: number;
   caratLabel?: string;
   length?: string | number;
   width?: string | number;
@@ -30,7 +32,9 @@ export default function FourCBreakdownView({
   clarityLabel = "Eye-clean",
   cutScore = 8.1,
   cutLabel = "Well Cut",
-  caratScore = 2.45,
+  caratScore = 8.5,
+  caratAssessmentScore = 85,
+  caratWeight = 2.45,
   caratLabel = "Liquid band",
   length = "8.42",
   width = "6.31",
@@ -318,7 +322,7 @@ export default function FourCBreakdownView({
         <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-extrabold text-slate-900 tracking-tight">
-              CARAT — {caratScore.toFixed(2)} CT
+              CARAT — {(caratScore > 10 ? caratScore / 10 : caratScore).toFixed(1)}
             </h3>
             <span className="text-sm font-bold text-slate-900">
               {caratLabel}
@@ -329,8 +333,27 @@ export default function FourCBreakdownView({
           <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
             <div
               className="bg-emerald-500 h-full rounded-full"
-              style={{ width: "85%" }}
+              style={{ width: `${Math.min(100, (caratAssessmentScore ?? (caratScore > 10 ? caratScore : caratScore * 10)))}%` }}
             />
+          </div>
+
+          {/* Dual Weight & Size Assessment Badge */}
+          <div className="rounded-xl bg-slate-50 border border-slate-200/80 p-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-slate-500">Weight:</span>
+              <span className="text-slate-900 font-bold">
+                {(caratWeight ?? (caratScore > 10 ? 2.45 : caratScore)).toFixed(2)} ct
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-slate-500">Size assessment:</span>
+              <span className="text-slate-900 font-bold font-mono">
+                {caratAssessmentScore ?? (caratScore > 10 ? Math.round(caratScore) : Math.round(caratScore * 10))}/100
+              </span>
+              <span className="text-[10px] text-slate-400">
+                ({(caratScore > 10 ? caratScore / 10 : caratScore).toFixed(1)}/10)
+              </span>
+            </div>
           </div>
 
           {/* Two Factor Boxes */}
