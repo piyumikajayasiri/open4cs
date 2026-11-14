@@ -501,6 +501,7 @@ export async function POST(request: NextRequest) {
     };
 
     let finalGemstoneId = data.gemstoneId;
+    let createdGemstoneId: string | null = null;
 
     if (finalGemstoneId && mongoose.Types.ObjectId.isValid(finalGemstoneId)) {
       const existingGem = await Gemstone.findById(finalGemstoneId);
@@ -526,6 +527,7 @@ export async function POST(request: NextRequest) {
         naturalStatus: data.naturalStatus || "Natural",
       });
       finalGemstoneId = createdGemstone._id.toString();
+      createdGemstoneId = finalGemstoneId;
     }
 
     const assessmentSnapshot = {
@@ -557,19 +559,32 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
     };
 
-    const savedEvaluation = await Evaluation.create({
-      userId: session.userId,
-      gemstoneId: finalGemstoneId,
-      ruleVersion: evaluation.ruleVersion,
-      status: evaluation.status,
-      result: evaluation,
-      referenceDataSufficiency,
-      bestReferenceMatch,
-      priceSuggestion,
-      exchangeRate: priceSuggestion.exchangeRate ?? null,
-      photoUrl: data.photoUrl || "",
-      assessmentSnapshot,
-    });
+    let savedEvaluation;
+    try {
+      savedEvaluation = await Evaluation.create({
+        userId: session.userId,
+        gemstoneId: finalGemstoneId,
+        ruleVersion: evaluation.ruleVersion,
+        status: evaluation.status,
+        result: evaluation,
+        referenceDataSufficiency,
+        bestReferenceMatch,
+        priceSuggestion,
+        exchangeRate: priceSuggestion.exchangeRate ?? null,
+        photoUrl: data.photoUrl || "",
+        assessmentSnapshot,
+      });
+    } catch (evalSaveError) {
+      // Clean rollback: If an evaluation save fails, delete any newly provisioned gemstone specimen
+      if (createdGemstoneId) {
+        try {
+          await Gemstone.findByIdAndDelete(createdGemstoneId);
+        } catch (cleanupErr) {
+          console.error("Failed to clean up orphaned gemstone specimen:", cleanupErr);
+        }
+      }
+      throw evalSaveError;
+    }
 
     return NextResponse.json(
       {

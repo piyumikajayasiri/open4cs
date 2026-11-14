@@ -1323,4 +1323,77 @@ test("Integration Workflow Suite", async (t) => {
       assert.strictEqual(ssrfDoc.getPageCount(), 2, "PDF with SSRF URL must cleanly generate 2-page report with vector fallback");
     }
   );
+
+  // =========================================================================
+  // Test 19: Atomic Rollback: Failed evaluation persistence does not leave orphaned gemstone records
+  // =========================================================================
+  await t.test(
+    "19. Atomic Rollback: Failed evaluation persistence does not leave orphaned gemstone records",
+    async () => {
+      const user = await User.create({
+        name: "Rollback Test User",
+        email: `rollback-user-${Date.now()}@example.com`,
+        passwordHash: "secret123",
+        category: "Student",
+        role: "USER",
+        status: "ACTIVE",
+        isActive: true,
+      });
+
+      const userToken = await createSessionToken({
+        userId: user._id.toString(),
+        role: "USER",
+      });
+
+      const initialGemCount = await Gemstone.countDocuments({ userId: user._id });
+
+      // Stub Evaluation.create to simulate a database failure during evaluation write
+      const originalCreate = Evaluation.create;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (Evaluation as any).create = async () => {
+        throw new Error("Simulated Database Storage Write Failure");
+      };
+
+      const payload = {
+        variety: "Blue Sapphire",
+        caratWeight: 2.15,
+        color: { hue: "Royal Blue", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None visible" },
+        clarity: { nakedEye: "Clean", loupe10x: "Very Slight", severity: "Minor" },
+        cut: { length: 8.0, width: 6.2, depth: 4.1, symmetry: "Good", polish: "Good", windowing: "None", extinction: "Minimal", bulging: "None" },
+        treatment: { status: "Unheated" },
+        origin: { value: "Sri Lanka", reliability: "High" },
+        informationReliability: { measurements: "Measured", treatment: "Laboratory Verified", origin: "Laboratory Verified" },
+      };
+
+      const req = new NextRequest("http://localhost:3000/api/evaluations", {
+        method: "POST",
+        headers: {
+          cookie: `session=${userToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      let failed = false;
+      try {
+        const res = await postEvaluation(req);
+        if (res.status >= 500) failed = true;
+      } catch {
+        failed = true;
+      } finally {
+        // Restore original method
+        Evaluation.create = originalCreate;
+      }
+
+      assert.ok(failed, "Evaluation save failure must trigger an error or 500 response");
+
+      // Verify that NO orphaned gemstone was left behind
+      const finalGemCount = await Gemstone.countDocuments({ userId: user._id });
+      assert.strictEqual(
+        finalGemCount,
+        initialGemCount,
+        "Failed evaluation persistence must clean up and leave exactly zero orphaned gemstone specimens"
+      );
+    }
+  );
 });

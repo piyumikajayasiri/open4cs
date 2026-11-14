@@ -77,7 +77,7 @@ async function testPdfImageAndQrExtraction() {
   const context = pdfDoc.context;
   const indirectObjects = context.enumerateIndirectObjects();
 
-  for (const [ref, obj] of indirectObjects) {
+  for (const [, obj] of indirectObjects) {
     if (obj instanceof PDFRawStream) {
       const dict = obj.dict;
       const subtype = dict.get(PDFName.of("Subtype"));

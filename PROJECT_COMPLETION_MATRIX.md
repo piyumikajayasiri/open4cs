@@ -52,7 +52,7 @@
 | **REQ-35** | Administration | Dynamic system governance configuration persisted to MongoDB | `src/models/SystemSetting.ts`, `src/app/api/admin/settings/route.ts` | Integration Test 17: Settings persistence | **VERIFIED** |
 | **REQ-36** | Administration | Live administration metrics and real audit trail without fabricated personas | `src/app/api/admin/status/route.ts`, `src/app/admin/dashboard/page.tsx` | Real MongoDB aggregations and audit queries | **VERIFIED** |
 | **REQ-37** | Administration | Rule version proposal workflow treated as research drafts in MongoDB | `src/app/api/admin/rule-versions/route.ts` | MongoDB persistence of draft rule proposals | **VERIFIED** |
-| **REQ-38** | Testing & QA | Automated test suite covering unit, integration, and browser workflows | `tests/`, `scripts/` | 42/42 tests pass; clean Next.js build | **VERIFIED** |
+| **REQ-38** | Testing & QA | Automated test suite covering unit, integration, and browser workflows | `tests/`, `scripts/` | 43/43 tests pass; clean Next.js build | **VERIFIED** |
 
 ---
 
@@ -68,3 +68,4 @@
 | **DEF-06** | LOW | Admin settings changes discarded | `/admin/settings` triggered simulated toast without API route or database persistence | Created `SystemSetting` model, `/api/admin/settings` route, and wired UI with database persistence | Integration Test 17 |
 | **DEF-07** | LOW | Last administrator demotion vulnerability | Admin could demote or suspend the last active `CAGS_ADMIN`, locking the system | Added checks preventing self-suspension and ensuring active admin count > 1 | Integration Test 13 |
 | **DEF-08** | LOW | Disconnected Compare and Report views | `/compare` and `/reports/[id]` relied on hardcoded static dummy data | Bound `/compare` and `/reports/[id]` to live authenticated user evaluations | End-to-end audit |
+| **DEF-09** | MEDIUM | Evaluation save write failure left orphaned specimen | If `Evaluation.create` threw an error after specimen provisioning, gemstone remained in MongoDB | Added compensation rollback to delete `createdGemstoneId` if `Evaluation.create` fails | Integration Test 19 |
