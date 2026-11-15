@@ -5,6 +5,7 @@ import { CheckCircle2, AlertTriangle, Edit3, ShieldAlert, Sparkles, Check } from
 
 type ReviewSectionProps = {
   variety: string;
+  naturalStatus?: "Natural" | "Lab-Grown" | "Not specified";
   caratWeight: string;
   length: string;
   width: string;
@@ -36,6 +37,7 @@ type ReviewSectionProps = {
 
 export default function ReviewSection({
   variety,
+  naturalStatus = "Not specified",
   caratWeight,
   length,
   width,
@@ -58,7 +60,10 @@ export default function ReviewSection({
   onRunEvaluation,
   loading = false,
 }: ReviewSectionProps) {
-  const displayVariety = variety || "Not entered";
+  const isNatureComplete = Boolean(naturalStatus && naturalStatus !== "Not specified");
+  const natureText = isNatureComplete ? `${naturalStatus} Corundum` : "Nature: Not entered";
+  const displayVariety = variety ? `${variety} · ${natureText}` : "Not entered";
+
   const hasCarat = Boolean(caratWeight && Number(caratWeight) > 0);
   const hasDimensions = Boolean(
     length && Number(length) > 0 &&
@@ -73,21 +78,23 @@ export default function ReviewSection({
   const depthPercent = hasDimensions && wVal > 0 ? ((dVal / wVal) * 100).toFixed(1) : null;
 
   const colorParts = [
-    hue ? `${hue}` : null,
-    tone ? `Tone ${tone}` : null,
-    saturation ? `${saturation}` : null,
+    hue ? `${hue}` : "Hue: Not entered",
+    tone ? `Tone ${tone}` : "Tone: Not entered",
+    saturation ? `${saturation}` : "Saturation: Not entered",
     distribution ? `Dist: ${distribution}` : null,
     zoning ? `Zoning: ${zoning}` : null,
   ].filter(Boolean);
-  const colorSubtitle = colorParts.length > 0 ? colorParts.join(" · ") : "Not entered";
+  const isColorComplete = Boolean(hue && tone && saturation);
+  const colorSubtitle = colorParts.join(" · ");
 
   const clarityParts = [
-    nakedEye ? `Naked eye: ${nakedEye}` : null,
-    loupe10x ? `10× loupe: ${loupe10x}` : null,
+    nakedEye ? `Naked eye: ${nakedEye}` : "Naked eye: Not entered",
+    loupe10x ? `10× loupe: ${loupe10x}` : "10× loupe: Not entered",
     inclusionType ? `Inclusions: ${inclusionType}` : null,
-    severity ? `Severity: ${severity}` : null,
+    severity ? `Severity: ${severity}` : "Severity: Not entered",
   ].filter(Boolean);
-  const claritySubtitle = clarityParts.length > 0 ? clarityParts.join(" · ") : "Not entered";
+  const isClarityComplete = Boolean(nakedEye && loupe10x && severity);
+  const claritySubtitle = clarityParts.join(" · ");
 
   const treatOriginParts = [
     treatmentStatus ? `Treatment: ${treatmentStatus}` : "Treatment: Not entered",
@@ -100,31 +107,31 @@ export default function ReviewSection({
     {
       id: "gemstone",
       title: "1. Gemstone Category & Origin Nature",
-      subtitle: variety ? `${variety} · Natural Corundum` : "Not entered",
-      iconType: variety ? "check" : "warning",
+      subtitle: variety ? displayVariety : "Variety & Nature: Not entered",
+      iconType: variety && isNatureComplete ? "check" : "warning",
       step: 1,
     },
     {
       id: "color",
       title: "2. Color Observation",
       subtitle: colorSubtitle,
-      iconType: hue && tone && saturation ? "check" : "warning",
+      iconType: isColorComplete ? "check" : "warning",
       step: 2,
     },
     {
       id: "clarity",
       title: "3. Clarity Assessment",
       subtitle: claritySubtitle,
-      iconType: nakedEye && loupe10x ? "check" : "warning",
+      iconType: isClarityComplete ? "check" : "warning",
       step: 3,
     },
     {
       id: "cut",
       title: "4. Cut & Proportions",
       subtitle: hasDimensions
-        ? `${length} × ${width} × ${depth} mm · L:W ${lwRatio} · Depth ${depthPercent}% · Symmetry: ${symmetry || "Not entered"}`
-        : "Dimensions incomplete — length, width, and depth required (Not entered)",
-      iconType: hasDimensions ? "check" : "warning",
+        ? `${length} × ${width} × ${depth} mm · L:W ${lwRatio} · Depth ${depthPercent}% · Symmetry: ${symmetry || "Not entered"} · Polish: ${polish || "Not entered"}`
+        : "Dimensions: Not entered (length, width, and depth required)",
+      iconType: hasDimensions && symmetry && polish ? "check" : "warning",
       step: 4,
     },
     {
@@ -132,7 +139,7 @@ export default function ReviewSection({
       title: "5. Carat Weight",
       subtitle: hasCarat
         ? `${caratWeight} ct calibrated electronic scale weight`
-        : "Carat weight required (Not entered)",
+        : "Carat weight: Not entered",
       iconType: hasCarat ? "check" : "warning",
       step: 5,
     },

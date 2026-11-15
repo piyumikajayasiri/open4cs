@@ -45,12 +45,22 @@ export async function GET(
 
     if (!gemstoneVariety) {
       return NextResponse.json(
-        { error: "Gemstone variety not found." },
+        { success: false, error: "Gemstone variety not found." },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ gemstoneVariety });
+    const varietyObj = gemstoneVariety as Record<string, unknown>;
+    const formatted = {
+      ...varietyObj,
+      status: varietyObj.isActive ? "ACTIVE" : "INACTIVE",
+    };
+
+    return NextResponse.json({
+      success: true,
+      gemstoneVariety: formatted,
+      gemstone: formatted,
+    });
   } catch (error) {
     console.error("Failed to fetch gemstone variety:", error);
     return NextResponse.json(
@@ -104,12 +114,24 @@ export async function PUT(
       updates.description = cleanDescription;
     }
 
+    if (typeof data.name === "string" && data.name.trim()) {
+      updates.name = data.name.trim();
+    }
+
+    if (typeof data.code === "string" && data.code.trim()) {
+      updates.code = data.code.trim().toUpperCase();
+    }
+
+    if (typeof data.supportedOrigin === "string") {
+      updates.supportedOrigin = data.supportedOrigin.trim();
+    }
+
     if (typeof data.isActive === "boolean") {
       updates.isActive = data.isActive;
     }
 
     if (typeof data.status === "string") {
-      updates.isActive = data.status === "Supported";
+      updates.isActive = data.status === "Supported" || data.status === "ACTIVE";
     }
 
     if (typeof data.species === "string" && data.species.trim()) {
@@ -143,14 +165,22 @@ export async function PUT(
 
     if (!gemstoneVariety) {
       return NextResponse.json(
-        { error: "Gemstone variety not found." },
+        { success: false, error: "Gemstone variety not found." },
         { status: 404 }
       );
     }
 
+    const varietyObj = gemstoneVariety as Record<string, unknown>;
+    const formatted = {
+      ...varietyObj,
+      status: varietyObj.isActive ? "ACTIVE" : "INACTIVE",
+    };
+
     return NextResponse.json({
+      success: true,
       message: "Gemstone variety updated successfully.",
-      gemstoneVariety,
+      gemstoneVariety: formatted,
+      gemstone: formatted,
     });
   } catch (error) {
     console.error("Failed to update gemstone variety:", error);

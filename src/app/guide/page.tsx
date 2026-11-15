@@ -251,7 +251,7 @@ export default function GemstoneGuidePage() {
                           href={`/evaluate/gemstone?variety=${encodeURIComponent(cat.name)}`}
                           className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700"
                         >
-                          <span>Evaluate this variety</span>
+                          <span>Evaluate {cat.name}</span>
                           <span>→</span>
                         </Link>
                       )}

@@ -140,6 +140,10 @@ async function runRealBrowserJourney() {
       const varietyCards = Array.from(document.querySelectorAll("button, div"));
       const blueCard = varietyCards.find(el => el.textContent?.includes("Blue Sapphire"));
       if (blueCard) (blueCard as HTMLElement).click();
+
+      // Explicitly select Natural Corundum
+      const naturalBtn = document.getElementById("natural-status-natural");
+      if (naturalBtn) naturalBtn.click();
     });
 
     // Enter stone code and photo
@@ -324,7 +328,7 @@ async function runRealBrowserJourney() {
     await page.waitForFunction(
       () => {
         const text = document.body.innerText;
-        return text.includes("4C Evaluation Breakdown") && !text.includes("Loading evaluation report");
+        return (text.includes("Evaluation Complete") || text.includes("4C Breakdown")) && !text.includes("Loading evaluation report");
       },
       { timeout: 25000 }
     );
@@ -384,7 +388,7 @@ async function runRealBrowserJourney() {
     await page.waitForFunction(
       () => {
         const text = document.body.innerText;
-        return (text.includes("4C Evaluation Breakdown") || text.includes("COLOR —")) && !text.includes("Loading evaluation report");
+        return (text.includes("4C Evaluation Breakdown") || text.includes("Evaluation Complete") || text.includes("COLOR —")) && !text.includes("Loading evaluation report");
       },
       { timeout: 25000 }
     );

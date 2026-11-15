@@ -1396,4 +1396,298 @@ test("Integration Workflow Suite", async (t) => {
       );
     }
   );
+
+  // =========================================================================
+  // Test 20: Isolated Pricing Rule Fixtures & Persistence Invariance
+  // =========================================================================
+  await t.test(
+    "20. Isolated Pricing Rule Engine: 3-wholesale real sale rule, retail/demo exclusion, deactivation & immutable snapshot",
+    async () => {
+      // Back up any pre-existing Ruby references to ensure total isolation
+      const savedRubyRefs = await ReferenceGemstone.find({ variety: "Ruby" }).lean();
+      await ReferenceGemstone.deleteMany({ variety: "Ruby" });
+
+      const testUser = await User.create({
+        name: "Pricing Engine Tester",
+        email: `pricing-rule-tester-${Date.now()}@example.com`,
+        passwordHash: "secret123",
+        category: "Trader",
+        role: "USER",
+        status: "ACTIVE",
+        isActive: true,
+      });
+
+      const userToken = await createSessionToken({
+        userId: testUser._id.toString(),
+        role: "USER",
+      });
+
+      const candidateRuby = {
+        variety: "Ruby",
+        caratWeight: 2.5,
+        color: {
+          hue: "Pigeon Blood Red",
+          tone: "6",
+          saturation: "Vivid",
+          distribution: "Even",
+          zoning: "None visible",
+        },
+        clarity: {
+          nakedEye: "Clean",
+          loupe10x: "Very Slight",
+          severity: "Minor",
+          inclusionType: "Silk needles",
+        },
+        cut: {
+          length: 8.5,
+          width: 6.5,
+          depth: 4.2,
+          symmetry: "Good",
+          polish: "Good",
+          windowing: "None",
+          extinction: "None",
+          bulging: "None",
+        },
+        treatment: { status: "Unheated" },
+        origin: { value: "Myanmar", reliability: "High" },
+        informationReliability: {
+          measurements: "Measured",
+          treatment: "Laboratory Verified",
+          origin: "Laboratory Verified",
+        },
+      };
+
+      try {
+        // Base references 1 & 2: Eligible Real Wholesale Completed Sales
+        await ReferenceGemstone.create({
+          referenceId: "REF-RUBY-ISO-1",
+          variety: "Ruby",
+          caratWeight: 2.5,
+          dataClassification: "Real",
+          transactionContext: "Completed Sale",
+          marketContext: "Wholesale",
+          verificationStatus: "Verified",
+          status: "ACTIVE",
+          isActive: true,
+          color: { hue: "Pigeon Blood Red", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None" },
+          clarity: { nakedEye: "Clean", loupe10x: "Very Slight", severity: "Minor", inclusionType: "Silk needles" },
+          cut: { length: 8.5, width: 6.5, depth: 4.2, symmetry: "Good", polish: "Good", windowing: "None", extinction: "None", bulging: "None" },
+          treatment: { status: "Unheated" },
+          origin: { value: "Myanmar", reliability: "High" },
+          referencePrice: 2500000,
+          currency: "LKR",
+          source: "Colombo Wholesale Gem Auction",
+        });
+
+        await ReferenceGemstone.create({
+          referenceId: "REF-RUBY-ISO-2",
+          variety: "Ruby",
+          caratWeight: 2.45,
+          dataClassification: "Real",
+          transactionContext: "Completed Sale",
+          marketContext: "Wholesale",
+          verificationStatus: "Verified",
+          status: "ACTIVE",
+          isActive: true,
+          color: { hue: "Pigeon Blood Red", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None" },
+          clarity: { nakedEye: "Clean", loupe10x: "Very Slight", severity: "Minor", inclusionType: "Silk needles" },
+          cut: { length: 8.4, width: 6.4, depth: 4.1, symmetry: "Good", polish: "Good", windowing: "None", extinction: "None", bulging: "None" },
+          treatment: { status: "Unheated" },
+          origin: { value: "Myanmar", reliability: "High" },
+          referencePrice: 2450000,
+          currency: "LKR",
+          source: "Ratnapura Trade Exchange",
+        });
+
+        // -------------------------------------------------------------------
+        // Scenario A: 2 eligible wholesale sales + 1 demo record -> price unavailable
+        // -------------------------------------------------------------------
+        await ReferenceGemstone.create({
+          referenceId: "REF-RUBY-ISO-3-DEMO",
+          variety: "Ruby",
+          caratWeight: 2.55,
+          dataClassification: "Demo", // DEMO
+          transactionContext: "Completed Sale",
+          marketContext: "Wholesale",
+          verificationStatus: "Verified",
+          status: "ACTIVE",
+          isActive: true,
+          color: { hue: "Pigeon Blood Red", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None" },
+          clarity: { nakedEye: "Clean", loupe10x: "Very Slight", severity: "Minor", inclusionType: "Silk needles" },
+          cut: { length: 8.6, width: 6.6, depth: 4.3, symmetry: "Good", polish: "Good", windowing: "None", extinction: "None", bulging: "None" },
+          treatment: { status: "Unheated" },
+          origin: { value: "Myanmar", reliability: "High" },
+          referencePrice: 2550000,
+          currency: "LKR",
+          source: "Synthetic Pedagogical Benchmark",
+        });
+
+        const reqA = new NextRequest("http://localhost:3000/api/evaluations", {
+          method: "POST",
+          headers: {
+            cookie: `session=${userToken}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(candidateRuby),
+        });
+        const resA = await postEvaluation(reqA);
+        assert.strictEqual(resA.status, 200);
+        const dataA = await resA.json();
+        assert.strictEqual(
+          dataA.priceSuggestion.status,
+          "UNAVAILABLE",
+          "Scenario A: 2 wholesale sales + 1 demo record must return price unavailable"
+        );
+        assert.strictEqual(dataA.priceSuggestion.suggestedPrice, null);
+
+        // -------------------------------------------------------------------
+        // Scenario B: 2 eligible wholesale sales + 1 retail sale -> wholesale price unavailable
+        // -------------------------------------------------------------------
+        await ReferenceGemstone.deleteOne({ referenceId: "REF-RUBY-ISO-3-DEMO" });
+        await ReferenceGemstone.create({
+          referenceId: "REF-RUBY-ISO-3-RETAIL",
+          variety: "Ruby",
+          caratWeight: 2.55,
+          dataClassification: "Real",
+          transactionContext: "Completed Sale",
+          marketContext: "Retail", // RETAIL
+          verificationStatus: "Verified",
+          status: "ACTIVE",
+          isActive: true,
+          color: { hue: "Pigeon Blood Red", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None" },
+          clarity: { nakedEye: "Clean", loupe10x: "Very Slight", severity: "Minor", inclusionType: "Silk needles" },
+          cut: { length: 8.6, width: 6.6, depth: 4.3, symmetry: "Good", polish: "Good", windowing: "None", extinction: "None", bulging: "None" },
+          treatment: { status: "Unheated" },
+          origin: { value: "Myanmar", reliability: "High" },
+          referencePrice: 3800000,
+          currency: "LKR",
+          source: "High Street Retail Boutique Sale",
+        });
+
+        const reqB = new NextRequest("http://localhost:3000/api/evaluations", {
+          method: "POST",
+          headers: {
+            cookie: `session=${userToken}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(candidateRuby),
+        });
+        const resB = await postEvaluation(reqB);
+        assert.strictEqual(resB.status, 200);
+        const dataB = await resB.json();
+        assert.strictEqual(
+          dataB.priceSuggestion.status,
+          "UNAVAILABLE",
+          "Scenario B: 2 wholesale sales + 1 retail sale must return wholesale price unavailable"
+        );
+        assert.strictEqual(dataB.priceSuggestion.suggestedPrice, null);
+
+        // -------------------------------------------------------------------
+        // Scenario C: 3 distinct eligible, verified wholesale sales meeting similarity & currency rules
+        //             -> indicative range with contributing references
+        // -------------------------------------------------------------------
+        await ReferenceGemstone.deleteOne({ referenceId: "REF-RUBY-ISO-3-RETAIL" });
+        await ReferenceGemstone.create({
+          referenceId: "REF-RUBY-ISO-3-WHOLESALE",
+          variety: "Ruby",
+          caratWeight: 2.55,
+          dataClassification: "Real",
+          transactionContext: "Completed Sale",
+          marketContext: "Wholesale", // WHOLESALE
+          verificationStatus: "Verified",
+          status: "ACTIVE",
+          isActive: true,
+          color: { hue: "Pigeon Blood Red", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None" },
+          clarity: { nakedEye: "Clean", loupe10x: "Very Slight", severity: "Minor", inclusionType: "Silk needles" },
+          cut: { length: 8.6, width: 6.6, depth: 4.3, symmetry: "Good", polish: "Good", windowing: "None", extinction: "None", bulging: "None" },
+          treatment: { status: "Unheated" },
+          origin: { value: "Myanmar", reliability: "High" },
+          referencePrice: 2550000,
+          currency: "LKR",
+          source: "B2B Trade Register Colombo #991",
+        });
+
+        const reqC = new NextRequest("http://localhost:3000/api/evaluations", {
+          method: "POST",
+          headers: {
+            cookie: `session=${userToken}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(candidateRuby),
+        });
+        const resC = await postEvaluation(reqC);
+        assert.strictEqual(resC.status, 200);
+        const dataC = await resC.json();
+        assert.strictEqual(
+          dataC.priceSuggestion.status,
+          "COMPLETED",
+          "Scenario C: 3 verified wholesale sales must yield available indicative price suggestion"
+        );
+        assert.ok(
+          dataC.priceSuggestion.suggestedPrice > 0,
+          "Scenario C: Suggested price must be a positive number"
+        );
+        assert.ok(
+          dataC.priceSuggestion.priceRange.minimum > 0 &&
+          dataC.priceSuggestion.priceRange.maximum > dataC.priceSuggestion.priceRange.minimum,
+          "Scenario C: Indicative price range must have valid positive minimum and maximum bounds"
+        );
+        const savedEvaluationCId = dataC.evaluationId;
+        assert.ok(savedEvaluationCId, "Evaluation ID must be returned");
+
+        // -------------------------------------------------------------------
+        // Scenario D: Deactivate one of those three -> new evaluation returns price unavailable
+        // -------------------------------------------------------------------
+        await ReferenceGemstone.findOneAndUpdate(
+          { referenceId: "REF-RUBY-ISO-1" },
+          { status: "INACTIVE", isActive: false }
+        );
+
+        const reqD = new NextRequest("http://localhost:3000/api/evaluations", {
+          method: "POST",
+          headers: {
+            cookie: `session=${userToken}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(candidateRuby),
+        });
+        const resD = await postEvaluation(reqD);
+        assert.strictEqual(resD.status, 200);
+        const dataD = await resD.json();
+        assert.strictEqual(
+          dataD.priceSuggestion.status,
+          "UNAVAILABLE",
+          "Scenario D: After deactivating one reference, subsequent evaluation must return price unavailable"
+        );
+        assert.strictEqual(dataD.priceSuggestion.suggestedPrice, null);
+
+        // -------------------------------------------------------------------
+        // Scenario E: Previously saved evaluations retain their original results
+        // -------------------------------------------------------------------
+        const retrievedEvalC = await Evaluation.findById(savedEvaluationCId).lean();
+        assert.ok(retrievedEvalC, "Previously saved evaluation must exist in database");
+        assert.strictEqual(
+          retrievedEvalC.priceSuggestion.status,
+          "COMPLETED",
+          "Scenario E: Previously saved evaluation must retain its original available pricing"
+        );
+        assert.strictEqual(
+          retrievedEvalC.priceSuggestion.suggestedPrice,
+          dataC.priceSuggestion.suggestedPrice,
+          "Scenario E: Suggested price in saved record must match original valuation exactly"
+        );
+        assert.strictEqual(
+          retrievedEvalC.assessmentSnapshot?.priceSuggestion?.status,
+          "COMPLETED",
+          "Scenario E: Assessment snapshot must immutably preserve original available pricing"
+        );
+      } finally {
+        // Clean up fixtures and restore original database state
+        await ReferenceGemstone.deleteMany({ variety: "Ruby" });
+        if (savedRubyRefs.length > 0) {
+          await ReferenceGemstone.insertMany(savedRubyRefs);
+        }
+      }
+    }
+  );
 });

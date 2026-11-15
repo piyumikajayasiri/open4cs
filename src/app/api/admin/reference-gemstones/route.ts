@@ -4,7 +4,6 @@ import { getCurrentUser } from "@/lib/auth/currentUser";
 import { connectDB } from "@/lib/mongodb";
 import Gemstone from "@/models/Gemstone";
 import ReferenceGemstone from "@/models/ReferenceGemstone";
-import AuditLog from "@/models/AuditLog";
 
 async function checkAdmin(req?: NextRequest) {
   const user = await getCurrentUser(req);
@@ -98,7 +97,6 @@ export async function POST(request: NextRequest) {
       referencePrice,
       priceCurrency,
       currency,
-      verificationStatus,
       source,
     } = body;
 
@@ -247,10 +245,10 @@ export async function POST(request: NextRequest) {
       currency: (priceCurrency || currency || "LKR").toUpperCase(),
       source: source ? String(source).trim() : "Market Reference",
       sourceType: body.sourceType || "Dealer Report",
-      verificationStatus: verificationStatus === "Verified" ? "Verified" : "Pending",
+      verificationStatus: "Pending",
       labCertificate: body.labCertificate || "",
-      verifiedBy: verificationStatus === "Verified" ? (body.verifiedBy || access.user?.name || "CAGS Admin") : "",
-      verifiedAt: verificationStatus === "Verified" ? (body.verifiedAt || new Date().toISOString()) : "",
+      verifiedBy: "",
+      verifiedAt: "",
       dataClassification: body.dataClassification === "Real" ? "Real" : "Demo",
       sourceEvidence: body.sourceEvidence || "",
       observationDate: body.observationDate || new Date().toISOString().split("T")[0],

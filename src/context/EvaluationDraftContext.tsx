@@ -19,7 +19,7 @@ export interface EvaluationDraft {
   // Step 1: Gemstone variety & identification
   variety: string;
   stoneId?: string;
-  naturalStatus?: "Natural" | "Lab-Grown";
+  naturalStatus?: "Natural" | "Lab-Grown" | "Not specified";
   photoUrl?: string;
 
   // Step 2 / Step 6: Carat & Basic dimensions
@@ -68,7 +68,7 @@ export interface EvaluationDraft {
 export const initialDraftState: EvaluationDraft = {
   variety: "Blue Sapphire",
   stoneId: "",
-  naturalStatus: "Natural",
+  naturalStatus: "Not specified",
   photoUrl: "",
   caratWeight: "",
   shape: "Oval",
@@ -240,7 +240,7 @@ export function EvaluationDraftProvider({ children }: { children: ReactNode }) {
         origin: draft.informationReliability?.origin || "Unverified",
       },
       photoUrl: draft.photoUrl || "",
-      naturalStatus: draft.naturalStatus || "Natural",
+      naturalStatus: draft.naturalStatus === "Lab-Grown" ? "Lab-Grown" : "Natural",
     };
 
     try {

@@ -94,7 +94,7 @@ type BasicInformationProps = {
   onVarietyChange: (value: string) => void;
   gemstoneCode?: string;
   onGemstoneCodeChange?: (value: string) => void;
-  naturalStatus?: "Natural" | "Lab-Grown";
+  naturalStatus?: "Natural" | "Lab-Grown" | "Not specified";
   onNaturalStatusChange?: (value: "Natural" | "Lab-Grown") => void;
   shape?: string;
   onShapeChange?: (value: string) => void;
@@ -107,7 +107,7 @@ export default function BasicInformation({
   onVarietyChange,
   gemstoneCode = "",
   onGemstoneCodeChange,
-  naturalStatus = "Natural",
+  naturalStatus = "Not specified",
   onNaturalStatusChange,
   shape = "Oval · Mixed Cut",
   onShapeChange,
@@ -256,6 +256,7 @@ export default function BasicInformation({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div
+            id="natural-status-natural"
             onClick={() => onNaturalStatusChange && onNaturalStatusChange("Natural")}
             className={`p-4 rounded-xl border cursor-pointer transition flex items-start gap-3 ${
               naturalStatus === "Natural"
@@ -280,6 +281,7 @@ export default function BasicInformation({
           </div>
 
           <div
+            id="natural-status-labgrown"
             onClick={() => onNaturalStatusChange && onNaturalStatusChange("Lab-Grown")}
             className={`p-4 rounded-xl border cursor-pointer transition flex items-start gap-3 ${
               naturalStatus === "Lab-Grown"

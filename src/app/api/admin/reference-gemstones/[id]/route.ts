@@ -7,8 +7,8 @@ import ReferenceGemstone from "@/models/ReferenceGemstone";
 import Gemstone from "@/models/Gemstone";
 import AuditLog from "@/models/AuditLog";
 
-async function requireAdmin() {
-  const user = await getCurrentUser();
+async function requireAdmin(req?: NextRequest) {
+  const user = await getCurrentUser(req);
 
   if (!user || user.role !== "CAGS_ADMIN") {
     return null;
@@ -18,11 +18,11 @@ async function requireAdmin() {
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await requireAdmin();
+    const session = await requireAdmin(request);
 
     if (!session) {
       return NextResponse.json(
@@ -78,7 +78,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await requireAdmin();
+    const session = await requireAdmin(request);
 
     if (!session) {
       return NextResponse.json(
@@ -258,12 +258,11 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await requireAdmin();
-
+    const session = await requireAdmin(request);
     if (!session) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
@@ -293,6 +292,7 @@ export async function DELETE(
 
     // Soft delete / deactivate
     reference.status = "INACTIVE";
+    reference.isActive = false;
     await reference.save();
 
     return NextResponse.json({
@@ -312,13 +312,12 @@ export async function DELETE(
   }
 }
 
-
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const admin = await requireAdmin();
+    const admin = await requireAdmin(request);
     if (!admin) {
       return NextResponse.json(
         { success: false, message: "CAGS Admin access required." },
@@ -330,14 +329,26 @@ export async function PATCH(
     await connectDB();
 
     const body = await request.json();
+    const updateDoc: Record<string, unknown> = { ...body };
+
+    if (body.verificationStatus === "Verified") {
+      const reviewerName = admin.name || "CAGS Admin";
+      const verifiedTimestamp = new Date().toISOString();
+      updateDoc.verificationStatus = "Verified";
+      updateDoc.verifiedBy = reviewerName;
+      updateDoc.verifiedAt = verifiedTimestamp;
+      updateDoc.reviewer = reviewerName;
+      updateDoc.reviewDate = verifiedTimestamp.split("T")[0];
+    }
+
     const query = mongoose.Types.ObjectId.isValid(id)
       ? { _id: id }
       : { referenceId: id.toUpperCase() };
 
     const updated = await ReferenceGemstone.findOneAndUpdate(
       query,
-      { $set: body },
-      { new: true }
+      { $set: updateDoc },
+      { returnDocument: "after" }
     ).lean();
 
     if (!updated) {
@@ -345,6 +356,26 @@ export async function PATCH(
         { success: false, message: "Reference record not found." },
         { status: 404 },
       );
+    }
+
+    if (body.verificationStatus === "Verified") {
+      try {
+        await AuditLog.create({
+          action: "VERIFY_REFERENCE_GEMSTONE",
+          entityType: "ReferenceGemstone",
+          entityId: updated._id,
+          performedBy: admin.id,
+          userEmail: admin.email,
+          details: {
+            referenceId: updated.referenceId,
+            verifiedBy: updateDoc.verifiedBy,
+            verifiedAt: updateDoc.verifiedAt,
+          },
+          timestamp: new Date(),
+        });
+      } catch (logErr) {
+        console.error("Audit log creation error:", logErr);
+      }
     }
 
     return NextResponse.json({

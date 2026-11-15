@@ -34,7 +34,7 @@ export default function GemstoneDetailsPage() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(`/api/admin/gemstones/${id}`, {
+        const response = await fetch(`/api/admin/gemstone-varieties/${id}`, {
           cache: "no-store",
         });
 
