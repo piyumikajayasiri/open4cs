@@ -22,7 +22,7 @@ const RuleVersionSchema = new Schema(
     },
 
     // ACTIVE is reserved for the future version-activation workflow.
-    // The current evaluation engine still uses static rules from rules.ts.
+    // The mock engine stores independent definitions in mock_evaluation_rules.
     status: {
       type: String,
       enum: ["DRAFT", "ACTIVE", "ARCHIVED"],

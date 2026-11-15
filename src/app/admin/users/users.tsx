@@ -2,21 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import ConfirmDelete from "@/components/admin/ConfirmDelete";
+import { adminRequest } from "@/components/admin/AdminUI";
 
 type UserCategory = "STUDENT" | "TRADER" | "GEMOLOGIST" | "PROFESSIONAL";
 
 type UserRole = "USER" | "ADMIN";
 type UserStatus = "ACTIVE" | "INACTIVE";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 type AdminUser = {
   _id: string;
@@ -77,6 +71,9 @@ function categoryLabel(category: UserCategory) {
 }
 
 export default function Users() {
+  const { data: session } = useSession();
+  const [deletingUser, setDeletingUser] = useState<AdminUser | null>(null);
+  const [deleteError, setDeleteError] = useState("");
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -87,7 +84,6 @@ export default function Users() {
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [pendingUser, setPendingUser] = useState<AdminUser | null>(null);
 
   const loadUsers = useCallback(
     async (showLoader = true) => {
@@ -166,7 +162,6 @@ export default function Users() {
         );
       }
 
-      setPendingUser(null);
       await loadUsers(false);
     } catch (err) {
       setError(
@@ -175,6 +170,13 @@ export default function Users() {
     } finally {
       setUpdatingId(null);
     }
+  }
+  async function deleteUser() {
+    if (!deletingUser || updatingId) return;
+    setUpdatingId(deletingUser._id); setDeleteError("");
+    try { await adminRequest("/api/admin/users/" + deletingUser._id, "DELETE"); setDeletingUser(null); await loadUsers(false); }
+    catch (error) { setDeleteError(error instanceof Error ? error.message : "Unable to delete account."); }
+    finally { setUpdatingId(null); }
   }
   const activeCount = users.filter((user) => user.status === "ACTIVE").length;
 
@@ -186,6 +188,7 @@ export default function Users() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-4 text-slate-900 sm:p-6 lg:p-8">
+      <ConfirmDelete open={Boolean(deletingUser)} title={"Delete account " + (deletingUser?.name || "") + "?"} description="This removes the account from User Management and disables sign-in. Existing evaluations and audit links are retained. The email remains reserved for this account." busy={Boolean(updatingId)} error={deleteError} onCancel={() => setDeletingUser(null)} onConfirm={deleteUser} />
       <div className="mx-auto max-w-7xl space-y-6">
         {/* Page header */}
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -507,6 +510,7 @@ export default function Users() {
                           >
                             View / Edit
                           </Link>
+                          <Button variant="destructive" className="h-9 text-xs" disabled={Boolean(updatingId) || session?.user?.id === user._id} aria-label={"Delete account " + user.name} onClick={() => { setDeletingUser(user); setDeleteError(""); }}>Delete</Button>
 
                           <button
                             type="button"

@@ -2,6 +2,17 @@ import mongoose, { Schema } from "mongoose";
 
 const ReferenceGemstoneSchema = new Schema(
   {
+    referenceId: { type: String },
+    dataKind: { type: String, enum: ["REFERENCE"], default: "REFERENCE" },
+    shape: String,
+    source: { type: String, default: "" }, sourceDate: String,
+    description: { type: String, maxlength: 1000 },
+    priceBasis: { type: String, enum: ["RETAIL_ESTIMATE", "B2B_QUOTE", "COMPLETED_SALE"] },
+    verificationStatus: { type: String, enum: ["PENDING", "VERIFIED", "REJECTED"], default: "PENDING" },
+    qualityReviewed: { type: Boolean, default: false }, permittedUseConfirmed: { type: Boolean, default: false },
+    createdBy: String, verifiedBy: String, verifiedByName: String, verifiedAt: Date,
+    lastEditedBy: String, lastEditedByName: String,
+    revision: { type: Number, default: 0 }, deletedAt: { type: Date, default: null }, deletedBy: String,
     variety: {
       type: String,
       required: true,
@@ -126,6 +137,9 @@ const ReferenceGemstoneSchema = new Schema(
     timestamps: true,
   }
 );
+
+// A distinct name permits this sparse index to coexist with legacy referenceId_1 indexes.
+ReferenceGemstoneSchema.index({ referenceId: 1 }, { unique: true, sparse: true, name: "referenceId_sparse_unique" });
 
 const ReferenceGemstone =
   mongoose.models.ReferenceGemstone ||
