@@ -6,10 +6,11 @@ const EvaluationSchema = new Schema(
     evaluationId: { type: String, required: true },
     submissionKey: { type: String, required: true },
     inputHash: { type: String, required: true },
-    dataKind: { type: String, enum: ["MOCK"], default: "MOCK", required: true },
+    dataKind: { type: String, enum: ["MOCK", "REFERENCE"], default: "MOCK", required: true },
     inputSnapshot: { type: Schema.Types.Mixed, required: true },
     ruleSnapshot: { type: Schema.Types.Mixed, required: true },
     recordSnapshots: { type: [Schema.Types.Mixed], default: [] },
+    catalogueSnapshot: Schema.Types.Mixed,
     userCategory: String,
     userId: {
       type: Schema.Types.ObjectId,

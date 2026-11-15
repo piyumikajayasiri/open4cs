@@ -1,14 +1,16 @@
 import { validateEvaluation } from "./engine.ts";
 import type { evaluateMock } from "./engine";
+import type { evaluateApproved, ReferenceQuote } from "./approved-policy";
 import type { EvaluationInput, MockGemstoneRecord, RuleSet } from "./types";
 
 export class SubmissionError extends Error {
   errors: Record<string, string>;
   constructor(message: string, errors: Record<string, string> = {}) { super(message); this.errors = errors; }
 }
-export type EngineResult = ReturnType<typeof evaluateMock>;
+export type EngineResult = ReturnType<typeof evaluateMock> | ReturnType<typeof evaluateApproved>;
 export function canonicalInput(input: EvaluationInput): EvaluationInput {
   return {
+    ...(input.catalogueId ? { catalogueId: input.catalogueId } : {}),
     variety: input.variety, origin: input.origin, originReliability: input.originReliability, treatment: input.treatment,
     caratWeight: input.caratWeight, shape: input.shape,
     color: { hue: input.color.hue, tone: input.color.tone, saturation: input.color.saturation, distribution: input.color.distribution, zoning: input.color.zoning },
@@ -68,17 +70,17 @@ export function evaluationSummary(document: Record<string, unknown>): Evaluation
   return {
     _id: String(document._id), evaluationId: String(document.evaluationId || document._id), variety: String(input.variety || result.variety || "Gemstone"),
     caratWeight: finite(input.caratWeight), ruleVersion: String(document.ruleVersion || "Not recorded"), status: String(document.status || "COMPLETED"), createdAt,
-    dataKind: document.dataKind === "MOCK" ? "MOCK" : "LEGACY", scores: { overall: scoreFor("overall"), color: scoreFor("color"), clarity: scoreFor("clarity"), cut: scoreFor("cut"), carat: scoreFor("carat") },
+    dataKind: document.dataKind === "MOCK" ? "MOCK" : document.dataKind === "REFERENCE" ? "REFERENCE" : "LEGACY", scores: { overall: scoreFor("overall"), color: scoreFor("color"), clarity: scoreFor("clarity"), cut: scoreFor("cut"), carat: scoreFor("carat") },
     priceRange: hasPrice ? `${currency} ${formatted(minimum)} – ${formatted(maximum)}` : "Price unavailable", priceStatus: hasPrice ? String(price.status || "AVAILABLE") : "UNAVAILABLE",
     priceReason: typeof price.reason === "string" ? price.reason : hasPrice ? "" : "No price suggestion was saved.",
   };
 }
 export interface EvaluationDetail extends EvaluationSummary {
-  inputSnapshot: EvaluationInput | null; result: EngineResult | null; ruleSnapshot: RuleSet | null; recordSnapshots: MockGemstoneRecord[];
+  inputSnapshot: EvaluationInput | null; result: EngineResult | null; ruleSnapshot: RuleSet | null; recordSnapshots: (MockGemstoneRecord | ReferenceQuote)[];
 }
 export function evaluationDetail(document: Record<string, unknown>): EvaluationDetail {
   return { ...evaluationSummary(document), inputSnapshot: document.inputSnapshot ? document.inputSnapshot as EvaluationInput : null,
     result: object(document.result).scores ? document.result as EngineResult : null,
     ruleSnapshot: document.ruleSnapshot ? document.ruleSnapshot as RuleSet : null,
-    recordSnapshots: Array.isArray(document.recordSnapshots) ? document.recordSnapshots as MockGemstoneRecord[] : [] };
+    recordSnapshots: Array.isArray(document.recordSnapshots) ? document.recordSnapshots as (MockGemstoneRecord | ReferenceQuote)[] : [] };
 }

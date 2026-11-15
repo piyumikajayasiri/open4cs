@@ -75,7 +75,7 @@ export default function RuleManager() {
       <Link href="/admin/evaluation-rules/test"><Button variant="outline"><FlaskConical /> Test Evaluation</Button></Link>
       <Button disabled={!selected || busy} onClick={() => selected && propose(selected)}><Plus /> Propose Rule Version</Button>
     </PageHeader>
-    <Notice message="Development dataset: these are provisional sample rules. Activation applies to the sample engine and does not represent CAGS approval." />
+    <p className="text-sm"><Link href="/admin/approved-rules" className="text-blue-600 underline">Open approved rules and catalogue integration</Link> · This page manages sample rules only.</p><Notice message="Development dataset: these are provisional sample rules. Activation applies to the sample engine and does not represent CAGS approval." />
     <Notice message={error || message} error={Boolean(error) || failure} />
     <div className="flex flex-wrap gap-3"><Choice label="Gemstone variety" value={variety} options={[{ value: "RUBY", label: "Ruby" }, { value: "SAPPHIRE", label: "Sapphire" }]} onChange={(value) => { setVariety(value as Variety); setChosen(""); setEditor(null); }} />
       {selected && <Choice label="Rule version" value={selected.version} options={versions.map((item) => ({ value: item.version, label: `${item.version} · ${pretty(item.status)}` }))} onChange={setChosen} />}
