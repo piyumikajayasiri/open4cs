@@ -7,9 +7,11 @@ import { Scale } from "lucide-react";
 
 export type GemstoneCompareItem = {
   id: string;
+  rawId?: string;
   variety: string;
   carat: string;
   caratScore?: string;
+  dimensions?: string;
   origin: string;
   color: string;
   colorSimilarity: string;
@@ -27,6 +29,7 @@ const DEFAULT_STONES: GemstoneCompareItem[] = [
     id: "EV-2026-0847",
     variety: "Ceylon Blue Sapphire",
     carat: "2.45 ct",
+    dimensions: "8.20 × 6.80 × 4.90 mm",
     origin: "Sri Lanka (unverified)",
     color: "8.6 Vivid Blue",
     colorSimilarity: "91%",
@@ -42,6 +45,7 @@ const DEFAULT_STONES: GemstoneCompareItem[] = [
     id: "EV-2026-0841",
     variety: "Padparadscha",
     carat: "1.87 ct",
+    dimensions: "7.60 × 6.00 × 3.80 mm",
     origin: "Sri Lanka (lab-verified)",
     color: "8.9 Lotus blend",
     colorSimilarity: "88%",
@@ -57,6 +61,7 @@ const DEFAULT_STONES: GemstoneCompareItem[] = [
     id: "EV-2026-0832",
     variety: "Yellow Sapphire",
     carat: "3.10 ct",
+    dimensions: "8.80 × 7.10 × 5.20 mm",
     origin: "Sri Lanka (seller)",
     color: "7.0 Golden",
     colorSimilarity: "79%",
@@ -113,6 +118,14 @@ export default function GemstoneCompareMatrixView({
       highlight: true,
       render: (s: GemstoneCompareItem) => (
         <span className="text-slate-800 font-semibold">{s.caratScore || "—"}</span>
+      ),
+    },
+    {
+      key: "dimensions",
+      label: "DIMENSIONS",
+      highlight: false,
+      render: (s: GemstoneCompareItem) => (
+        <span className="text-slate-800 font-semibold">{s.dimensions || "Not assessed"}</span>
       ),
     },
     {
@@ -234,8 +247,8 @@ export default function GemstoneCompareMatrixView({
         </div>
       ) : (
         <>
-          {/* Top 3 Stone Cards Selector */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Top Stone Cards Selector */}
+          <div className={`grid grid-cols-1 ${stones.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"} gap-4`}>
         {stones.map((stone) => {
           const isSelected = selectedStoneId === stone.id;
 
@@ -292,7 +305,7 @@ export default function GemstoneCompareMatrixView({
                 {stones.map((stone) => (
                   <th
                     key={stone.id}
-                    className="py-3.5 px-5 text-[11px] font-extrabold uppercase tracking-wider text-white w-1/4"
+                    className="py-3.5 px-5 text-[11px] font-extrabold uppercase tracking-wider text-white"
                   >
                     {stone.id}
                   </th>

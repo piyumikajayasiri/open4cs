@@ -251,6 +251,7 @@ export default function ReferenceGemstoneForm({
               Reference ID *
             </label>
             <input
+              id="ref-input-referenceId"
               type="text"
               value={form.referenceId}
               onChange={(e) => updateField("referenceId", e.target.value)}
@@ -265,6 +266,7 @@ export default function ReferenceGemstoneForm({
               Variety *
             </label>
             <select
+              id="ref-select-variety"
               value={form.variety}
               onChange={(e) => updateField("variety", e.target.value)}
               className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-900 outline-none"
@@ -280,6 +282,7 @@ export default function ReferenceGemstoneForm({
               Carat Weight (ct) *
             </label>
             <input
+              id="ref-input-caratWeight"
               type="number"
               step="0.01"
               min="0.01"
@@ -299,6 +302,7 @@ export default function ReferenceGemstoneForm({
               Data Classification *
             </label>
             <select
+              id="ref-select-dataClassification"
               value={form.dataClassification}
               onChange={(e) =>
                 updateField("dataClassification", e.target.value as "Real" | "Demo" | "")
@@ -323,6 +327,7 @@ export default function ReferenceGemstoneForm({
               Price Basis / Transaction Context *
             </label>
             <select
+              id="ref-select-transactionContext"
               value={form.transactionContext}
               onChange={(e) =>
                 updateField("transactionContext", e.target.value as "Completed Sale" | "Asking Price" | "")
@@ -345,6 +350,7 @@ export default function ReferenceGemstoneForm({
               Market Context *
             </label>
             <select
+              id="ref-select-marketContext"
               value={form.marketContext}
               onChange={(e) =>
                 updateField("marketContext", e.target.value as "Wholesale" | "Retail" | "Auction" | "")
@@ -624,6 +630,7 @@ export default function ReferenceGemstoneForm({
               Original Price *
             </label>
             <input
+              id="ref-input-referencePrice"
               type="number"
               step="1"
               min="1"
@@ -640,6 +647,7 @@ export default function ReferenceGemstoneForm({
               Currency *
             </label>
             <select
+              id="ref-select-currency"
               value={form.currency}
               onChange={(e) => updateField("currency", e.target.value as "LKR" | "USD")}
               className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-900 outline-none"
@@ -654,6 +662,7 @@ export default function ReferenceGemstoneForm({
               Observation / Sale Date *
             </label>
             <input
+              id="ref-input-observationDate"
               type="date"
               value={form.observationDate}
               onChange={(e) => updateField("observationDate", e.target.value)}
@@ -669,6 +678,7 @@ export default function ReferenceGemstoneForm({
               Source Register / Dealer *
             </label>
             <input
+              id="ref-input-source"
               type="text"
               value={form.source}
               onChange={(e) => updateField("source", e.target.value)}
@@ -683,6 +693,7 @@ export default function ReferenceGemstoneForm({
               Source Evidence / Document Ref
             </label>
             <input
+              id="ref-input-sourceEvidence"
               type="text"
               value={form.sourceEvidence}
               onChange={(e) => updateField("sourceEvidence", e.target.value)}
@@ -719,6 +730,7 @@ export default function ReferenceGemstoneForm({
         )}
 
         <button
+          id="ref-submit-btn"
           type="submit"
           disabled={saving}
           className="inline-flex items-center gap-2 rounded-xl bg-[#0B1528] hover:bg-slate-800 text-white px-6 py-2.5 text-xs sm:text-sm font-bold shadow-xs transition disabled:opacity-50"

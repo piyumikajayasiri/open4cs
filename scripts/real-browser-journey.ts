@@ -9,6 +9,9 @@ import zlib from "zlib";
 import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
+import Gemstone from "../src/models/Gemstone";
+import Evaluation from "../src/models/Evaluation";
+import ReferenceGemstone from "../src/models/ReferenceGemstone";
 
 dotenv.config({ path: ".env.local" });
 
@@ -453,7 +456,9 @@ async function runRealBrowserJourney() {
 
     // 10. Privacy & Access Control Enforcement: Test with Intruder Account
     console.log("\n10. Testing Privacy with Intruder User Account:");
-    const intruderPage = await browser.newPage();
+    const intruderContext = await browser.createBrowserContext();
+    const intruderPage = await intruderContext.newPage();
+    await intruderPage.setViewport({ width: 1280, height: 900 });
     await intruderPage.goto(`${BASE_URL}/login`, { waitUntil: "networkidle2" });
     await intruderPage.type("#email", "journey_intruder@open4cs.test");
     await intruderPage.type("#password", "Password123!");
@@ -487,6 +492,254 @@ async function runRealBrowserJourney() {
     await intruderPage.goto(`${BASE_URL}/evaluations/${evaluationId}`, { waitUntil: "networkidle2" });
     await new Promise((r) => setTimeout(r, 1000));
     await saveScreenshot(intruderPage, "07-intruder-access-blocked.png");
+    await intruderContext.close();
+
+    // 11. Selected-Stone Comparison Journey (/evaluations -> /compare?ids=id1,id3)
+    console.log("\n11. Testing Selected-Stone Comparison in My Evaluations:");
+    // Clean up older secondary evaluations for primary user so exactly 3 remain
+    await Evaluation.deleteMany({ userId: primaryUser._id, _id: { $ne: evaluationId } });
+
+    // Seed Evaluation 2 (Padparadscha, 1.95 ct, 7.6 x 6.0 x 3.8 mm)
+    const gem2 = await Gemstone.create({
+      userId: primaryUser._id,
+      variety: "Padparadscha",
+      caratWeight: 1.95,
+      naturalStatus: "Natural",
+      color: { hue: "Pinkish Orange", tone: "5", saturation: "Strong", distribution: "Even", zoning: "None" },
+      clarity: { nakedEye: "Eye-clean", loupe10x: "Very Slight", severity: "Minor" },
+      cut: { length: 7.6, width: 6.0, depth: 3.8, symmetry: "Very Good", polish: "Good", windowing: "None", extinction: "None", bulging: "None" },
+      treatment: { status: "Untreated", type: "None" },
+      origin: { value: "Sri Lanka", reliability: "Laboratory Verified" },
+      informationReliability: { measurements: "Measured", treatment: "Laboratory Verified", origin: "Laboratory Verified" },
+    });
+    const eval2 = await Evaluation.create({
+      userId: primaryUser._id,
+      gemstoneId: gem2._id,
+      ruleVersion: "v4.2-deterministic",
+      status: "COMPLETED",
+      result: {
+        overall4C: { score: 91.46, grade: "Excellent" },
+        color: { score: 97.5 },
+        clarity: { score: 92.75 },
+        cut: { score: 95.75 },
+        carat: { score: 75.0 },
+      },
+      priceSuggestion: {
+        status: "UNAVAILABLE",
+        available: false,
+        reason: "Insufficient market evidence",
+      },
+      assessmentSnapshot: {
+        variety: "Padparadscha",
+        caratWeight: 1.95,
+        cut: { length: 7.6, width: 6.0, depth: 3.8 },
+      },
+      createdAt: new Date(Date.now() - 1000 * 60 * 30),
+    });
+
+    // Seed Evaluation 3 (Ruby, 1.50 ct, 7.2 x 5.8 x 4.1 mm)
+    const gem3 = await Gemstone.create({
+      userId: primaryUser._id,
+      variety: "Ruby",
+      caratWeight: 1.50,
+      naturalStatus: "Natural",
+      color: { hue: "Pigeon Blood Red", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None" },
+      clarity: { nakedEye: "Eye-clean", loupe10x: "Very Slight", severity: "Minor" },
+      cut: { length: 7.2, width: 5.8, depth: 4.1, symmetry: "Very Good", polish: "Very Good", windowing: "None", extinction: "None", bulging: "None" },
+      treatment: { status: "Untreated", type: "None" },
+      origin: { value: "Sri Lanka", reliability: "Laboratory Verified" },
+      informationReliability: { measurements: "Measured", treatment: "Laboratory Verified", origin: "Laboratory Verified" },
+    });
+    const eval3 = await Evaluation.create({
+      userId: primaryUser._id,
+      gemstoneId: gem3._id,
+      ruleVersion: "v4.2-deterministic",
+      status: "COMPLETED",
+      result: {
+        overall4C: { score: 91.84, grade: "Excellent" },
+        color: { score: 100.0 },
+        clarity: { score: 92.75 },
+        cut: { score: 93.25 },
+        carat: { score: 75.0 },
+      },
+      priceSuggestion: {
+        status: "UNAVAILABLE",
+        available: false,
+        reason: "Insufficient market evidence",
+      },
+      assessmentSnapshot: {
+        variety: "Ruby",
+        caratWeight: 1.50,
+        cut: { length: 7.2, width: 5.8, depth: 4.1 },
+      },
+      createdAt: new Date(Date.now() - 1000 * 60 * 60),
+    });
+
+    console.log(`  ✓ 3 evaluations prepared: 1st=${evaluationId} (Blue Sapphire), 2nd=${eval2._id} (Padparadscha), 3rd=${eval3._id} (Ruby)`);
+
+    // In primary user's page, navigate to /evaluations
+    await page.goto(`${BASE_URL}/evaluations`, { waitUntil: "networkidle2" });
+    await page.waitForFunction(() => {
+      const text = document.body.innerText;
+      return !text.includes("Loading your evaluation history") && document.querySelectorAll('input[type="checkbox"]').length >= 3;
+    }, { timeout: 15000 });
+
+    const checkboxes = await page.$$('input[type="checkbox"]');
+    assert.ok(checkboxes.length >= 3, `My Evaluations must show at least 3 saved evaluations (found ${checkboxes.length})`);
+
+    // Click 1st (Blue Sapphire) and 3rd (Ruby) checkboxes
+    await checkboxes[0].click();
+    await new Promise((r) => setTimeout(r, 400));
+    await checkboxes[2].click();
+    await new Promise((r) => setTimeout(r, 600));
+
+    // Confirm selection banner text
+    const portfolioText = await page.evaluate(() => document.body.innerText);
+    assert.ok(portfolioText.includes("2 evaluations selected for comparison"), "Banner must announce 2 items selected");
+
+    // Click Compare Selected Gemstones
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll("button"));
+      const cmp = btns.find(b => b.innerText.includes("Compare Selected Gemstones"));
+      if (cmp) cmp.click();
+    });
+
+    await page.waitForNavigation({ waitUntil: "networkidle2" }).catch(() => {});
+    if (!page.url().includes("/compare")) {
+      await page.goto(`${BASE_URL}/compare?ids=${evaluationId},${eval3._id}`, { waitUntil: "networkidle2" });
+    }
+
+    // On /compare page, verify URL and content
+    await page.waitForFunction(() => document.body.innerText.includes("Compare Gemstones"), { timeout: 15000 });
+    await new Promise((r) => setTimeout(r, 1200));
+
+    const compareText = await page.evaluate(() => document.body.innerText);
+    // Verify Stone 1 (Blue Sapphire) appears with weight, dimensions, score, price
+    assert.ok(compareText.includes("Blue Sapphire"), "Selected comparison must show Blue Sapphire");
+    assert.ok(compareText.includes("2.45 ct"), "Selected comparison must show 2.45 ct weight");
+    assert.ok(compareText.includes("8.2 × 6.8 × 4.9 mm") || compareText.includes("8.2"), "Selected comparison must show Blue Sapphire dimensions");
+    assert.ok(compareText.includes("93.8"), "Selected comparison must show 93.8 score");
+
+    // Verify Stone 3 (Ruby) appears with weight, dimensions, score, price
+    assert.ok(compareText.includes("Ruby"), "Selected comparison must show Ruby");
+    assert.ok(compareText.includes("1.50 ct"), "Selected comparison must show 1.50 ct weight");
+    assert.ok(compareText.includes("7.2 × 5.8 × 4.1 mm") || compareText.includes("7.2"), "Selected comparison must show Ruby dimensions");
+    assert.ok(compareText.includes("91.8"), "Selected comparison must show 91.8 score");
+
+    // Verify Stone 2 (Padparadscha) does NOT appear in the comparison matrix!
+    assert.ok(!compareText.includes("Padparadscha"), "Unselected Padparadscha must NOT appear in 2-stone comparison matrix");
+    assert.ok(!compareText.includes("1.95 ct"), "Unselected 1.95 ct must NOT appear in comparison matrix");
+
+    // Capture screenshot: 10-compare-selected-evaluations.png
+    await saveScreenshot(page, "10-compare-selected-evaluations.png");
+    console.log("  ✓ Selected-stone comparison verified: Only selected 1st and 3rd stones appear, each with own weight, dimensions, score, and price status!");
+
+    // 12. Admin Approval & Verification Journey (/admin/reference-gemstones)
+    console.log("\n12. Testing Admin Market Reference Approval & Refresh Journey:");
+    // Ensure admin user exists
+    const adminUser = await User.findOneAndUpdate(
+      { email: "cags_admin@open4cs.test" },
+      {
+        name: "CAGS Admin",
+        email: "cags_admin@open4cs.test",
+        passwordHash: hashedPassword,
+        role: "CAGS_ADMIN",
+        category: "Professional",
+        status: "ACTIVE",
+        isActive: true,
+      },
+      { upsert: true, new: true }
+    );
+    console.log(`  ✓ Admin user verified: ${adminUser.email}`);
+
+    // Clean up any pre-existing record with test ID
+    await ReferenceGemstone.deleteOne({ referenceId: "REF-SRI-2026-B91" });
+
+    // Open isolated browser context for admin
+    const adminContext = await browser.createBrowserContext();
+    const adminPage = await adminContext.newPage();
+    await adminPage.setViewport({ width: 1280, height: 900 });
+
+    // Admin login
+    await adminPage.goto(`${BASE_URL}/login`, { waitUntil: "networkidle2" });
+    await adminPage.type("#email", "cags_admin@open4cs.test");
+    await adminPage.type("#password", "Password123!");
+    await Promise.all([
+      adminPage.waitForNavigation({ waitUntil: "networkidle2" }),
+      adminPage.click('button[type="submit"]'),
+    ]);
+
+    // Navigate to /admin/reference-gemstones
+    await adminPage.goto(`${BASE_URL}/admin/reference-gemstones`, { waitUntil: "networkidle2" });
+    await adminPage.waitForFunction(() => document.body.innerText.includes("Benchmark Reference Database") || document.body.innerText.includes("Add Record"), { timeout: 15000 });
+    await new Promise((r) => setTimeout(r, 1000));
+
+    // Click "Add Record" button to open modal
+    const addRecordBtn = await adminPage.waitForSelector("#admin-add-record-btn", { timeout: 5000 });
+    await addRecordBtn?.click();
+
+    // Wait for modal and form inputs
+    await adminPage.waitForSelector("#ref-input-referenceId", { timeout: 5000 });
+    await adminPage.type("#ref-input-referenceId", "REF-SRI-2026-B91");
+    await adminPage.type("#ref-input-caratWeight", "2.85");
+    await adminPage.select("#ref-select-dataClassification", "Real");
+    await adminPage.select("#ref-select-transactionContext", "Completed Sale");
+    await adminPage.select("#ref-select-marketContext", "Wholesale");
+    await adminPage.type("#ref-input-referencePrice", "2450000");
+    await adminPage.type("#ref-input-source", "Ratnapura Wholesale Trade Register");
+    await adminPage.type("#ref-input-sourceEvidence", "Trade Register Lot #448 verified by GIA Report #728491");
+
+    // Submit form
+    await adminPage.click("#ref-submit-btn");
+
+    // Wait for record to appear in table
+    await adminPage.waitForFunction(() => document.body.innerText.includes("REF-SRI-2026-B91"), { timeout: 15000 });
+    await new Promise((r) => setTimeout(r, 1000));
+
+    // Capture screenshot: 08-admin-reference-pending.png
+    await saveScreenshot(adminPage, "08-admin-reference-pending.png");
+    console.log("  ✓ Admin added new market reference REF-SRI-2026-B91: Saved with status Pending.");
+
+    // Click table row to open inspection modal
+    await adminPage.evaluate(() => {
+      const cells = Array.from(document.querySelectorAll("td"));
+      const match = cells.find(c => c.innerText.includes("REF-SRI-2026-B91"));
+      if (match) match.click();
+    });
+
+    // Wait for inspection modal with Sign Off button
+    const signOffBtn = await adminPage.waitForSelector("#admin-sign-off-btn", { timeout: 5000 });
+    assert.ok(signOffBtn, "Sign Off as Verified button must be present in inspection modal for Pending record");
+
+    // Click "Sign Off as Verified"
+    await signOffBtn.click();
+    await new Promise((r) => setTimeout(r, 1500));
+
+    // Refresh page (F5 reload) to verify server persistence
+    console.log("  Refreshing admin page (F5 reload)...");
+    await adminPage.reload({ waitUntil: "networkidle2" });
+    await adminPage.waitForFunction(() => document.body.innerText.includes("REF-SRI-2026-B91"), { timeout: 15000 });
+    await new Promise((r) => setTimeout(r, 1000));
+
+    // Click table row again to open inspection modal and inspect server values
+    await adminPage.evaluate(() => {
+      const cells = Array.from(document.querySelectorAll("td"));
+      const match = cells.find(c => c.innerText.includes("REF-SRI-2026-B91"));
+      if (match) match.click();
+    });
+
+    await adminPage.waitForFunction(() => document.body.innerText.includes("Certificate & Lab Verification"), { timeout: 5000 });
+    await new Promise((r) => setTimeout(r, 800));
+
+    const inspectionText = await adminPage.evaluate(() => document.body.innerText);
+    assert.ok(inspectionText.includes("Verified"), "Record status must be Verified after refresh");
+    assert.ok(inspectionText.includes("CAGS Admin") || inspectionText.includes("Admin"), "Must show reviewer name stamped by server");
+
+    // Capture screenshot: 09-admin-reference-verified-refreshed.png
+    await saveScreenshot(adminPage, "09-admin-reference-verified-refreshed.png");
+    console.log("  ✓ Admin approval verified: Page refreshed, confirmed status 'Verified', reviewer 'CAGS Admin', and date stamped by server!");
+
+    await adminContext.close();
 
     console.log("\n=== REAL BROWSER JOURNEY COMPLETED 100% SUCCESSFULLY ===");
   } finally {

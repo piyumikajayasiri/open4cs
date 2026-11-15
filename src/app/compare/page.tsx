@@ -9,13 +9,14 @@ import { Loader2 } from "lucide-react";
 interface EvaluationApiItem {
   _id: string;
   createdAt: string;
+  assessmentSnapshot?: Record<string, unknown>;
   gemstoneId?: {
     _id?: string;
     variety?: string;
     caratWeight?: number;
-    color?: { hue?: string };
-    clarity?: { nakedEye?: string };
-    cut?: { symmetry?: string };
+    color?: { hue?: string; tone?: string; saturation?: string };
+    clarity?: { nakedEye?: string; loupe10x?: string };
+    cut?: { length?: number; width?: number; depth?: number; symmetry?: string; polish?: string };
     treatment?: { status?: string };
     origin?: { value?: string; reliability?: string };
     informationReliability?: { origin?: string };
@@ -32,9 +33,13 @@ interface EvaluationApiItem {
   };
   priceSuggestion?: {
     status?: string;
+    available?: boolean;
     currency?: string;
     min?: number;
     max?: number;
+    minimumPrice?: number;
+    maximumPrice?: number;
+    priceRangeLkr?: { minimum?: number; maximum?: number };
   };
 }
 
@@ -69,7 +74,7 @@ function CompareContent() {
             const mapped: GemstoneCompareItem[] = filteredList.map((item: EvaluationApiItem) => {
               const gem = item.gemstoneId || {};
               const resObj = item.result || {};
-              const price = item.priceSuggestion as {
+              const price = (item.priceSuggestion as {
                 status?: string;
                 available?: boolean;
                 currency?: string;
@@ -78,7 +83,7 @@ function CompareContent() {
                 minimumPrice?: number;
                 maximumPrice?: number;
                 priceRangeLkr?: { minimum?: number; maximum?: number };
-              } || {};
+              }) || {};
 
               const colorScore = resObj.color?.score ? (resObj.color.score / 10).toFixed(1) : "—";
               const clarityScore = resObj.clarity?.score ? (resObj.clarity.score / 10).toFixed(1) : "—";
@@ -86,10 +91,11 @@ function CompareContent() {
               const caratSc = resObj.carat?.score ? (resObj.carat.score / 10).toFixed(1) : "—";
               const caratPts = resObj.carat?.score ? Math.round(resObj.carat.score > 10 ? resObj.carat.score : resObj.carat.score * 10) : null;
               const overallScore = resObj.overall4C?.score ? (resObj.overall4C.score / 10).toFixed(1) : "—";
+              const overallPts = resObj.overall4C?.score ? Number(resObj.overall4C.score).toFixed(1) : null;
 
               const minVal = price.priceRangeLkr?.minimum ?? price.minimumPrice ?? price.min ?? null;
               const maxVal = price.priceRangeLkr?.maximum ?? price.maximumPrice ?? price.max ?? null;
-              let rangeText = "Unavailable (Insufficient Market Evidence)";
+              let rangeText = "Unavailable (Demo / Insufficient Real Evidence)";
               if (
                 (price.status === "COMPLETED" || price.available === true) &&
                 typeof minVal === "number" &&
@@ -99,22 +105,29 @@ function CompareContent() {
               }
 
               const weightNum = gem.caratWeight ? Number(gem.caratWeight) : null;
+              const cutObj = gem.cut || (item.assessmentSnapshot?.cut as Record<string, unknown>) || {};
+              const len = cutObj.length ? Number(cutObj.length) : null;
+              const wid = cutObj.width ? Number(cutObj.width) : null;
+              const dep = cutObj.depth ? Number(cutObj.depth) : null;
+              const dims = (len && wid && dep) ? `${len} × ${wid} × ${dep} mm` : "Not assessed";
 
               return {
-                id: item._id,
+                id: `EV-${item._id.slice(-6).toUpperCase()}`,
+                rawId: item._id,
                 variety: gem.variety || "Natural Sapphire",
                 carat: weightNum ? `${weightNum.toFixed(2)} ct` : "—",
                 caratScore: caratPts ? `${caratSc} (${caratPts}/100)` : "—",
+                dimensions: dims,
                 origin: `${gem.origin?.value || "Unknown"} (${gem.origin?.reliability || "unverified"})`,
-                color: `${colorScore} ${gem.color?.hue || ""}`,
+                color: `${colorScore} ${gem.color?.hue || ""}`.trim(),
                 colorSimilarity: item.bestReferenceMatch?.similarity
                   ? `${Math.round(item.bestReferenceMatch.similarity)}%`
                   : "—",
-                clarity: `${clarityScore} ${gem.clarity?.nakedEye || ""}`,
-                cut: `${cutScore} ${gem.cut?.symmetry || ""}`,
+                clarity: `${clarityScore} ${gem.clarity?.nakedEye || ""}`.trim(),
+                cut: `${cutScore} ${gem.cut?.symmetry || ""}`.trim(),
                 treatment: gem.treatment?.status || "Unknown",
                 isTreatmentBold: gem.treatment?.status === "Untreated",
-                overallEvaluation: `${overallScore} (${resObj.overall4C?.grade || "Provisional"})`,
+                overallEvaluation: overallPts ? `${overallPts} / 100 (${overallScore}/10 · ${resObj.overall4C?.grade || "Provisional"})` : `${overallScore} (${resObj.overall4C?.grade || "Provisional"})`,
                 suggestedRange: rangeText,
                 informationReliability: gem.informationReliability?.origin || "Provisional user-observed",
               };
@@ -130,7 +143,7 @@ function CompareContent() {
     }
 
     loadUserEvaluations();
-  }, []);
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex font-sans text-slate-900">

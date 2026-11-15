@@ -660,7 +660,7 @@ export async function GET(request?: NextRequest) {
     })
       .populate(
         "gemstoneId",
-        "variety caratWeight treatment origin informationReliability"
+        "variety caratWeight color clarity cut treatment origin informationReliability photoUrl"
       )
       .sort({ createdAt: -1 })
       .limit(20)
