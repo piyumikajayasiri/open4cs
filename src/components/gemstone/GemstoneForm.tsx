@@ -1,3 +1,3 @@
 import EvaluationWizard from "./EvaluationWizard";
 import type { Variety } from "@/lib/evaluation/types";
-export default function GemstoneForm({ userId, initialVariety }: { userId: string; initialVariety?: Variety }) { return <EvaluationWizard userId={userId} initialVariety={initialVariety} />; }
+export default function GemstoneForm({ userId, initialVariety, initialCatalogueId }: { userId: string; initialVariety?: Variety; initialCatalogueId?: string }) { return <EvaluationWizard initialCatalogueId={initialCatalogueId} userId={userId} initialVariety={initialVariety} />; }

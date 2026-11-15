@@ -12,34 +12,38 @@ export class EvaluationValidationError extends Error {
 
 export class MockDataError extends Error {}
 
-export function validateRuleCatalog(catalog: Record<EvaluationInput["variety"], RuleSet>) {
+export function validateScoringDefinition(rule: RuleSet, variety: EvaluationInput["variety"]) {
   const finite = (value: unknown, min: number, max: number) => typeof value === "number" && Number.isFinite(value) && value >= min && value <= max;
+  const fail = () => { throw new MockDataError(`Invalid scoring definition for ${variety}.`); };
+  if (!rule || rule.variety !== variety) fail();
+  if (!Array.isArray(rule.hues) || !rule.hues.length || rule.hues.some((hue) => !MOCK_RULES[variety].hues.includes(hue))) fail();
+  if (!Array.isArray(rule.toneRange) || rule.toneRange.length !== 2 || rule.toneRange.some((value) => !finite(value, 0, 10)) || rule.toneRange[0] > rule.toneRange[1]) fail();
+  if (!rule.weights || ["color", "clarity", "cut", "carat"].some((key) => !finite(rule.weights[key as keyof typeof rule.weights], 0, 1)) || Math.abs(Object.values(rule.weights).reduce((sum, value) => sum + value, 0) - 1) > 1e-9 || rule.weights.color + rule.weights.clarity + rule.weights.cut <= 0) fail();
+  for (const shape of ["OVAL", "ROUND", "CUSHION", "PEAR", "EMERALD"] as const) {
+    const range = rule.depthRanges?.[shape];
+    if (!Array.isArray(range) || range.length !== 2 || range.some((value) => !finite(value, 0, 200)) || range[0] > range[1]) fail();
+  }
+  const tables = {
+    severityPenalty: ["NONE", "MINOR", "MODERATE", "SEVERE"], qualityScore: ["EXCELLENT", "GOOD", "FAIR", "POOR"],
+    saturationScore: ["WEAK", "MEDIUM", "STRONG", "VIVID"], nakedEyeScore: ["CLEAN", "SLIGHTLY_INCLUDED", "INCLUDED"], loupeScore: ["MINOR", "MODERATE", "HEAVY"],
+  };
+  for (const [table, keys] of Object.entries(tables)) {
+    const values = rule.scoring?.[table as keyof typeof rule.scoring] as Record<string, number> | undefined;
+    if (!values || keys.some((key) => !finite(values[key], 0, 10))) fail();
+  }
+  for (const key of ["tonePenaltyPerStep", "unevenDistributionPenalty", "depthPenalty"] as const) if (!finite(rule.scoring?.[key], 0, 10)) fail();
+  const bands = rule.scoring?.caratBands;
+  if (!Array.isArray(bands) || !bands.length || bands[0].minimum !== 0 || bands.some((band, index) => !finite(band.minimum, 0, 100) || !finite(band.score, 0, 10) || index > 0 && band.minimum <= bands[index - 1].minimum)) fail();
+  if (!finite(rule.rangePercentage, 0, 100) || !finite(rule.matching?.relativeWeightTolerance, 0, 1) || !finite(rule.matching?.maxComponentScoreDifference, 0, 10)
+    || !Number.isInteger(rule.matching?.minimumComparables) || !finite(rule.matching?.minimumComparables, 2, 100)
+    || !Number.isInteger(rule.matching?.maximumComparables) || !finite(rule.matching?.maximumComparables, rule.matching.minimumComparables, 100)
+    || !finite(rule.pricing?.adjustmentPerScorePoint, 0, 1) || !finite(rule.pricing?.maximumAdjustmentPercentage, 0, 50)) fail();
+}
+export function validateRuleCatalog(catalog: Record<EvaluationInput["variety"], RuleSet>) {
   for (const variety of ["RUBY", "SAPPHIRE"] as const) {
     const rule = catalog?.[variety];
-    const fail = () => { throw new MockDataError(`Invalid mock rule definition for ${variety}.`); };
-    if (!rule || rule.variety !== variety || rule.dataKind !== "MOCK" || rule.approval !== "PROVISIONAL" || !/^mock-[a-z]+-v\d+$/.test(rule.version)) fail();
-    if (!Array.isArray(rule.hues) || !rule.hues.length || rule.hues.some((hue) => !MOCK_RULES[variety].hues.includes(hue))) fail();
-    if (!Array.isArray(rule.toneRange) || rule.toneRange.length !== 2 || rule.toneRange.some((value) => !finite(value, 0, 10)) || rule.toneRange[0] > rule.toneRange[1]) fail();
-    if (!rule.weights || ["color", "clarity", "cut", "carat"].some((key) => !finite(rule.weights[key as keyof typeof rule.weights], 0, 1)) || Math.abs(Object.values(rule.weights).reduce((sum, value) => sum + value, 0) - 1) > 1e-9 || rule.weights.color + rule.weights.clarity + rule.weights.cut <= 0) fail();
-    for (const shape of ["OVAL", "ROUND", "CUSHION", "PEAR", "EMERALD"] as const) {
-      const range = rule.depthRanges?.[shape];
-      if (!Array.isArray(range) || range.length !== 2 || range.some((value) => !finite(value, 0, 200)) || range[0] > range[1]) fail();
-    }
-    const tables = {
-      severityPenalty: ["NONE", "MINOR", "MODERATE", "SEVERE"], qualityScore: ["EXCELLENT", "GOOD", "FAIR", "POOR"],
-      saturationScore: ["WEAK", "MEDIUM", "STRONG", "VIVID"], nakedEyeScore: ["CLEAN", "SLIGHTLY_INCLUDED", "INCLUDED"], loupeScore: ["MINOR", "MODERATE", "HEAVY"],
-    };
-    for (const [table, keys] of Object.entries(tables)) {
-      const values = rule.scoring?.[table as keyof typeof rule.scoring] as Record<string, number> | undefined;
-      if (!values || keys.some((key) => !finite(values[key], 0, 10))) fail();
-    }
-    for (const key of ["tonePenaltyPerStep", "unevenDistributionPenalty", "depthPenalty"] as const) if (!finite(rule.scoring?.[key], 0, 10)) fail();
-    const bands = rule.scoring?.caratBands;
-    if (!Array.isArray(bands) || !bands.length || bands[0].minimum !== 0 || bands.some((band, index) => !finite(band.minimum, 0, 100) || !finite(band.score, 0, 10) || index > 0 && band.minimum <= bands[index - 1].minimum)) fail();
-    if (!finite(rule.rangePercentage, 0, 100) || !finite(rule.matching?.relativeWeightTolerance, 0, 1) || !finite(rule.matching?.maxComponentScoreDifference, 0, 10)
-      || !Number.isInteger(rule.matching?.minimumComparables) || !finite(rule.matching?.minimumComparables, 2, 100)
-      || !Number.isInteger(rule.matching?.maximumComparables) || !finite(rule.matching?.maximumComparables, rule.matching.minimumComparables, 100)
-      || !finite(rule.pricing?.adjustmentPerScorePoint, 0, 1) || !finite(rule.pricing?.maximumAdjustmentPercentage, 0, 50)) fail();
+    if (!rule || rule.variety !== variety || rule.dataKind !== "MOCK" || rule.approval !== "PROVISIONAL" || !/^mock-[a-z]+-v\d+$/.test(rule.version)) throw new MockDataError(`Invalid mock rule definition for ${variety}.`);
+    validateScoringDefinition(rule, variety);
   }
 }
 
@@ -61,13 +65,14 @@ export function validateEvaluation(input: unknown, catalog: Record<EvaluationInp
   function number(path: string, value: unknown, min: number, max: number) {
     if (typeof value !== "number" || !Number.isFinite(value) || value < min || value > max) errors[path] = `Enter a number between ${min} and ${max}.`;
   }
+  if (root.catalogueId !== undefined && (typeof root.catalogueId !== "string" || !/^[0-9a-f]{24}$/i.test(root.catalogueId))) errors.catalogueId = "Choose a valid catalogue entry.";
   choice("variety", root.variety, ["RUBY", "SAPPHIRE"]);
   choice("origin", root.origin, ["Sri Lanka"]);
   choice("originReliability", root.originReliability, ["LAB_VERIFIED", "SELLER_PROVIDED", "UNVERIFIED"]);
   choice("treatment", root.treatment, ["UNHEATED", "HEATED", "UNKNOWN"]);
   choice("shape", root.shape, ["OVAL", "ROUND", "CUSHION", "PEAR", "EMERALD"]);
   number("caratWeight", root.caratWeight, 0.01, 100);
-  if (root.variety === "RUBY" || root.variety === "SAPPHIRE") choice("color.hue", color.hue, catalog[root.variety].hues);
+  if (root.variety === "RUBY" || root.variety === "SAPPHIRE") choice("color.hue", color.hue, catalog[root.variety]?.hues || []);
   number("color.tone", color.tone, 0, 10);
   if (typeof color.tone === "number" && !Number.isInteger(color.tone)) errors["color.tone"] = "Tone must be a whole number from 0 to 10.";
   choice("color.saturation", color.saturation, ["WEAK", "MEDIUM", "STRONG", "VIVID"]);
@@ -84,7 +89,7 @@ export function validateEvaluation(input: unknown, catalog: Record<EvaluationInp
   return errors;
 }
 
-export function gradeMock(input: unknown, catalog: Record<EvaluationInput["variety"], RuleSet> = MOCK_RULES) {
+export function gradeGemstone(input: unknown, catalog: Record<EvaluationInput["variety"], RuleSet> = MOCK_RULES) {
   const errors = validateEvaluation(input, catalog);
   if (Object.keys(errors).length) throw new EvaluationValidationError(errors);
   const stone = input as EvaluationInput;
@@ -101,11 +106,11 @@ export function gradeMock(input: unknown, catalog: Record<EvaluationInput["varie
   const saturationScore = rules.scoring.saturationScore[stone.color.saturation];
   const color = score((colorless ? 10 : saturationScore - tonePenalty)
     - (stone.color.distribution === "UNEVEN" ? rules.scoring.unevenDistributionPenalty : 0) - severityPenalty[stone.color.zoning]);
-  record("COLOR", colorless ? "Colourless mock scoring uses distribution and zoning; coloured-stone tone and saturation preferences are skipped." : `Mock saturation score ${saturationScore}, tone penalty ${tonePenalty}; uneven distribution penalty ${stone.color.distribution === "UNEVEN" ? rules.scoring.unevenDistributionPenalty : 0}, zoning penalty ${severityPenalty[stone.color.zoning]}.`, color);
+  record("COLOR", colorless ? "Colourless scoring uses distribution and zoning; coloured-stone tone and saturation preferences are skipped." : `Configured saturation score ${saturationScore}, tone penalty ${tonePenalty}; uneven distribution penalty ${stone.color.distribution === "UNEVEN" ? rules.scoring.unevenDistributionPenalty : 0}, zoning penalty ${severityPenalty[stone.color.zoning]}.`, color);
 
   const clarity = score((rules.scoring.nakedEyeScore[stone.clarity.nakedEye]
     + rules.scoring.loupeScore[stone.clarity.loupe10x]) / 2 - severityPenalty[stone.clarity.severity]);
-  record("CLARITY", "Average naked-eye and 10x observation scores, then deduct the mock inclusion severity penalty.", clarity);
+  record("CLARITY", "Average naked-eye and 10x observation scores, then deduct the configured inclusion severity penalty.", clarity);
 
   const denominator = stone.shape === "ROUND" ? (stone.cut.length + stone.cut.width) / 2 : stone.cut.width;
   const rawDepthPercentage = stone.cut.depth / denominator * 100;
@@ -116,16 +121,19 @@ export function gradeMock(input: unknown, catalog: Record<EvaluationInput["varie
   const depthPenalty = rawDepthPercentage < depthMin - 1e-9 || rawDepthPercentage > depthMax + 1e-9 ? rules.scoring.depthPenalty : 0;
   const cut = score((qualityScore[stone.cut.symmetry] + qualityScore[stone.cut.polish]) / 2 - depthPenalty
     - severityPenalty[stone.cut.windowing] - severityPenalty[stone.cut.extinction] - severityPenalty[stone.cut.bulging]);
-  record("CUT", `Depth is ${depthPercentage}% (${stone.shape === "ROUND" ? "average face-up diameter" : "width"} denominator); mock preferred range ${depthMin}-${depthMax}%. Depth penalty ${depthPenalty}; visible cut concerns apply additional penalties.`, cut);
+  record("CUT", `Depth is ${depthPercentage}% (${stone.shape === "ROUND" ? "average face-up diameter" : "width"} denominator); configured preferred range ${depthMin}-${depthMax}%. Depth penalty ${depthPenalty}; visible cut concerns apply additional penalties.`, cut);
   record("DIMENSIONS", "Length divided by width; dimensions are in millimetres.", lengthWidthRatio);
 
   const carat = [...rules.scoring.caratBands].reverse().find((band) => stone.caratWeight >= band.minimum)!.score;
-  record("CARAT", `Configured mock bands: ${rules.scoring.caratBands.map((band) => `${band.minimum}+ ct → ${band.score}`).join(", ")}. This is a test size score, not a quality claim.`, carat);
+  record("CARAT", `Configured weight bands: ${rules.scoring.caratBands.map((band) => `${band.minimum}+ ct → ${band.score}`).join(", ")}. This size score is separate from gemstone quality.`, carat);
   const overall = round(color * rules.weights.color + clarity * rules.weights.clarity + cut * rules.weights.cut + carat * rules.weights.carat);
-  record("OVERALL", "Provisional weighted score out of 10; weights differ for ruby and sapphire.", overall);
+  record("OVERALL", "Weighted score out of 10 using the selected version.", overall);
 
   return { scores: { color, clarity, cut, carat, overall }, measurements: { depthPercentage, lengthWidthRatio }, trace };
 }
+
+// Compatibility alias for the existing sample calculator.
+export const gradeMock = gradeGemstone;
 
 const median = (values: number[]) => {
   const sorted = [...values].sort((a, b) => a - b);

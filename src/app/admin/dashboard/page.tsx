@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Gem, SlidersHorizontal, Database, History, Users } from "lucide-react";
 const sections = [
+  { href: "/admin/approved-rules", title: "Approved Rules & Catalogue", text: "Review domain rules and enable real-reference evaluations.", icon: SlidersHorizontal },
   { href: "/admin/gemstones", title: "Gemstone Catalogue", text: "Manage supported gemstone varieties.", icon: Gem },
   { href: "/admin/evaluation-rules", title: "4C Rules & Pricing", text: "Propose, review and compare sample rule versions.", icon: SlidersHorizontal },
   { href: "/admin/historical-pricing", title: "Historical & Reference Data", text: "Manage evidence while keeping sample and reference data separate.", icon: Database },
