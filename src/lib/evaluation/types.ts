@@ -5,6 +5,7 @@ export type Treatment = "UNHEATED" | "HEATED" | "UNKNOWN";
 export type Hue = "RED" | "PURPLISH_RED" | "BLUE" | "PINK" | "YELLOW" | "GREEN" | "PURPLE" | "COLORLESS";
 
 export interface EvaluationInput {
+  catalogueId?: string;
   variety: Variety;
   origin: "Sri Lanka";
   originReliability: "LAB_VERIFIED" | "SELLER_PROVIDED" | "UNVERIFIED";
@@ -38,8 +39,10 @@ export interface EvaluationInput {
 export interface RuleSet {
   version: string;
   variety: Variety;
-  dataKind: "MOCK";
-  approval: "PROVISIONAL";
+  dataKind: "MOCK" | "REFERENCE";
+  approval: "PROVISIONAL" | "PENDING" | "APPROVED";
+  currency?: "USD" | "LKR";
+  maximumReferenceAgeDays?: number;
   hues: readonly Hue[];
   toneRange: readonly [number, number];
   weights: { color: number; clarity: number; cut: number; carat: number };

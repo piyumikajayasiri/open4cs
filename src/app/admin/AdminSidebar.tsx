@@ -31,6 +31,7 @@ type AdminSidebarProps = {
 };
 
 const navigation = [
+  { label: "Approved Rules & Catalogue", href: "/admin/approved-rules", icon: ShieldCheck },
   {
     label: "Dashboard",
     href: "/admin/dashboard",
