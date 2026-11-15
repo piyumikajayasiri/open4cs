@@ -59,10 +59,10 @@ async function generateSamplePdfs() {
         asOfDate: "2026-11-12",
         isAvailable: true,
       },
-      isRealMarketData: true,
-      marketLevel: "Indicative Wholesale Range (Traceable Reference Sales)",
+      isRealMarketData: false,
+      marketLevel: "Illustrative price range (Pedagogical Demo Reference REF-1181)",
     },
-    referenceComparison: { available: true, referenceName: "Colombo B2B Dealer Parcel REF-1207", similarity: 82.4 },
+    referenceComparison: { available: true, referenceName: "Colombo Fort Dealer Lot REF-1181 (Pedagogical Demo Data)", similarity: 82.4 },
     recommendations: [
       "Specimen displays prime Royal Blue color with high natural transparency.",
       "Maintain unheated certification record from an accredited laboratory.",

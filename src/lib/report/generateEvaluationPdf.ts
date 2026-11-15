@@ -687,9 +687,10 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
       borderWidth: 1,
     });
 
-    const marketHeader = report.priceSuggestion.isRealMarketData
+    const isRealMarket = report.priceSuggestion.isRealMarketData === true;
+    const marketHeader = isRealMarket
       ? "INDICATIVE WHOLESALE MARKET RANGE (VERIFIED COMPLETED SALES)"
-      : "INDICATIVE RESEARCH BENCHMARK (DEMONSTRATION / ACADEMIC DATA)";
+      : "ILLUSTRATIVE PRICE RANGE (DEMONSTRATION / ACADEMIC DATA)";
 
     page2.drawText(marketHeader, {
       x: margin + 16,
@@ -724,9 +725,10 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
         color: emeraldDark,
       });
 
+      const rangeLabel = isRealMarket ? "Estimated Range" : "Illustrative price range";
       const rangeLine = (typeof minUsd === "number" && typeof maxUsd === "number")
-        ? `Estimated Range: LKR ${formatMoneyNum(minLkr)} – ${formatMoneyNum(maxLkr)} (~ $${formatMoneyNum(minUsd)} – $${formatMoneyNum(maxUsd)} USD)`
-        : `Estimated Range: LKR ${formatMoneyNum(minLkr)} – ${formatMoneyNum(maxLkr)}`;
+        ? `${rangeLabel}: LKR ${formatMoneyNum(minLkr)} – ${formatMoneyNum(maxLkr)} (~ $${formatMoneyNum(minUsd)} – $${formatMoneyNum(maxUsd)} USD)`
+        : `${rangeLabel}: LKR ${formatMoneyNum(minLkr)} – ${formatMoneyNum(maxLkr)}`;
 
       page2.drawText(rangeLine, {
         x: margin + 16,
@@ -750,7 +752,7 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
 
       // Comparables Count Right Box
       const compName = report.referenceComparison.referenceName || "Colombo B2B Dealer References";
-      page2.drawText("Market Benchmark Source:", {
+      page2.drawText(isRealMarket ? "Market Benchmark Source:" : "Illustrative Benchmark Source:", {
         x: margin + 280,
         y: y - 44,
         size: 7.5,

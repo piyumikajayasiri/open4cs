@@ -796,7 +796,7 @@ test("Integration Workflow Suite", async (t) => {
             asOfDate: "2026-11-12",
             isAvailable: true,
           },
-          isRealMarketData: true,
+          isRealMarketData: false,
         },
         referenceComparison: { available: true, referenceName: "REF-1207", similarity: 82.4 },
         recommendations: [

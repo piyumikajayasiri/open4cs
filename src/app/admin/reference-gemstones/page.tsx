@@ -344,9 +344,10 @@ export default function ReferenceGemstonesPage() {
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <button
+            id="admin-add-record-btn"
             type="button"
             onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#0B1528] hover:bg-slate-800 text-white px-4 py-2.5 text-xs sm:text-sm font-semibold shadow-xs transition"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#0B1528] hover:bg-slate-800 text-white px-4 py-2.5 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Add Record</span>
@@ -491,7 +492,7 @@ export default function ReferenceGemstonesPage() {
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
               <button type="button" onClick={() => setInspectingRecord(null)} className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50">Close</button>
               {inspectingRecord.status === "Pending" && (
-                <button type="button" onClick={() => handleVerify(inspectingRecord.id)} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 font-bold shadow-xs flex items-center gap-1.5">
+                <button id="admin-sign-off-btn" type="button" onClick={() => handleVerify(inspectingRecord.id)} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 font-bold shadow-xs flex items-center gap-1.5 cursor-pointer">
                   <CheckCircle2 className="w-3.5 h-3.5" /><span>Sign Off as Verified</span>
                 </button>
               )}
