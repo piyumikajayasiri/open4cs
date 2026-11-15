@@ -263,7 +263,7 @@ export default function ColorSection({
             What does this mean?
           </h4>
           <p className="leading-relaxed text-[11px] text-emerald-900/80">
-            Tone is lightness-darkness; saturation is colour intensity. For Ceylon blue, medium-medium-dark tone (5–6) with vivid saturation scores highest in Rule COL-03.
+            Tone is lightness-darkness. saturation is colour intensity. For Ceylon blue, medium-medium-dark tone (5–6) with vivid saturation scores highest in Rule COL-03.
           </p>
         </div>
 
