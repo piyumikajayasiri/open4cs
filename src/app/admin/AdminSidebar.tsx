@@ -32,11 +32,6 @@ type AdminSidebarProps = {
 
 const navigation = [
   {
-    label: "Add Administrator",
-    href: "/admin/administrators/new",
-    icon: ShieldCheck,
-  },
-  {
     label: "Dashboard",
     href: "/admin/dashboard",
     icon: LayoutDashboard,
@@ -67,6 +62,11 @@ const navigation = [
     icon: History,
   },
   {
+    label: "Market References",
+    href: "/admin/market-references",
+    icon: Database,
+  },
+  {
     label: "Treatment Data",
     href: "/admin/treatment-data",
     icon: Beaker,
@@ -95,6 +95,11 @@ const navigation = [
     label: "Users",
     href: "/admin/users",
     icon: Users,
+  },
+  {
+    label: "Add Administrator",
+    href: "/admin/administrators/new",
+    icon: ShieldCheck,
   },
   {
     label: "Settings",

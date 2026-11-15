@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
+import AdminAudit from "@/models/AdminAudit";
+import { userAuditSnapshot } from "@/lib/admin/policy";
 import { validateAccount } from "@/lib/account-validation";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
@@ -37,7 +40,7 @@ export async function GET(request: NextRequest) {
     const role = params.get("role") ?? "";
     const status = params.get("status") ?? "";
 
-    const filter: Record<string, unknown> = {};
+    const filter: Record<string, unknown> = { deletedAt: null };
 
     if (search) {
       filter.$or = [
@@ -137,14 +140,17 @@ export async function POST(request: NextRequest) {
 
     const passwordHash = await bcrypt.hash(password, 12);
 
-    const user = await User.create({
-      name,
-      email,
-      passwordHash,
-      category,
-      role,
-      status,
-    });
+    await AdminAudit.init();
+    const auditSession = await mongoose.startSession();
+    let user;
+    try {
+      user = await auditSession.withTransaction(async () => {
+        const [created] = await User.create([{ name, email, passwordHash, category, role, status }], { session: auditSession });
+        await AdminAudit.create([{ actorId: session.user.id, actorName: session.user.name || "Administrator", action: "USER_CREATED", entity: "USER", entityId: String(created._id),
+          summary: `Created ${role === "ADMIN" ? "administrator" : "user"} ${name}.`, after: userAuditSnapshot(created.toObject()) }], { session: auditSession });
+        return created;
+      });
+    } finally { await auditSession.endSession(); }
 
     return NextResponse.json(
       {
