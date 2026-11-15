@@ -3,6 +3,8 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 export type GemstoneStatus = "ACTIVE" | "INACTIVE";
 
 export interface IGemstone extends Document {
+  evaluationVariety?: "RUBY" | "SAPPHIRE";
+  supportedHues?: string[];
   code?: string;
   name?: string;
   species?: string;
@@ -62,6 +64,8 @@ export interface IGemstone extends Document {
 
 const gemstoneSchema = new Schema<IGemstone>(
   {
+    evaluationVariety: { type: String, enum: ["RUBY", "SAPPHIRE"] },
+    supportedHues: { type: [String], default: [] },
     code: {
       type: String,
       trim: true,

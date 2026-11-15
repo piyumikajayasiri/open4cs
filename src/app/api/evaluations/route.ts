@@ -4,7 +4,7 @@ import Evaluation from "@/models/Evaluation";
 import { evaluationRoute } from "@/lib/evaluation/user-route";
 import { evaluationDetail, evaluationSummary, ownedEvaluationFilter, parseSubmission, SubmissionError } from "@/lib/evaluation/submission";
 import { evaluationStats, existingSubmission, persistEvaluation } from "@/lib/evaluation/persistence";
-import { loadMockData } from "@/lib/evaluation/load-mock-data";
+import { loadApprovedEvaluation } from "@/lib/evaluation/approved-data";
 
 export async function GET(request: Request) {
   return evaluationRoute(request, async (user) => {
@@ -38,8 +38,8 @@ export async function POST(request: Request) {
       const saved = await session.withTransaction(async () => {
         const existing = await existingSubmission(user.id, submissionKey, input, session);
         if (existing) return { document: existing, replayed: true };
-        const { records, rules } = await loadMockData(session);
-        return persistEvaluation({ userId: user.id, userCategory: user.category, submissionKey, input, records, rules, session });
+        const approved = await loadApprovedEvaluation(input, session);
+        return persistEvaluation({ userId: user.id, userCategory: user.category, submissionKey, input, approved, session });
       }, { readConcern: { level: "snapshot" }, writeConcern: { w: "majority" } });
       return NextResponse.json({ success: true, replayed: saved.replayed, evaluation: evaluationDetail(saved.document) }, { status: saved.replayed ? 200 : 201 });
     } catch (error) {

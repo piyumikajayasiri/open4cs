@@ -3,6 +3,8 @@ import type { ClientSession } from "mongoose";
 import { Types } from "mongoose";
 import Evaluation from "../../models/Evaluation.ts";
 import { evaluateMock } from "./engine.ts";
+import { snapshotApprovedEvaluation } from "./approved-submission.ts";
+import type { loadApprovedEvaluation } from "./approved-data";
 import { canonicalInput, ownedEvaluationFilter, snapshotEvaluation, sriLankanMonthStart } from "./submission.ts";
 import type { EvaluationInput, MockGemstoneRecord, RuleSet, Variety } from "./types";
 
@@ -14,13 +16,15 @@ export async function existingSubmission(userId: string, submissionKey: string, 
   return document;
 }
 
-export async function persistEvaluation({ userId, userCategory, submissionKey, input, records, rules, session }: {
-  userId: string; userCategory: string; submissionKey: string; input: EvaluationInput; records: readonly MockGemstoneRecord[]; rules: Record<Variety, RuleSet>; session: ClientSession;
+export async function persistEvaluation({ userId, userCategory, submissionKey, input, records, rules, approved, session }: {
+  userId: string; userCategory: string; submissionKey: string; input: EvaluationInput; records?: readonly MockGemstoneRecord[]; rules?: Record<Variety, RuleSet>; approved?: Awaited<ReturnType<typeof loadApprovedEvaluation>>; session: ClientSession;
 }) {
   const existing = await existingSubmission(userId, submissionKey, input, session);
   if (existing) return { document: existing, replayed: true };
-  const result = evaluateMock(input, records, rules);
-  const snapshot = snapshotEvaluation(input, result, rules[input.variety], records);
+  if (!approved && (!records || !rules)) throw new Error("Evaluation evidence is required.");
+  const result = approved?.result || evaluateMock(input, records!, rules!);
+  const snapshot = approved ? snapshotApprovedEvaluation(input, approved.result, approved.rule, approved.records, approved.catalogueSnapshot)
+    : snapshotEvaluation(input, result, rules![input.variety], records!);
   const [saved] = await Evaluation.create([{ ...snapshot, userId: ownedEvaluationFilter(userId).userId, userCategory,
     submissionKey, inputHash: hashInput(input), evaluationId: `EVAL-${randomUUID()}` }], { session });
   return { document: saved.toObject(), replayed: false };
