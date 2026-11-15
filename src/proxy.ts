@@ -52,6 +52,7 @@ export const config = {
     "/register",
     "/dashboard/:path*",
     "/evaluation/:path*",
+    "/evaluations/:path*",
     "/evaluate/:path*",
     "/history/:path*",
     "/settings/:path*",

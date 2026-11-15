@@ -7,6 +7,7 @@ export type UserCategory = (typeof USER_CATEGORIES)[number];
 
 const UserSchema = new Schema(
   {
+    deletedAt: { type: Date, default: null }, deletedBy: String,
     name: {
       type: String,
       required: true,

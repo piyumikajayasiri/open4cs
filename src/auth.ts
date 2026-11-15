@@ -45,7 +45,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        if (user.status !== "ACTIVE") {
+        if (user.deletedAt || user.status !== "ACTIVE") {
           return null;
         }
 
@@ -75,6 +75,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.userId = user.id;
         token.role = user.role;
         token.category = user.category;
+      }
+
+      // Recheck access so deactivation and role changes affect existing sessions.
+      if (token.userId) {
+        await connectDB();
+        const current = await User.findById(token.userId).select("role category status isActive deletedAt").lean();
+        if (!current || current.deletedAt || (current.status ?? (current.isActive === false ? "INACTIVE" : "ACTIVE")) !== "ACTIVE") return null;
+        token.role = current.role; token.category = current.category;
       }
 
       return token;

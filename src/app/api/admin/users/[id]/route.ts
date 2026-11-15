@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Types } from "mongoose";
+import mongoose from "mongoose";
+import AdminAudit from "@/models/AdminAudit";
+import { requireUserDeletion, userAuditSnapshot } from "@/lib/admin/policy";
+import { adminRoute, AdminError } from "@/lib/admin/server";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
 import User, { USER_CATEGORIES, USER_ROLES, USER_STATUSES } from "@/models/User";
@@ -32,7 +36,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
     await connectDB();
 
-    const user = await User.findById(id).select("-passwordHash").lean();
+    const user = await User.findOne({ _id: id, deletedAt: null }).select("-passwordHash").lean();
 
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
@@ -104,7 +108,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     }
 
     // Do not allow an administrator to deactivate or demote themselves.
-    if (id === session.user.id) {
+    if (id.toLowerCase() === session.user.id.toLowerCase()) {
       if (
         (updates.role && updates.role !== "ADMIN") ||
         (updates.status && updates.status !== "ACTIVE")
@@ -118,11 +122,20 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     await connectDB();
 
-    const user = await User.findByIdAndUpdate(
-      id,
-      { $set: updates },
-      { new: true, runValidators: true },
-    ).select("-passwordHash");
+    await AdminAudit.init();
+    const auditSession = await mongoose.startSession();
+    let user;
+    try {
+      user = await auditSession.withTransaction(async () => {
+        const before = await User.findOne({ _id: id, deletedAt: null }).select("-passwordHash").session(auditSession);
+        if (!before) return null;
+        const updated = await User.findOneAndUpdate({ _id: id, deletedAt: null }, { $set: updates }, { new: true, runValidators: true, session: auditSession }).select("-passwordHash");
+        if (!updated) return null;
+        await AdminAudit.create([{ actorId: session.user.id, actorName: session.user.name || "Administrator", action: "USER_UPDATED", entity: "USER", entityId: id,
+          summary: `Updated account ${updated.name}.`, before: userAuditSnapshot(before.toObject()), after: userAuditSnapshot(updated.toObject()) }], { session: auditSession });
+        return updated;
+      });
+    } finally { await auditSession.endSession(); }
 
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
@@ -139,4 +152,26 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       { status: 500 },
     );
   }
+}
+
+export async function DELETE(request: Request, context: RouteContext) {
+  return adminRoute(request, async (actor) => {
+    const { id } = await context.params;
+    if (!Types.ObjectId.isValid(id)) throw new AdminError("Invalid user ID.");
+    try { requireUserDeletion(id, actor.id); } catch (error) { throw new AdminError(error instanceof Error ? error.message : "Cannot delete this account.", 409); }
+    await AdminAudit.init();
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        const user = await User.findOne({ _id: id, deletedAt: null }).session(session);
+        if (!user) throw new AdminError("Account was not found or has already been deleted.", 404);
+        const before = userAuditSnapshot(user.toObject());
+        user.status = "INACTIVE"; user.deletedAt = new Date(); user.deletedBy = actor.id;
+        await user.save({ session });
+        await AdminAudit.create([{ actorId: actor.id, actorName: actor.name, action: "USER_DELETED", entity: "USER", entityId: id,
+          summary: `Deleted account ${user.name}; sign-in disabled.`, before, after: userAuditSnapshot(user.toObject()) }], { session });
+      });
+      return NextResponse.json({ success: true });
+    } finally { await session.endSession(); }
+  });
 }
