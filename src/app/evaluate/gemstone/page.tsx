@@ -51,9 +51,6 @@ function GemstoneStepContent() {
       alert("Evaluation is currently supported only for Blue Sapphire, Padparadscha, and Ruby.");
       return;
     }
-    if (!draft.naturalStatus) {
-      updateDraft({ naturalStatus: "Natural" });
-    }
     router.push("/evaluate/color");
   };
 
@@ -75,14 +72,25 @@ function GemstoneStepContent() {
 
         <div className="flex items-center gap-2.5 self-start sm:self-auto">
           {hasExistingDraft && (
-            <button
-              type="button"
-              onClick={handleStartNew}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition shadow-2xs cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
-              <span>Start New</span>
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => router.push("/evaluate/color")}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 text-xs font-semibold text-white hover:bg-blue-700 transition shadow-2xs cursor-pointer"
+              >
+                <Play className="w-3.5 h-3.5" />
+                <span>Resume Draft</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleStartNew}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition shadow-2xs cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
+                <span>Start New</span>
+              </button>
+            </>
           )}
 
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -98,7 +106,7 @@ function GemstoneStepContent() {
           onVarietyChange={(val) => updateDraft({ variety: val })}
           gemstoneCode={draft.stoneId}
           onGemstoneCodeChange={(val) => updateDraft({ stoneId: val })}
-          naturalStatus={draft.naturalStatus || "Natural"}
+          naturalStatus={draft.naturalStatus || "Not specified"}
           onNaturalStatusChange={(val) => updateDraft({ naturalStatus: val })}
           shape={draft.shape || "Oval · Mixed Cut"}
           onShapeChange={(val) => updateDraft({ shape: val })}

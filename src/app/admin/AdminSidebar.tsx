@@ -6,6 +6,7 @@ import {
   Gem,
   LayoutDashboard,
   LogOut,
+  Settings,
   ShieldCheck,
   SlidersHorizontal,
   Star,
@@ -92,7 +93,7 @@ export default function AdminSidebar({ pathname, user }: AdminSidebarProps) {
         </div>
       </div>
 
-      {/* Navigation Links */}
+      {/* Navigation Links (Strictly 6 Primary Destinations) */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
         {navigation.map((item) => {
           const active = isActive(item.href);
@@ -117,6 +118,21 @@ export default function AdminSidebar({ pathname, user }: AdminSidebarProps) {
             </Link>
           );
         })}
+      </div>
+
+      {/* Secondary Action: Organisation Settings */}
+      <div className="px-3 pb-2 pt-1 border-t border-slate-800/60">
+        <Link
+          href="/admin/settings"
+          className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition ${
+            isActive("/admin/settings")
+              ? "bg-slate-800 text-white font-bold"
+              : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+          }`}
+        >
+          <Settings className="w-4 h-4 shrink-0 text-slate-400" />
+          <span className="truncate">Organisation Settings</span>
+        </Link>
       </div>
 
       {/* User Footer Profile */}

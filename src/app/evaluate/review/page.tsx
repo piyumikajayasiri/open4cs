@@ -88,6 +88,7 @@ export default function ReviewStepPage() {
       {/* Review Section Summary Cards */}
       <ReviewSection
         variety={draft.variety}
+        naturalStatus={draft.naturalStatus}
         caratWeight={draft.caratWeight}
         length={draft.length}
         width={draft.width}

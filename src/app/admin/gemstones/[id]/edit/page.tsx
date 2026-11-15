@@ -57,7 +57,7 @@ export default function EditGemstonePage() {
 
         console.log("Loading gemstone:", id);
 
-        const response = await fetch(`/api/admin/gemstones/${id}`, {
+        const response = await fetch(`/api/admin/gemstone-varieties/${id}`, {
           method: "GET",
           cache: "no-store",
         });
@@ -133,7 +133,7 @@ export default function EditGemstonePage() {
     try {
       setSaving(true);
 
-      const response = await fetch(`/api/admin/gemstones/${id}`, {
+      const response = await fetch(`/api/admin/gemstone-varieties/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -156,7 +156,7 @@ export default function SettingsPage() {
       a.click();
       URL.revokeObjectURL(url);
 
-      showToast("Profile and evaluations exported successfully.", "info");
+      showToast("Profile and preferences exported successfully.", "info");
     } catch {
       showToast("Failed to export complete user records.", "error");
     }
@@ -488,7 +488,7 @@ export default function SettingsPage() {
                   Data &amp; Privacy
                 </p>
                 <p className="text-[11px] text-red-600/90 leading-relaxed mt-0.5 font-normal">
-                  Export or request deletion of your evaluations and account.
+                  Export your account profile and preferences below. To request account deletion under data privacy guidelines, please contact <a href="mailto:support@cags.lk?subject=Account%20Deletion%20Request" className="font-semibold underline">support@cags.lk</a>.
                 </p>
               </div>
 
@@ -498,15 +498,7 @@ export default function SettingsPage() {
                   onClick={handleExportData}
                   className="rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs cursor-pointer"
                 >
-                  Export profile and evaluations
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleDeleteAccount}
-                  className="rounded-lg bg-[#B91C1C] hover:bg-[#991B1B] px-3.5 py-1.5 text-xs font-semibold text-white transition shadow-xs cursor-pointer"
-                >
-                  Request account deletion
+                  Export profile and preferences
                 </button>
               </div>
             </div>
