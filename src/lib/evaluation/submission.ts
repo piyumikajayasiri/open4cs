@@ -1,3 +1,4 @@
+import type { GuidanceSnapshot } from "./guidance";
 import { validateEvaluation } from "./engine.ts";
 import type { evaluateMock } from "./engine";
 import type { evaluateApproved, ReferenceQuote } from "./approved-policy";
@@ -76,10 +77,11 @@ export function evaluationSummary(document: Record<string, unknown>): Evaluation
   };
 }
 export interface EvaluationDetail extends EvaluationSummary {
+  guidanceSnapshot: GuidanceSnapshot | null;
   inputSnapshot: EvaluationInput | null; result: EngineResult | null; ruleSnapshot: RuleSet | null; recordSnapshots: (MockGemstoneRecord | ReferenceQuote)[];
 }
 export function evaluationDetail(document: Record<string, unknown>): EvaluationDetail {
-  return { ...evaluationSummary(document), inputSnapshot: document.inputSnapshot ? document.inputSnapshot as EvaluationInput : null,
+  return { ...evaluationSummary(document), guidanceSnapshot: document.guidanceSnapshot ? document.guidanceSnapshot as GuidanceSnapshot : null, inputSnapshot: document.inputSnapshot ? document.inputSnapshot as EvaluationInput : null,
     result: object(document.result).scores ? document.result as EngineResult : null,
     ruleSnapshot: document.ruleSnapshot ? document.ruleSnapshot as RuleSet : null,
     recordSnapshots: Array.isArray(document.recordSnapshots) ? document.recordSnapshots as (MockGemstoneRecord | ReferenceQuote)[] : [] };

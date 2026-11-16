@@ -11,6 +11,7 @@ const EvaluationSchema = new Schema(
     ruleSnapshot: { type: Schema.Types.Mixed, required: true },
     recordSnapshots: { type: [Schema.Types.Mixed], default: [] },
     catalogueSnapshot: Schema.Types.Mixed,
+    guidanceSnapshot: Schema.Types.Mixed,
     userCategory: String,
     userId: {
       type: Schema.Types.ObjectId,
