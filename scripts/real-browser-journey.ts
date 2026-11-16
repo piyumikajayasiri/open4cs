@@ -739,6 +739,21 @@ async function runRealBrowserJourney() {
     await saveScreenshot(adminPage, "09-admin-reference-verified-refreshed.png");
     console.log("  ✓ Admin approval verified: Page refreshed, confirmed status 'Verified', reviewer 'CAGS Admin', and date stamped by server!");
 
+    // 12b. Market Evidence Hygiene Teardown:
+    // Quarantines test record as Demo and deactivates it so synthetic browser test fixtures never pollute real market pricing evidence
+    await ReferenceGemstone.updateOne(
+      { referenceId: "REF-SRI-2026-B91" },
+      {
+        $set: {
+          dataClassification: "Demo",
+          status: "INACTIVE",
+          isActive: false,
+          sourceEvidence: "Automated browser test journey fixture (Demo data only - quarantined)",
+        },
+      }
+    );
+    console.log("  ✓ Market Data Hygiene: REF-SRI-2026-B91 quarantined as Demo and deactivated to ensure zero real pricing contamination.");
+
     await adminContext.close();
 
     console.log("\n=== REAL BROWSER JOURNEY COMPLETED 100% SUCCESSFULLY ===");
