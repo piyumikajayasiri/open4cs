@@ -10,10 +10,6 @@ const SHAPES = [
   "Cushion",
   "Pear",
   "Emerald",
-  "Princess",
-  "Radiant",
-  "Marquise",
-  "Cabochon",
 ];
 
 type Gemstone = {
@@ -80,7 +76,7 @@ export default function EditGemstonePage() {
           code: gemstone.code ?? "",
           name: gemstone.name ?? "",
           species: gemstone.species ?? "",
-          supportedShapes: gemstone.supportedShapes ?? [],
+          supportedShapes: (gemstone.supportedShapes ?? []).map((shape) => shape.charAt(0).toUpperCase() + shape.slice(1).toLowerCase()),
           supportedOrigin: gemstone.supportedOrigin ?? "Sri Lanka",
           description: gemstone.description ?? "",
           status: gemstone.status ?? "ACTIVE",

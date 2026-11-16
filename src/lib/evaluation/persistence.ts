@@ -2,6 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import type { ClientSession } from "mongoose";
 import { Types } from "mongoose";
 import Evaluation from "../../models/Evaluation.ts";
+import { buildGuidance } from "./guidance.ts";
 import { evaluateMock } from "./engine.ts";
 import { snapshotApprovedEvaluation } from "./approved-submission.ts";
 import type { loadApprovedEvaluation } from "./approved-data";
@@ -25,7 +26,8 @@ export async function persistEvaluation({ userId, userCategory, submissionKey, i
   const result = approved?.result || evaluateMock(input, records!, rules!);
   const snapshot = approved ? snapshotApprovedEvaluation(input, approved.result, approved.rule, approved.records, approved.catalogueSnapshot)
     : snapshotEvaluation(input, result, rules![input.variety], records!);
-  const [saved] = await Evaluation.create([{ ...snapshot, userId: ownedEvaluationFilter(userId).userId, userCategory,
+  const guidanceSnapshot = buildGuidance(input, result, approved?.rule.definition || rules![input.variety], userCategory, approved?.catalogueSnapshot.name);
+  const [saved] = await Evaluation.create([{ ...snapshot, guidanceSnapshot, userId: ownedEvaluationFilter(userId).userId, userCategory,
     submissionKey, inputHash: hashInput(input), evaluationId: `EVAL-${randomUUID()}` }], { session });
   return { document: saved.toObject(), replayed: false };
 }
