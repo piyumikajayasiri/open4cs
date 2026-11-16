@@ -10,10 +10,6 @@ const SHAPES = [
   "Cushion",
   "Pear",
   "Emerald",
-  "Princess",
-  "Radiant",
-  "Marquise",
-  "Cabochon",
 ];
 
 export default function NewGemstonePage() {

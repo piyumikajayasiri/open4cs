@@ -14,6 +14,8 @@ export default function UserShell({ user, children, currentPage }: { user: UserI
     { href: "/evaluate", label: "New Evaluation", icon: Plus },
     { href: "/dashboard?tab=evaluations", label: "My Evaluations", icon: FileText },
     { href: "/dashboard?tab=history", label: "Evaluation History", icon: History },
+    { href: "/compare", label: "Compare Gemstones", icon: Gem },
+    { href: "/reports", label: "Reports", icon: FileText },
     { href: "/catalogue", label: "Gemstone Catalogue", icon: BookOpen },
   ];
   return <div className="flex min-h-screen bg-slate-50 text-slate-900">
