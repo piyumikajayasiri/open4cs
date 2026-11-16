@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
 import Gemstone from "@/models/Gemstone";
+import { catalogueWriteFields } from "@/lib/evaluation/catalogue-config";
 
 async function checkAdmin() {
   const session = await auth();
@@ -136,8 +137,6 @@ export async function PUT(
       code,
       name,
       species,
-      supportedShapes,
-      supportedOrigin,
       description,
       status,
     } = body;
@@ -181,23 +180,17 @@ export async function PUT(
       );
     }
 
+    const previous = await Gemstone.findById(id).lean();
     const gemstone = await Gemstone.findByIdAndUpdate(
       id,
       {
         code: normalizedCode,
         name: String(name).trim(),
-        species: String(species).trim(),
-
-        supportedShapes: Array.isArray(supportedShapes)
-          ? supportedShapes.map((shape) => String(shape).trim()).filter(Boolean)
-          : [],
-
-        supportedOrigin:
-          String(supportedOrigin || "Sri Lanka").trim() || "Sri Lanka",
 
         description: description ? String(description).trim() : "",
 
         status,
+        ...catalogueWriteFields({ ...previous, ...body, _id: id }),
       },
       {
         new: true,

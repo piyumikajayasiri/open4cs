@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
 import Gemstone from "@/models/Gemstone";
+import { catalogueWriteFields } from "@/lib/evaluation/catalogue-config";
 
 async function checkAdmin() {
   const session = await auth();
@@ -96,7 +97,6 @@ export async function POST(request: NextRequest) {
       code,
       name,
       species,
-      supportedShapes,
       supportedOrigin,
       description,
       status,
@@ -147,17 +147,11 @@ export async function POST(request: NextRequest) {
     const gemstone = await Gemstone.create({
       code: normalizedCode,
       name: String(name).trim(),
-      species: String(species).trim(),
-
-      supportedShapes: Array.isArray(supportedShapes)
-        ? supportedShapes.map((shape) => String(shape).trim()).filter(Boolean)
-        : [],
-
-      supportedOrigin: finalOrigin,
 
       description: description ? String(description).trim() : undefined,
 
       status: finalStatus,
+      ...catalogueWriteFields({ ...body, _id: "", name: String(name).trim(), species: String(species).trim(), supportedOrigin: finalOrigin, status: finalStatus }),
     });
 
     return NextResponse.json(
