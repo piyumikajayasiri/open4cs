@@ -14,6 +14,7 @@ import {
   Key,
 } from "lucide-react";
 import ToastNotification, { ToastMessage, ToastType } from "@/components/ui/ToastNotification";
+import { ShadcnSelect } from "@/components/ui/select";
 
 interface UserItem {
   _id: string;
@@ -314,28 +315,23 @@ export default function AdminUsersPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Category</label>
-                  <select
+                  <ShadcnSelect
                     value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    className="w-full px-3 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white"
-                  >
-                    <option value="Professional">Professional</option>
-                    <option value="Student">Student</option>
-                    <option value="Trader">Trader</option>
-                    <option value="Gemologist">Gemologist</option>
-                  </select>
+                    onValueChange={(val) => setNewCategory(val)}
+                    options={["Professional", "Student", "Trader", "Gemologist"]}
+                  />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Role</label>
-                  <select
+                  <ShadcnSelect
                     value={newRole}
-                    onChange={(e) => setNewRole(e.target.value as "USER" | "CAGS_ADMIN")}
-                    className="w-full px-3 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white"
-                  >
-                    <option value="USER">Normal User</option>
-                    <option value="CAGS_ADMIN">CAGS Admin</option>
-                  </select>
+                    onValueChange={(val) => setNewRole(val as "USER" | "CAGS_ADMIN")}
+                    options={[
+                      { value: "USER", label: "Normal User" },
+                      { value: "CAGS_ADMIN", label: "CAGS Admin" },
+                    ]}
+                  />
                 </div>
               </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Clock,
   Plus,
@@ -15,6 +15,7 @@ import ToastNotification, {
   ToastMessage,
   ToastType,
 } from "@/components/ui/ToastNotification";
+import { ShadcnSelect } from "@/components/ui/select";
 
 export interface EvaluationRuleItem {
   id: string;
@@ -486,12 +487,11 @@ export default function EvaluationRulesPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Category</label>
-                  <select value={newCategory} onChange={(e) => setNewCategory(e.target.value as "Color" | "Clarity" | "Cut" | "Pricing")} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800">
-                    <option value="Color">Color</option>
-                    <option value="Clarity">Clarity</option>
-                    <option value="Cut">Cut</option>
-                    <option value="Pricing">Pricing</option>
-                  </select>
+                  <ShadcnSelect
+                    value={newCategory}
+                    onValueChange={(val) => setNewCategory(val as "Color" | "Clarity" | "Cut" | "Pricing")}
+                    options={["Color", "Clarity", "Cut", "Pricing"]}
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Rule ID Code</label>
