@@ -6,6 +6,8 @@ export type ApprovedDefinition = RuleSet & { dataKind: "REFERENCE"; approval: "P
 export interface RuleReview {
   version: string; variety: Variety; status: string; definition: ApprovedDefinition;
   summary: string; evidence: string; createdBy: string; lastEditedBy: string;
+  recordedDomainApproval?: { basis: string; approvalDate: string; reviewerName: string | null; reviewerNameStatus: string; documentReference: string | null; appliesToDefinition: boolean };
+  sourcePackId?: string; sourceCandidateId?: string; sourcePackFingerprint?: string;
   approvedBy?: string; approvedByName?: string; approvedAt?: string | Date; reviewNotes?: string; domainReviewConfirmed?: boolean;
 }
 export const SHAPES = ["OVAL", "ROUND", "CUSHION", "PEAR", "EMERALD"] as const;
@@ -142,5 +144,5 @@ export function evaluateApproved(input: EvaluationInput, rule: RuleReview, recor
     ...graded, weights: definition.weights, priceSuggestion, comparables: comparables.map((match)=>({...match, rawPricePerCarat: round(match.rawPricePerCarat), adjustedPricePerCarat: round(match.adjustedPricePerCarat), adjustmentFactor: round(match.adjustmentFactor)})),
     trace: [...graded.trace, {ruleId:`${definition.version}:MATCH`,explanation:"Verified B2B references matched by hue, shape, treatment, weight and score tolerances.",value:comparables.length},
       {ruleId:`${definition.version}:PRICE`, explanation:priceSuggestion.status === "AVAILABLE" ? priceSuggestion.formula : priceSuggestion.reason,value:priceSuggestion.status === "AVAILABLE" ? priceSuggestion.suggestedPrice : "UNAVAILABLE"}],
-    referenceValidation: "REVIEWED_B2B_QUOTES" as const, warnings, recommendations };
+    referenceValidation: "REVIEWED_B2B_QUOTES" as const, recordedDomainApproval: rule.recordedDomainApproval || null, policyFeatures: { sizeScored: definition.weights.carat > 0, toneAdjustmentEnabled: definition.scoring.tonePenaltyPerStep > 0, depthAdjustmentEnabled: definition.scoring.depthPenalty > 0, qualityPriceAdjustmentEnabled: definition.pricing.adjustmentPerScorePoint > 0 && definition.pricing.maximumAdjustmentPercentage > 0 }, warnings, recommendations };
 }

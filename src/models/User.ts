@@ -7,6 +7,10 @@ export type UserCategory = (typeof USER_CATEGORIES)[number];
 
 const UserSchema = new Schema(
   {
+    organization: { type: String, trim: true, maxlength: 150, default: "" },
+    preferences: { dashboardActivity: { type: Boolean, default: true }, showLearningHints: { type: Boolean, default: true } },
+    learningProgress: { type: [String], default: [] },
+    sessionVersion: { type: Number, default: 0, select: false },
     deletedAt: { type: Date, default: null }, deletedBy: String,
     name: {
       type: String,

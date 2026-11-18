@@ -15,7 +15,7 @@ export function canonicalInput(input: EvaluationInput): EvaluationInput {
     variety: input.variety, origin: input.origin, originReliability: input.originReliability, treatment: input.treatment,
     caratWeight: input.caratWeight, shape: input.shape,
     color: { hue: input.color.hue, tone: input.color.tone, saturation: input.color.saturation, distribution: input.color.distribution, zoning: input.color.zoning },
-    clarity: { nakedEye: input.clarity.nakedEye, loupe10x: input.clarity.loupe10x, severity: input.clarity.severity },
+    clarity: { ...(input.clarity.inclusionType?.trim() ? { inclusionType: input.clarity.inclusionType.trim() } : {}), ...(input.clarity.inclusionLocation?.trim() ? { inclusionLocation: input.clarity.inclusionLocation.trim() } : {}), ...(input.clarity.durabilityConcern ? { durabilityConcern: input.clarity.durabilityConcern } : {}), nakedEye: input.clarity.nakedEye, loupe10x: input.clarity.loupe10x, severity: input.clarity.severity },
     cut: { length: input.cut.length, width: input.cut.width, depth: input.cut.depth, symmetry: input.cut.symmetry, polish: input.cut.polish,
       windowing: input.cut.windowing, extinction: input.cut.extinction, bulging: input.cut.bulging },
   };
@@ -66,7 +66,7 @@ export function evaluationSummary(document: Record<string, unknown>): Evaluation
   const hasPrice = price.status !== "UNAVAILABLE" && minimum !== null && maximum !== null && minimum >= 0 && maximum >= minimum;
   const currency = typeof price.currency === "string" && /^[A-Z]{3}$/.test(price.currency) ? price.currency : "USD";
   const formatted = (value: number) => value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const scoreFor = (key: ScoreName) => finite(scores[key]) ?? finite(object(result[key === "overall" ? "overall4C" : key]).score);
+  const scoreFor = (key: ScoreName) => key === "carat" && object(result.weights).carat === 0 ? null : finite(scores[key]) ?? finite(object(result[key === "overall" ? "overall4C" : key]).score);
   const createdAt = document.createdAt instanceof Date ? document.createdAt.toISOString() : typeof document.createdAt === "string" ? document.createdAt : "";
   return {
     _id: String(document._id), evaluationId: String(document.evaluationId || document._id), variety: String(input.variety || result.variety || "Gemstone"),
