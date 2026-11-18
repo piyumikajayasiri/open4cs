@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus, Search, X, CheckCircle2 } from "lucide-react";
 import ToastNotification, { ToastMessage, ToastType } from "@/components/ui/ToastNotification";
 import ReferenceGemstoneForm from "@/components/admin/ReferenceGemstoneForm";
+import { ShadcnSelect } from "@/components/ui/select";
 
 export interface EvidenceRecord {
   id: string;
@@ -373,29 +374,29 @@ export default function ReferenceGemstonesPage() {
             className="w-full bg-white border border-slate-200/90 rounded-xl pl-9 pr-4 py-2 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-2xs"
           />
         </div>
-        <div className="shrink-0">
-          <select
+        <div className="w-full sm:w-56 shrink-0">
+          <ShadcnSelect
             value={sourceFilter}
-            onChange={(e) => setSourceFilter(e.target.value)}
-            className="w-full sm:w-auto bg-white border border-slate-200/90 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-700 font-medium focus:outline-none shadow-2xs"
-          >
-            <option value="ALL">All Sources</option>
-            <option value="Lab">Lab Verified</option>
-            <option value="Desk">Desk Market Observation</option>
-            <option value="Member">Member Submissions</option>
-            <option value="Desk + members">Desk + members</option>
-          </select>
+            onValueChange={setSourceFilter}
+            options={[
+              { value: "ALL", label: "All Sources" },
+              { value: "Lab", label: "Lab Verified" },
+              { value: "Desk", label: "Desk Market Observation" },
+              { value: "Member", label: "Member Submissions" },
+              { value: "Desk + members", label: "Desk + members" },
+            ]}
+          />
         </div>
-        <div className="shrink-0">
-          <select
+        <div className="w-full sm:w-56 shrink-0">
+          <ShadcnSelect
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full sm:w-auto bg-white border border-slate-200/90 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-700 font-medium focus:outline-none shadow-2xs"
-          >
-            <option value="ALL">Verified + Pending</option>
-            <option value="Verified">Verified Only</option>
-            <option value="Pending">Pending Only</option>
-          </select>
+            onValueChange={setStatusFilter}
+            options={[
+              { value: "ALL", label: "Verified + Pending" },
+              { value: "Verified", label: "Verified Only" },
+              { value: "Pending", label: "Pending Only" },
+            ]}
+          />
         </div>
       </div>
 

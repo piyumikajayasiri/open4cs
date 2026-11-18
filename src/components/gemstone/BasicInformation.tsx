@@ -2,6 +2,7 @@
 
 import React, { useRef } from "react";
 import { ShieldCheck, AlertCircle, Check, UploadCloud, X } from "lucide-react";
+import { ShadcnSelect } from "@/components/ui/select";
 
 export interface GemstoneCardItem {
   id: string;
@@ -407,17 +408,12 @@ export default function BasicInformation({
             <label className="block text-xs font-bold text-slate-700 mb-1.5">
               Shape & Cutting Style <span className="text-rose-500">*</span>
             </label>
-            <select
+            <ShadcnSelect
               value={shape}
-              onChange={(e) => onShapeChange && onShapeChange(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-900 outline-none transition focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-            >
-              {SHAPE_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
+              onValueChange={(val) => onShapeChange && onShapeChange(val)}
+              options={SHAPE_OPTIONS}
+              placeholder="Select shape..."
+            />
             <p className="text-[10px] text-slate-400 mt-1">
               Determines acceptable length-to-width and depth tolerances on the Cut step.
             </p>

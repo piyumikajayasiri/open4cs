@@ -17,6 +17,7 @@ import {
   Clock,
   Sparkles,
 } from "lucide-react";
+import { ShadcnSelect } from "@/components/ui/select";
 
 interface EvaluationItem {
   _id: string;
@@ -179,19 +180,21 @@ export default function MyEvaluationsPage() {
                 />
               </div>
 
-              <select
-                value={filterVariety}
-                onChange={(e) => setFilterVariety(e.target.value)}
-                className="px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[#0E2A47]"
-              >
-                <option value="ALL">All Varieties</option>
-                <option value="Blue Sapphire">Blue Sapphire</option>
-                <option value="Padparadscha">Padparadscha</option>
-                <option value="Ruby">Ruby</option>
-                <option value="Yellow Sapphire">Yellow Sapphire</option>
-                <option value="Pink Sapphire">Pink Sapphire</option>
-                <option value="White Sapphire">White Sapphire</option>
-              </select>
+              <div className="w-full sm:w-56 shrink-0">
+                <ShadcnSelect
+                  value={filterVariety}
+                  onValueChange={setFilterVariety}
+                  options={[
+                    { value: "ALL", label: "All Varieties" },
+                    { value: "Blue Sapphire", label: "Blue Sapphire" },
+                    { value: "Padparadscha", label: "Padparadscha" },
+                    { value: "Ruby", label: "Ruby" },
+                    { value: "Yellow Sapphire", label: "Yellow Sapphire" },
+                    { value: "Pink Sapphire", label: "Pink Sapphire" },
+                    { value: "White Sapphire", label: "White Sapphire" },
+                  ]}
+                />
+              </div>
             </div>
 
             {/* Secondary Compare Action Bar (appears when 2+ items selected) */}

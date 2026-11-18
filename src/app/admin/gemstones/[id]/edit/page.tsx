@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { ShadcnSelect } from "@/components/ui/select";
 
 const SHAPES = [
   "Oval",
@@ -356,19 +357,21 @@ export default function EditGemstonePage() {
                   </p>
                 </div>
 
-                <select
-                  value={form.status}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      status: e.target.value as "ACTIVE" | "INACTIVE",
-                    })
-                  }
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                >
-                  <option value="ACTIVE">Active</option>
-                  <option value="INACTIVE">Inactive</option>
-                </select>
+                <div className="w-40">
+                  <ShadcnSelect
+                    value={form.status}
+                    onValueChange={(val) =>
+                      setForm({
+                        ...form,
+                        status: val as "ACTIVE" | "INACTIVE",
+                      })
+                    }
+                    options={[
+                      { value: "ACTIVE", label: "Active" },
+                      { value: "INACTIVE", label: "Inactive" },
+                    ]}
+                  />
+                </div>
               </div>
             </section>
 

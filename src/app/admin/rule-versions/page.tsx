@@ -14,6 +14,7 @@ import ToastNotification, {
   ToastMessage,
   ToastType,
 } from "@/components/ui/ToastNotification";
+import { ShadcnSelect } from "@/components/ui/select";
 
 interface RuleVersionItem {
   id: string;
@@ -613,16 +614,16 @@ export default function RuleVersionsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">User Category</label>
-                  <select
+                  <ShadcnSelect
                     value={inviteCategory}
-                    onChange={(e) => setInviteCategory(e.target.value as "Student" | "Trader" | "Gemologist" | "Professional")}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800"
-                  >
-                    <option value="Student">Student</option>
-                    <option value="Trader">Trader</option>
-                    <option value="Gemologist">Gemologist (Reviewer)</option>
-                    <option value="Professional">Professional Exporter</option>
-                  </select>
+                    onValueChange={(val) => setInviteCategory(val as "Student" | "Trader" | "Gemologist" | "Professional")}
+                    options={[
+                      { value: "Student", label: "Student" },
+                      { value: "Trader", label: "Trader" },
+                      { value: "Gemologist", label: "Gemologist (Reviewer)" },
+                      { value: "Professional", label: "Professional Exporter" },
+                    ]}
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Affiliation / Org</label>

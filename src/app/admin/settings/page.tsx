@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Building, Coins, Save, Loader2 } from "lucide-react";
 import ToastNotification, { ToastMessage, ToastType } from "@/components/ui/ToastNotification";
+import { ShadcnSelect } from "@/components/ui/select";
 
 export default function AdminSettingsPage() {
   const [orgName, setOrgName] = useState("Ceylon Academy of Gemmological Science (CAGS)");
@@ -110,10 +111,14 @@ export default function AdminSettingsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Base Currency</label>
-                <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-800 cursor-pointer">
-                  <option value="LKR — Sri Lankan Rupee">LKR — Sri Lankan Rupee</option>
-                  <option value="USD — US Dollar">USD — US Dollar</option>
-                </select>
+                <ShadcnSelect
+                  value={currency}
+                  onValueChange={setCurrency}
+                  options={[
+                    "LKR — Sri Lankan Rupee",
+                    "USD — US Dollar",
+                  ]}
+                />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Active Ruleset</label>

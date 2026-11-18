@@ -126,9 +126,13 @@ export function SelectTrigger({ children, className = "", id }: SelectTriggerPro
       type="button"
       role="combobox"
       aria-expanded={open}
+      aria-haspopup="listbox"
+      aria-controls={id ? `${id}-listbox` : "select-content-listbox"}
       disabled={disabled}
       onClick={() => !disabled && setOpen((prev) => !prev)}
-      className={`flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 shadow-2xs outline-none transition hover:border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer ${className}`}
+      className={`flex w-full items-center justify-between rounded-xl border bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 shadow-2xs outline-none transition hover:border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer ${
+        open ? "border-blue-500 ring-2 ring-blue-100" : "border-slate-200"
+      } ${className}`}
     >
       <div className="flex-1 text-left truncate mr-2">{children}</div>
       <ChevronDown
@@ -142,14 +146,15 @@ export function SelectTrigger({ children, className = "", id }: SelectTriggerPro
 
 export interface SelectValueProps {
   placeholder?: string;
+  children?: ReactNode;
 }
 
-export function SelectValue({ placeholder = "Select..." }: SelectValueProps) {
+export function SelectValue({ placeholder = "Select...", children }: SelectValueProps) {
   const { value, selectedLabel } = useSelectContext();
-  const display = selectedLabel || value || placeholder;
+  const display = children || selectedLabel || value || placeholder;
 
   return (
-    <span className={!value && !selectedLabel ? "text-slate-400" : "text-slate-900 font-medium"}>
+    <span className={!value && !selectedLabel && !children ? "text-slate-400" : "text-slate-900 font-medium"}>
       {display}
     </span>
   );
@@ -252,11 +257,34 @@ export function ShadcnSelect({
     typeof opt === "string" ? { value: opt, label: opt } : opt
   );
 
+  const selectedOpt = normalizedOptions.find((opt) => opt.value === value);
+  const displayLabel = selectedOpt ? (selectedOpt.label || selectedOpt.value) : "";
+
   return (
     <Select value={value} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger id={id} className={className}>
-        <SelectValue placeholder={placeholder} />
+      <SelectTrigger id={id ? `${id}-trigger` : undefined} className={className}>
+        <SelectValue placeholder={placeholder}>
+          {displayLabel}
+        </SelectValue>
       </SelectTrigger>
+      {id && (
+        <select
+          id={id}
+          value={value}
+          onChange={(e) => onValueChange(e.target.value)}
+          disabled={disabled}
+          className="sr-only"
+          tabIndex={-1}
+          aria-hidden="true"
+        >
+          {placeholder && <option value="">{placeholder}</option>}
+          {normalizedOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label || opt.value}
+            </option>
+          ))}
+        </select>
+      )}
       <SelectContent>
         {normalizedOptions.map((opt) => (
           <SelectItem key={opt.value} value={opt.value}>

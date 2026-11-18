@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Save, Loader2 } from "lucide-react";
+import { ShadcnSelect } from "@/components/ui/select";
 
 export type ReferenceFormData = {
   referenceId: string;
@@ -265,16 +266,12 @@ export default function ReferenceGemstoneForm({
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Variety *
             </label>
-            <select
+            <ShadcnSelect
               id="ref-select-variety"
               value={form.variety}
-              onChange={(e) => updateField("variety", e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-900 outline-none"
-            >
-              <option value="Blue Sapphire">Blue Sapphire</option>
-              <option value="Padparadscha">Padparadscha</option>
-              <option value="Ruby">Ruby</option>
-            </select>
+              onValueChange={(val) => updateField("variety", val)}
+              options={["Blue Sapphire", "Padparadscha", "Ruby"]}
+            />
           </div>
 
           <div>
@@ -301,72 +298,55 @@ export default function ReferenceGemstoneForm({
             <label className="block text-xs font-bold text-slate-800 mb-1.5">
               Data Classification *
             </label>
-            <select
+            <ShadcnSelect
               id="ref-select-dataClassification"
               value={form.dataClassification}
-              onChange={(e) =>
-                updateField("dataClassification", e.target.value as "Real" | "Demo" | "")
+              onValueChange={(val) =>
+                updateField("dataClassification", val as "Real" | "Demo" | "")
               }
-              required
-              className={`w-full rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-semibold outline-none ${
-                form.dataClassification === "Real"
-                  ? "border-emerald-500 bg-emerald-50/50 text-emerald-900"
-                  : form.dataClassification === "Demo"
-                  ? "border-amber-500 bg-amber-50/50 text-amber-900"
-                  : "border-slate-300 text-slate-500"
-              }`}
-            >
-              <option value="">— Select Real or Demo —</option>
-              <option value="Real">Real Market Record (Eligible for pricing)</option>
-              <option value="Demo">Demo Record (Excluded from commercial valuation)</option>
-            </select>
+              options={[
+                { value: "Real", label: "Real Market Record (Eligible for pricing)" },
+                { value: "Demo", label: "Demo Record (Excluded from commercial valuation)" },
+              ]}
+              placeholder="— Select Real or Demo —"
+            />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-800 mb-1.5">
               Price Basis / Transaction Context *
             </label>
-            <select
+            <ShadcnSelect
               id="ref-select-transactionContext"
               value={form.transactionContext}
-              onChange={(e) =>
-                updateField("transactionContext", e.target.value as "Completed Sale" | "Asking Price" | "")
+              onValueChange={(val) =>
+                updateField("transactionContext", val as "Completed Sale" | "Asking Price" | "")
               }
-              required
-              className={`w-full rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-semibold outline-none ${
-                form.transactionContext === "Completed Sale"
-                  ? "border-emerald-500 bg-emerald-50/50 text-emerald-900"
-                  : "border-slate-300 text-slate-700"
-              }`}
-            >
-              <option value="">— Select Sale or Asking —</option>
-              <option value="Completed Sale">Completed Sale (Verified transaction)</option>
-              <option value="Asking Price">Asking Price / Dealer Quotation</option>
-            </select>
+              options={[
+                { value: "Completed Sale", label: "Completed Sale (Verified transaction)" },
+                { value: "Asking Price", label: "Asking Price / Dealer Quotation" },
+              ]}
+              placeholder="— Select Sale or Asking —"
+            />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-800 mb-1.5">
               Market Context *
             </label>
-            <select
+            <ShadcnSelect
               id="ref-select-marketContext"
               value={form.marketContext}
-              onChange={(e) =>
-                updateField("marketContext", e.target.value as "Wholesale" | "Retail" | "Auction" | "")
+              onValueChange={(val) =>
+                updateField("marketContext", val as "Wholesale" | "Retail" | "Auction" | "")
               }
-              required
-              className={`w-full rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-semibold outline-none ${
-                form.marketContext === "Wholesale"
-                  ? "border-blue-500 bg-blue-50/50 text-blue-900"
-                  : "border-slate-300 text-slate-700"
-              }`}
-            >
-              <option value="">— Select Market Context —</option>
-              <option value="Wholesale">Wholesale (B2B Trade)</option>
-              <option value="Retail">Retail (Consumer Market)</option>
-              <option value="Auction">Auction (Public Clearing)</option>
-            </select>
+              options={[
+                { value: "Wholesale", label: "Wholesale (B2B Trade)" },
+                { value: "Retail", label: "Retail (Consumer Market)" },
+                { value: "Auction", label: "Auction (Public Clearing)" },
+              ]}
+              placeholder="— Select Market Context —"
+            />
           </div>
         </div>
       </section>
@@ -396,32 +376,22 @@ export default function ReferenceGemstoneForm({
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Tone (1–9)
             </label>
-            <select
+            <ShadcnSelect
               value={form.tone}
-              onChange={(e) => updateField("tone", e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-900 outline-none"
-            >
-              {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+              onValueChange={(val) => updateField("tone", val)}
+              options={["1", "2", "3", "4", "5", "6", "7", "8", "9"]}
+            />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Saturation
             </label>
-            <select
+            <ShadcnSelect
               value={form.saturation}
-              onChange={(e) => updateField("saturation", e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-900 outline-none"
-            >
-              <option value="Greyish">Greyish</option>
-              <option value="Slightly Greyish">Slightly Greyish</option>
-              <option value="Medium">Medium</option>
-              <option value="Strong">Strong</option>
-              <option value="Vivid">Vivid</option>
-            </select>
+              onValueChange={(val) => updateField("saturation", val)}
+              options={["Greyish", "Slightly Greyish", "Medium", "Strong", "Vivid"]}
+            />
           </div>
         </div>
 
@@ -430,48 +400,48 @@ export default function ReferenceGemstoneForm({
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Naked Eye Clarity
             </label>
-            <select
+            <ShadcnSelect
               value={form.nakedEye}
-              onChange={(e) => updateField("nakedEye", e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-900 outline-none"
-            >
-              <option value="Clean">Eye-clean (Clean)</option>
-              <option value="Slight">Slightly Included (Slight)</option>
-              <option value="Noticeable">Moderately Included (Noticeable)</option>
-              <option value="Obvious">Heavily Included (Obvious)</option>
-            </select>
+              onValueChange={(val) => updateField("nakedEye", val)}
+              options={[
+                { value: "Clean", label: "Eye-clean (Clean)" },
+                { value: "Slight", label: "Slightly Included (Slight)" },
+                { value: "Noticeable", label: "Moderately Included (Noticeable)" },
+                { value: "Obvious", label: "Heavily Included (Obvious)" },
+              ]}
+            />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               10× Loupe Observation
             </label>
-            <select
+            <ShadcnSelect
               value={form.loupe10x}
-              onChange={(e) => updateField("loupe10x", e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-900 outline-none"
-            >
-              <option value="Clean">Minute (VVS / Clean)</option>
-              <option value="Very Slight">Minor (VS / Very Slight)</option>
-              <option value="Slight">Noticeable (SI / Slight)</option>
-              <option value="Noticeable">Obvious (I / Noticeable)</option>
-            </select>
+              onValueChange={(val) => updateField("loupe10x", val)}
+              options={[
+                { value: "Clean", label: "Minute (VVS / Clean)" },
+                { value: "Very Slight", label: "Minor (VS / Very Slight)" },
+                { value: "Slight", label: "Noticeable (SI / Slight)" },
+                { value: "Noticeable", label: "Obvious (I / Noticeable)" },
+              ]}
+            />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Inclusion Severity *
             </label>
-            <select
+            <ShadcnSelect
               value={form.severity}
-              onChange={(e) => updateField("severity", e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-900 outline-none"
-            >
-              <option value="None">None (Clean)</option>
-              <option value="Minor">Minor</option>
-              <option value="Moderate">Moderate</option>
-              <option value="Severe">Severe</option>
-            </select>
+              onValueChange={(val) => updateField("severity", val)}
+              options={[
+                { value: "None", label: "None (Clean)" },
+                { value: "Minor", label: "Minor" },
+                { value: "Moderate", label: "Moderate" },
+                { value: "Severe", label: "Severe" },
+              ]}
+            />
           </div>
         </div>
       </section>
@@ -531,33 +501,22 @@ export default function ReferenceGemstoneForm({
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Cut Symmetry *
             </label>
-            <select
+            <ShadcnSelect
               value={form.symmetry}
-              onChange={(e) => updateField("symmetry", e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-900 outline-none"
-            >
-              <option value="Excellent">Excellent</option>
-              <option value="Very Good">Very Good</option>
-              <option value="Good">Good</option>
-              <option value="Fair">Fair</option>
-              <option value="Poor">Poor</option>
-            </select>
+              onValueChange={(val) => updateField("symmetry", val)}
+              options={["Excellent", "Very Good", "Good", "Fair", "Poor"]}
+            />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Cut Polish *
             </label>
-            <select
+            <ShadcnSelect
               value={form.polish}
-              onChange={(e) => updateField("polish", e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-900 outline-none"
-            >
-              <option value="Excellent">Excellent</option>
-              <option value="Very Good">Very Good</option>
-              <option value="Good">Good</option>
-              <option value="Fair">Fair</option>
-            </select>
+              onValueChange={(val) => updateField("polish", val)}
+              options={["Excellent", "Very Good", "Good", "Fair"]}
+            />
           </div>
         </div>
       </section>
@@ -573,47 +532,47 @@ export default function ReferenceGemstoneForm({
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Treatment Status *
             </label>
-            <select
+            <ShadcnSelect
               value={form.treatmentStatus}
-              onChange={(e) => updateField("treatmentStatus", e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-900 outline-none"
-            >
-              <option value="Untreated">Untreated / Natural</option>
-              <option value="Heated">Heated</option>
-              <option value="Treated">Treated (Lattice/Diffusion)</option>
-            </select>
+              onValueChange={(val) => updateField("treatmentStatus", val)}
+              options={[
+                { value: "Untreated", label: "Untreated / Natural" },
+                { value: "Heated", label: "Heated" },
+                { value: "Treated", label: "Treated (Lattice/Diffusion)" },
+              ]}
+            />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Geographic Origin *
             </label>
-            <select
+            <ShadcnSelect
               value={form.originValue}
-              onChange={(e) => updateField("originValue", e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-900 outline-none"
-            >
-              <option value="Sri Lanka">Sri Lanka (Ceylon)</option>
-              <option value="Madagascar">Madagascar</option>
-              <option value="Myanmar">Myanmar (Burma)</option>
-              <option value="Other">Other / Unknown</option>
-            </select>
+              onValueChange={(val) => updateField("originValue", val)}
+              options={[
+                { value: "Sri Lanka", label: "Sri Lanka (Ceylon)" },
+                { value: "Madagascar", label: "Madagascar" },
+                { value: "Myanmar", label: "Myanmar (Burma)" },
+                { value: "Other", label: "Other / Unknown" },
+              ]}
+            />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Origin Reliability
             </label>
-            <select
+            <ShadcnSelect
               value={form.originReliability}
-              onChange={(e) => updateField("originReliability", e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-900 outline-none"
-            >
-              <option value="High">High (Lab report confirmed)</option>
-              <option value="Medium">Medium (Dealer documentation)</option>
-              <option value="Low">Low</option>
-              <option value="Unknown">Unknown</option>
-            </select>
+              onValueChange={(val) => updateField("originReliability", val)}
+              options={[
+                { value: "High", label: "High (Lab report confirmed)" },
+                { value: "Medium", label: "Medium (Dealer documentation)" },
+                { value: "Low", label: "Low" },
+                { value: "Unknown", label: "Unknown" },
+              ]}
+            />
           </div>
         </div>
       </section>
@@ -646,15 +605,15 @@ export default function ReferenceGemstoneForm({
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Currency *
             </label>
-            <select
+            <ShadcnSelect
               id="ref-select-currency"
               value={form.currency}
-              onChange={(e) => updateField("currency", e.target.value as "LKR" | "USD")}
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-900 outline-none"
-            >
-              <option value="LKR">LKR — Sri Lankan Rupee</option>
-              <option value="USD">USD — US Dollar</option>
-            </select>
+              onValueChange={(val) => updateField("currency", val as "LKR" | "USD")}
+              options={[
+                { value: "LKR", label: "LKR — Sri Lankan Rupee" },
+                { value: "USD", label: "USD — US Dollar" },
+              ]}
+            />
           </div>
 
           <div>
