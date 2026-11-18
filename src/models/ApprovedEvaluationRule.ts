@@ -4,6 +4,8 @@ const schema = new Schema({
   variety: { type: String, enum: ["RUBY", "SAPPHIRE"], required: true },
   status: { type: String, enum: ["DRAFT", "PENDING", "ACTIVE", "ARCHIVED"], default: "DRAFT", required: true },
   definition: { type: Schema.Types.Mixed, required: true },
+  sourcePackId: String, sourceCandidateId: String, sourcePackFingerprint: String,
+  recordedDomainApproval: Schema.Types.Mixed,
   summary: { type: String, required: true, maxlength: 1000 },
   evidence: { type: String, required: true, maxlength: 4000 },
   createdBy: { type: String, required: true }, createdByName: String,
@@ -13,4 +15,5 @@ const schema = new Schema({
   approvedBy: String, approvedByName: String, approvedAt: Date, reviewNotes: String,
 }, { timestamps: true, collection: "approved_evaluation_rules" });
 schema.index({ variety: 1 }, { unique: true, partialFilterExpression: { status: "ACTIVE" }, name: "one_active_approved_rule_per_variety" });
+schema.index({sourcePackId:1,sourceCandidateId:1},{unique:true,partialFilterExpression:{sourcePackId:{$type:"string"},sourceCandidateId:{$type:"string"}},name:"one_import_per_recorded_candidate"});
 export default mongoose.models.ApprovedEvaluationRule || mongoose.model("ApprovedEvaluationRule", schema);

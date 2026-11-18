@@ -55,6 +55,7 @@ const ReferenceGemstoneSchema = new Schema(
         type: String,
         required: true,
       },
+      durabilityConcern: { type: String, enum: ["NONE_OBSERVED", "POSSIBLE", "UNKNOWN"] },
       inclusionType: {
         type: String,
         default: "",

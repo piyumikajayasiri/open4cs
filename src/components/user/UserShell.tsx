@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Gem, LayoutDashboard, Plus, History, BookOpen, ShieldCheck, LogOut, FileText } from "lucide-react";
+import { Gem, LayoutDashboard, Plus, History, BookOpen, ShieldCheck, LogOut, FileText, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export interface UserIdentity { id: string; name: string; email: string; category: string; role: string }
@@ -17,6 +17,8 @@ export default function UserShell({ user, children, currentPage }: { user: UserI
     { href: "/compare", label: "Compare Gemstones", icon: Gem },
     { href: "/reports", label: "Reports", icon: FileText },
     { href: "/catalogue", label: "Gemstone Catalogue", icon: BookOpen },
+    { href: "/learning", label: "Learning / 4Cs Guide", icon: BookOpen },
+    { href: "/settings", label: "Settings", icon: Settings },
   ];
   return <div className="flex min-h-screen bg-slate-50 text-slate-900">
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-[#101b2e] p-4 text-white lg:flex">
