@@ -13,7 +13,7 @@ async function generateSamplePdfs() {
     fs.mkdirSync(workspaceDir, { recursive: true });
   }
 
-  // Scenario A: Complete assessment with supported market evidence
+  // Scenario A: Complete Ceylon Blue Sapphire with supported market evidence
   const inputA = {
     variety: "Blue Sapphire",
     caratWeight: 2.45,
@@ -31,10 +31,10 @@ async function generateSamplePdfs() {
     evaluationId: "EVAL-SCENARIO-A",
     generatedAt: new Date().toISOString(),
     evaluationDate: new Date("2026-11-12"),
-    user: { name: "Kasun Perera", category: "Professional Gemmologist" },
+    user: { name: "Thasneem Mohamed", category: "Professional Gemmologist" },
     gemstone: {
       ...inputA,
-      photoUrl: "",
+      photoUrl: "/images/gemstones/ceylon-blue-sapphire.jpg",
     },
     scores: {
       overall: evalA.overall4C.score!,
@@ -69,14 +69,14 @@ async function generateSamplePdfs() {
       "Pavilion proportions produce minimal extinction and excellent light return.",
     ],
     ruleVersion: evalA.ruleVersion,
-    userStatement: "Private record generated for Kasun Perera, registered as Professional Gemmologist.",
+    userStatement: "Private record generated for Thasneem Mohamed, registered as Professional Gemmologist.",
     disclaimer: "Academic decision-support output. Not an independent laboratory certificate or guaranteed market valuation.",
   };
 
-  // Scenario B: Complete assessment WITHOUT sufficient market evidence (pricing unavailable)
+  // Scenario B: Padparadscha Sapphire (Comparison Specimen)
   const inputB = {
     variety: "Padparadscha",
-    caratWeight: 1.95,
+    caratWeight: 1.85,
     color: { hue: "Pinkish Orange", tone: "5", saturation: "Strong", distribution: "Even", zoning: "None" },
     clarity: { nakedEye: "Eye-clean", loupe10x: "Very Slight", inclusionType: "Silk needles", inclusionLocation: "Off-table", severity: "Minor" },
     cut: { length: 7.6, width: 6.0, depth: 3.8, symmetry: "Very Good", polish: "Good", windowing: "None", extinction: "None", bulging: "None" },
@@ -91,10 +91,10 @@ async function generateSamplePdfs() {
     evaluationId: "EVAL-SCENARIO-B",
     generatedAt: new Date().toISOString(),
     evaluationDate: new Date("2026-11-12"),
-    user: { name: "Amara Silva", category: "Student Researcher" },
+    user: { name: "Thasneem Mohamed", category: "Professional Gemmologist" },
     gemstone: {
       ...inputB,
-      photoUrl: "",
+      photoUrl: "/images/gemstones/padparadscha-sapphire.jpg",
     },
     scores: {
       overall: evalB.overall4C.score!,
@@ -104,33 +104,44 @@ async function generateSamplePdfs() {
       carat: evalB.carat.score!,
     },
     priceSuggestion: {
-      available: false,
-      suggestedPrice: null,
-      minimumPrice: null,
-      maximumPrice: null,
-      currency: null,
-      reason: "Insufficient verified market data: At least 3 verified completed-sale commercial transaction records are required. Demo and unverified records are strictly excluded from commercial valuation.",
+      available: true,
+      suggestedPrice: 1550000,
+      minimumPrice: 1395000,
+      maximumPrice: 1705000,
+      currency: "LKR",
+      priceLkr: 1550000,
+      priceUsd: 5095,
+      priceRangeLkr: { minimum: 1395000, maximum: 1705000 },
+      priceRangeUsd: { minimum: 4585, maximum: 5604 },
+      exchangeRate: {
+        rate: 304.25,
+        source: "Central Bank of Sri Lanka (CBSL) - Indicative Spot Exchange Rate",
+        asOfDate: "2026-11-12",
+        isAvailable: true,
+      },
+      isRealMarketData: false,
+      marketLevel: "Illustrative price range (Pedagogical Demo Reference REF-PAD-02)",
     },
-    referenceComparison: { available: false, referenceName: null, similarity: null },
+    referenceComparison: { available: true, referenceName: "Ratnapura Collector Lot REF-PAD-02 (Pedagogical Demo Data)", similarity: 80.2 },
     recommendations: [
-      "Specimen color balance observed within delicate pinkish-orange corundum hue range.",
-      "Request treatment assessment from a qualified gemmological laboratory.",
+      "Classic delicate pinkish-orange corundum balance with good saturation.",
+      "Preserve natural unheated documentation from an independent gemmological laboratory.",
     ],
     ruleVersion: evalB.ruleVersion,
-    userStatement: "Private record generated for Amara Silva, registered as Student Researcher.",
-    disclaimer: "Academic decision-support output. Not an independent laboratory certificate or guaranteed market valuation.",
+    userStatement: "Private record generated for Thasneem Mohamed.",
+    disclaimer: "Academic decision-support output. Not an independent laboratory certificate.",
   };
 
-  // Scenario C: Missing photo and unknown treatment/origin
+  // Scenario C: Natural Ruby (Uncertainty Handling & Risk Disclosures)
   const inputC = {
     variety: "Ruby",
     caratWeight: 1.50,
     color: { hue: "Pigeon Blood Red", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None" },
-    clarity: { nakedEye: "Clean", loupe10x: "Very Slight", inclusionType: "Minor rutile", inclusionLocation: "Pavilion", severity: "Minor" },
-    cut: { length: 6.8, width: 5.2, depth: 3.4, symmetry: "Good", polish: "Good", windowing: "None", extinction: "None", bulging: "None" },
-    treatment: { status: "Unknown", type: "Unverified" },
-    origin: { value: "Unknown", reliability: "Unverified" },
-    informationReliability: { measurements: "User Observed" as const, treatment: "Unverified" as const, origin: "Unverified" as const },
+    clarity: { nakedEye: "Slightly Included", loupe10x: "Slight", inclusionType: "Feather", inclusionLocation: "Under table", severity: "Moderate" },
+    cut: { length: 7.0, width: 5.5, depth: 3.6, symmetry: "Good", polish: "Good", windowing: "Slight", extinction: "Slight", bulging: "None" },
+    treatment: { status: "Unknown", type: "Unknown" },
+    origin: { value: "Unknown", reliability: "Unknown" },
+    informationReliability: { measurements: "Measured" as const, treatment: "Unverified" as const, origin: "Unverified" as const },
   };
   const evalC = evaluateGemstone(inputC);
 
@@ -139,10 +150,10 @@ async function generateSamplePdfs() {
     evaluationId: "EVAL-SCENARIO-C",
     generatedAt: new Date().toISOString(),
     evaluationDate: new Date("2026-11-12"),
-    user: { name: "University Student", category: "Student" },
+    user: { name: "Thasneem Mohamed", category: "Professional Gemmologist" },
     gemstone: {
       ...inputC,
-      photoUrl: "",
+      photoUrl: "/images/gemstones/ceylon-ruby.jpg",
     },
     scores: {
       overall: evalC.overall4C.score!,
@@ -157,15 +168,63 @@ async function generateSamplePdfs() {
       minimumPrice: null,
       maximumPrice: null,
       currency: null,
-      reason: "Pricing unavailable because treatment and origin are unverified.",
+      reason: "Pricing unavailable: Treatment status and geographical origin are unverified. Laboratory confirmation required.",
     },
     referenceComparison: { available: false, referenceName: null, similarity: null },
     recommendations: [
-      "Treatment status unverified: Request treatment assessment from a qualified gemmological laboratory.",
-      "Origin unverified: Geographical provenance should not be declared without laboratory spectroscopic confirmation.",
+      "Treatment status unverified: Request thermal/flux analysis from an accredited gemmological laboratory.",
+      "Origin unverified: Trace-element spectroscopic confirmation recommended before commercial transactions.",
     ],
     ruleVersion: evalC.ruleVersion,
-    userStatement: "Private record generated for University Student.",
+    userStatement: "Private record generated for Thasneem Mohamed.",
+    disclaimer: "Academic decision-support output. Not an independent laboratory certificate.",
+  };
+
+  // Scenario D: Exceptional Ceylon Blue Sapphire (Data Sufficiency Boundary)
+  const inputD = {
+    variety: "Blue Sapphire",
+    caratWeight: 4.25,
+    color: { hue: "Royal Blue", tone: "6", saturation: "Vivid", distribution: "Even", zoning: "None" },
+    clarity: { nakedEye: "Eye-clean", loupe10x: "Very Slight", inclusionType: "Silk needles", inclusionLocation: "Off-table", severity: "Minor" },
+    cut: { length: 10.2, width: 8.5, depth: 5.8, symmetry: "Very Good", polish: "Excellent", windowing: "None", extinction: "None", bulging: "None" },
+    treatment: { status: "Untreated", type: "None" },
+    origin: { value: "Sri Lanka", reliability: "Laboratory Verified" },
+    informationReliability: { measurements: "Measured" as const, treatment: "Laboratory Verified" as const, origin: "Laboratory Verified" as const },
+  };
+  const evalD = evaluateGemstone(inputD);
+
+  const reportD: ReportData = {
+    reportTitle: "Open 4Cs Gemstone Evaluation Report",
+    evaluationId: "EVAL-SCENARIO-D",
+    generatedAt: new Date().toISOString(),
+    evaluationDate: new Date("2026-11-12"),
+    user: { name: "Thasneem Mohamed", category: "Professional Gemmologist" },
+    gemstone: {
+      ...inputD,
+      photoUrl: "/images/gemstones/yellow-sapphire.jpg",
+    },
+    scores: {
+      overall: evalD.overall4C.score!,
+      color: evalD.color.score!,
+      clarity: evalD.clarity.score!,
+      cut: evalD.cut.score!,
+      carat: evalD.carat.score!,
+    },
+    priceSuggestion: {
+      available: false,
+      suggestedPrice: null,
+      minimumPrice: null,
+      maximumPrice: null,
+      currency: null,
+      reason: "Pricing unavailable: Insufficient verified wholesale transactions for >4.0 ct size bracket (minimum 3 required).",
+    },
+    referenceComparison: { available: false, referenceName: null, similarity: null },
+    recommendations: [
+      "Exceptional carat size exceeding standard wholesale reference bracket.",
+      "Maintain unheated certification from multiple tier-1 international gem laboratories.",
+    ],
+    ruleVersion: evalD.ruleVersion,
+    userStatement: "Private record generated for Thasneem Mohamed.",
     disclaimer: "Academic decision-support output. Not an independent laboratory certificate.",
   };
 
@@ -173,20 +232,24 @@ async function generateSamplePdfs() {
   console.log("- Scenario A Composite:", evalA.overall4C.score);
   console.log("- Scenario B Composite:", evalB.overall4C.score);
   console.log("- Scenario C Composite:", evalC.overall4C.score);
+  console.log("- Scenario D Composite:", evalD.overall4C.score);
 
   const pdfA = await generateEvaluationPdf(reportA);
   const pdfB = await generateEvaluationPdf(reportB);
   const pdfC = await generateEvaluationPdf(reportC);
+  const pdfD = await generateEvaluationPdf(reportD);
 
   // Write to Artifact directory
   fs.writeFileSync(path.join(artifactDir, "sample-report-scenario-a.pdf"), pdfA);
   fs.writeFileSync(path.join(artifactDir, "sample-report-scenario-b.pdf"), pdfB);
   fs.writeFileSync(path.join(artifactDir, "sample-report-scenario-c.pdf"), pdfC);
+  fs.writeFileSync(path.join(artifactDir, "sample-report-scenario-d.pdf"), pdfD);
 
   // Write to workspace sample-reports directory
   fs.writeFileSync(path.join(workspaceDir, "sample-report-scenario-a.pdf"), pdfA);
   fs.writeFileSync(path.join(workspaceDir, "sample-report-scenario-b.pdf"), pdfB);
   fs.writeFileSync(path.join(workspaceDir, "sample-report-scenario-c.pdf"), pdfC);
+  fs.writeFileSync(path.join(workspaceDir, "sample-report-scenario-d.pdf"), pdfD);
 
   // Write to public/sample-reports directory for static browser serving
   const publicDir = path.join(process.cwd(), "public", "sample-reports");
@@ -196,11 +259,13 @@ async function generateSamplePdfs() {
   fs.writeFileSync(path.join(publicDir, "sample-report-scenario-a.pdf"), pdfA);
   fs.writeFileSync(path.join(publicDir, "sample-report-scenario-b.pdf"), pdfB);
   fs.writeFileSync(path.join(publicDir, "sample-report-scenario-c.pdf"), pdfC);
+  fs.writeFileSync(path.join(publicDir, "sample-report-scenario-d.pdf"), pdfD);
 
-  console.log("Successfully generated all 3 sample PDFs:");
-  console.log("- Scenario A (Complete + Market Evidence):", pdfA.byteLength, "bytes");
-  console.log("- Scenario B (Complete, Price Unavailable):", pdfB.byteLength, "bytes");
-  console.log("- Scenario C (Missing Photo, Unknown Treatment/Origin):", pdfC.byteLength, "bytes");
+  console.log("Successfully generated all 4 sample PDFs with embedded specimen photographs:");
+  console.log("- Scenario A:", pdfA.byteLength, "bytes");
+  console.log("- Scenario B:", pdfB.byteLength, "bytes");
+  console.log("- Scenario C:", pdfC.byteLength, "bytes");
+  console.log("- Scenario D:", pdfD.byteLength, "bytes");
 }
 
 generateSamplePdfs().catch(console.error);
