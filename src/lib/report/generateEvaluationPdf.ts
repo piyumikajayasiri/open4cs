@@ -1,5 +1,7 @@
 import { PDFDocument, PDFPage, PDFFont, RGB, StandardFonts, rgb } from "pdf-lib";
 import QRCode from "qrcode";
+import fs from "fs";
+import path from "path";
 
 export type ReportData = {
   reportTitle: string;
@@ -276,6 +278,16 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
             } catch {
               // Ignore network fetch error; fallback to placeholder
             }
+          }
+        } else if (rawPhoto.startsWith("/") || !rawPhoto.includes("://")) {
+          try {
+            const localPath = path.join(process.cwd(), "public", rawPhoto.replace(/^\//, ""));
+            if (fs.existsSync(localPath)) {
+              imageBytes = fs.readFileSync(localPath);
+              isPng = localPath.toLowerCase().endsWith(".png");
+            }
+          } catch {
+            // Ignore filesystem error; fallback to placeholder
           }
         }
 
