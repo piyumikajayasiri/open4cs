@@ -1,0 +1,6 @@
+export interface DashboardEvent {id:string;label:string;href:string;createdAt:string;kind:"EVALUATION"|"REPORT"}
+export function recentActivity(evaluations:{_id:string;evaluationId:string;variety:string;createdAt:string}[],reports:{id:string;reportId:string;createdAt:string}[]):DashboardEvent[]{
+ return [...evaluations.map(item=>({id:`evaluation:${item._id}`,label:`${item.variety} evaluation saved`,href:`/evaluations/${item._id}`,createdAt:item.createdAt,kind:"EVALUATION" as const})),...reports.map(item=>({id:`report:${item.id}`,label:`Report ${item.reportId} generated`,href:`/reports/${item.id}`,createdAt:item.createdAt,kind:"REPORT" as const}))].filter(item=>Number.isFinite(Date.parse(item.createdAt))).sort((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)||a.id.localeCompare(b.id)).slice(0,8);
+}
+export function dashboardGreeting(date:string){const current=new Date(date);if(!Number.isFinite(current.getTime()))return "Welcome";const hour=Number(new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Colombo",hour:"numeric",hourCycle:"h23"}).format(current));return hour<12?"Good morning":hour<17?"Good afternoon":"Good evening";}
+export function validBrowserDraft(raw:string|null){try{const value=JSON.parse(raw||"null");return Boolean(value?.version===1&&value.draft&&typeof value.draft==="object"&&!Array.isArray(value.draft));}catch{return false;}}

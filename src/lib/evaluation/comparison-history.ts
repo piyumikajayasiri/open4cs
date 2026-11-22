@@ -18,10 +18,11 @@ export function buildComparison(documents:Record<string,unknown>[]){
   row("Reliability","Origin",e=>e.inputSnapshot?.origin||"Not recorded");row("Reliability","Declared origin evidence",e=>pretty(e.inputSnapshot?.originReliability));
   row("Reliability","Treatment (user declared)",e=>pretty(e.inputSnapshot?.treatment));row("Reliability","Measurements and observations",e=>e.inputSnapshot?"User entered; not independently verified":"Not recorded");
   row("Reliability","Reference evidence",e=>e.dataKind==="REFERENCE"?"Reviewed B2B quotations":e.dataKind==="MOCK"?"Invented sample records":"Legacy / not recorded");
-  for(const key of ["overall","color","clarity","cut","carat"] as const)row("Scores",key==="carat"?"Size score (separate from quality)":`${key==="color"?"Colour":key} score`,e=>number(e.scores[key]," / 10"));
+  for(const key of ["overall","color","clarity","cut","carat"] as const)row("Scores",key==="carat"?"Size score (separate from quality)":`${key==="color"?"Colour":key} score`,e=>key==="carat"&&e.result?.weights?.carat===0?"Not graded; weight used for matching":number(e.scores[key]," / 10"));
   for(const key of ["hue","tone","saturation","distribution","zoning"] as const)row("Colour",key,e=>key==="tone"?number(e.inputSnapshot?.color?.tone):pretty(e.inputSnapshot?.color?.[key]));
   row("Colour","Reference colour similarity",()=>"Not calculated");
   for(const key of ["nakedEye","loupe10x","severity"] as const)row("Clarity",key==="nakedEye"?"Naked-eye appearance":key==="loupe10x"?"10× observations":"Inclusion severity",e=>pretty(e.inputSnapshot?.clarity?.[key]));
+  row("Clarity","Observed inclusion type",e=>e.inputSnapshot?.clarity?.inclusionType||"Not recorded");row("Clarity","Observed inclusion location",e=>e.inputSnapshot?.clarity?.inclusionLocation||"Not recorded");row("Clarity","Reported durability concern",e=>pretty(e.inputSnapshot?.clarity?.durabilityConcern));
   for(const key of ["length","width","depth"] as const)row("Cut",key,e=>number(e.inputSnapshot?.cut?.[key]," mm"));
   row("Cut","Depth percentage",e=>number(e.result?.measurements?.depthPercentage,"%"));row("Cut","Length / width",e=>number(e.result?.measurements?.lengthWidthRatio));
   for(const key of ["symmetry","polish","windowing","extinction","bulging"] as const)row("Cut",key,e=>pretty(e.inputSnapshot?.cut?.[key]));

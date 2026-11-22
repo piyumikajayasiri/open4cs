@@ -81,6 +81,8 @@ export function validateEvaluation(input: unknown, catalog: Record<EvaluationInp
   choice("clarity.nakedEye", clarity.nakedEye, ["CLEAN", "SLIGHTLY_INCLUDED", "INCLUDED"]);
   choice("clarity.loupe10x", clarity.loupe10x, ["MINOR", "MODERATE", "HEAVY"]);
   choice("clarity.severity", clarity.severity, severities);
+  for (const field of ["inclusionType", "inclusionLocation"]) if (clarity[field] !== undefined && (typeof clarity[field] !== "string" || String(clarity[field]).length > 120)) errors[`clarity.${field}`] = "Use no more than 120 characters for this observation.";
+  if (clarity.durabilityConcern !== undefined && clarity.durabilityConcern !== "") choice("clarity.durabilityConcern", clarity.durabilityConcern, ["NONE_OBSERVED", "POSSIBLE", "UNKNOWN"]);
   for (const field of ["length", "width", "depth"]) number(`cut.${field}`, cut[field], 0.01, 100);
   for (const field of ["symmetry", "polish"]) choice(`cut.${field}`, cut[field], qualities);
   for (const field of ["windowing", "extinction", "bulging"]) choice(`cut.${field}`, cut[field], severities);
@@ -106,7 +108,7 @@ export function gradeGemstone(input: unknown, catalog: Record<EvaluationInput["v
   const saturationScore = rules.scoring.saturationScore[stone.color.saturation];
   const color = score((colorless ? 10 : saturationScore - tonePenalty)
     - (stone.color.distribution === "UNEVEN" ? rules.scoring.unevenDistributionPenalty : 0) - severityPenalty[stone.color.zoning]);
-  record("COLOR", colorless ? "Colourless scoring uses distribution and zoning; coloured-stone tone and saturation preferences are skipped." : `Configured saturation score ${saturationScore}, tone penalty ${tonePenalty}; uneven distribution penalty ${stone.color.distribution === "UNEVEN" ? rules.scoring.unevenDistributionPenalty : 0}, zoning penalty ${severityPenalty[stone.color.zoning]}.`, color);
+  record("COLOR", rules.scoring.tonePenaltyPerStep === 0 && !colorless ? `Tone is recorded without a numerical adjustment. Saturation score ${saturationScore}; distribution and zoning use the selected definition.` : colorless ? "Colourless scoring uses distribution and zoning; coloured-stone tone and saturation preferences are skipped." : `Configured saturation score ${saturationScore}, tone penalty ${tonePenalty}; uneven distribution penalty ${stone.color.distribution === "UNEVEN" ? rules.scoring.unevenDistributionPenalty : 0}, zoning penalty ${severityPenalty[stone.color.zoning]}.`, color);
 
   const clarity = score((rules.scoring.nakedEyeScore[stone.clarity.nakedEye]
     + rules.scoring.loupeScore[stone.clarity.loupe10x]) / 2 - severityPenalty[stone.clarity.severity]);
@@ -121,11 +123,11 @@ export function gradeGemstone(input: unknown, catalog: Record<EvaluationInput["v
   const depthPenalty = rawDepthPercentage < depthMin - 1e-9 || rawDepthPercentage > depthMax + 1e-9 ? rules.scoring.depthPenalty : 0;
   const cut = score((qualityScore[stone.cut.symmetry] + qualityScore[stone.cut.polish]) / 2 - depthPenalty
     - severityPenalty[stone.cut.windowing] - severityPenalty[stone.cut.extinction] - severityPenalty[stone.cut.bulging]);
-  record("CUT", `Depth is ${depthPercentage}% (${stone.shape === "ROUND" ? "average face-up diameter" : "width"} denominator); configured preferred range ${depthMin}-${depthMax}%. Depth penalty ${depthPenalty}; visible cut concerns apply additional penalties.`, cut);
+  record("CUT", rules.scoring.depthPenalty === 0 ? `Depth is ${depthPercentage}%; depth-based scoring is disabled. Finish and observed cut concerns determine this component.` : `Depth is ${depthPercentage}% (${stone.shape === "ROUND" ? "average face-up diameter" : "width"} denominator); configured preferred range ${depthMin}-${depthMax}%. Depth penalty ${depthPenalty}; visible cut concerns apply additional penalties.`, cut);
   record("DIMENSIONS", "Length divided by width; dimensions are in millimetres.", lengthWidthRatio);
 
   const carat = [...rules.scoring.caratBands].reverse().find((band) => stone.caratWeight >= band.minimum)!.score;
-  record("CARAT", `Configured weight bands: ${rules.scoring.caratBands.map((band) => `${band.minimum}+ ct → ${band.score}`).join(", ")}. This size score is separate from gemstone quality.`, carat);
+  record("CARAT", rules.weights.carat === 0 ? "Size grading is disabled. Carat weight is recorded for matching and price-per-carat calculations, not included in the quality score." : `Configured weight bands: ${rules.scoring.caratBands.map((band) => `${band.minimum}+ ct → ${band.score}`).join(", ")}. This size score is separate from gemstone quality.`, carat);
   const overall = round(color * rules.weights.color + clarity * rules.weights.clarity + cut * rules.weights.cut + carat * rules.weights.carat);
   record("OVERALL", "Weighted score out of 10 using the selected version.", overall);
 

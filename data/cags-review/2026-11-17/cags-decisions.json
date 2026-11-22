@@ -1,0 +1,222 @@
+{
+  "status": "AWAITING_CAGS",
+  "reviewers": [],
+  "reviewedOn": null,
+  "rules": [
+    {
+      "id": "D01",
+      "decision": null,
+      "changes": null,
+      "evidence": null,
+      "reviewer": null
+    },
+    {
+      "id": "D02",
+      "decision": null,
+      "changes": null,
+      "evidence": null,
+      "reviewer": null
+    },
+    {
+      "id": "D03",
+      "decision": null,
+      "changes": null,
+      "evidence": null,
+      "reviewer": null
+    },
+    {
+      "id": "D04",
+      "decision": null,
+      "changes": null,
+      "evidence": null,
+      "reviewer": null
+    },
+    {
+      "id": "D05",
+      "decision": null,
+      "changes": null,
+      "evidence": null,
+      "reviewer": null
+    },
+    {
+      "id": "D06",
+      "decision": null,
+      "changes": null,
+      "evidence": null,
+      "reviewer": null
+    },
+    {
+      "id": "D07",
+      "decision": null,
+      "changes": null,
+      "evidence": null,
+      "reviewer": null
+    },
+    {
+      "id": "D08",
+      "decision": null,
+      "changes": null,
+      "evidence": null,
+      "reviewer": null
+    },
+    {
+      "id": "D09",
+      "decision": null,
+      "changes": null,
+      "evidence": null,
+      "reviewer": null
+    },
+    {
+      "id": "D10",
+      "decision": null,
+      "changes": null,
+      "evidence": null,
+      "reviewer": null
+    },
+    {
+      "id": "D11",
+      "decision": null,
+      "changes": null,
+      "evidence": null,
+      "reviewer": null
+    },
+    {
+      "id": "D12",
+      "decision": null,
+      "changes": null,
+      "evidence": null,
+      "reviewer": null
+    },
+    {
+      "id": "D13",
+      "decision": null,
+      "changes": null,
+      "evidence": null,
+      "reviewer": null
+    },
+    {
+      "id": "D14",
+      "decision": null,
+      "changes": null,
+      "evidence": null,
+      "reviewer": null
+    },
+    {
+      "id": "D15",
+      "decision": null,
+      "changes": null,
+      "evidence": null,
+      "reviewer": null
+    },
+    {
+      "id": "D16",
+      "decision": null,
+      "changes": null,
+      "evidence": null,
+      "reviewer": null
+    }
+  ],
+  "parameterReviewFile": "parameter-review.json",
+  "pricing": [
+    {
+      "id": "CGH953",
+      "decision": null,
+      "currencyConfirmed": false,
+      "quoteDateConfirmed": false,
+      "sellerClaimVerified": false,
+      "permissionConfirmed": false,
+      "reviewer": null
+    },
+    {
+      "id": "CGH931",
+      "decision": null,
+      "currencyConfirmed": false,
+      "quoteDateConfirmed": false,
+      "sellerClaimVerified": false,
+      "permissionConfirmed": false,
+      "reviewer": null
+    },
+    {
+      "id": "CGH900",
+      "decision": null,
+      "currencyConfirmed": false,
+      "quoteDateConfirmed": false,
+      "sellerClaimVerified": false,
+      "permissionConfirmed": false,
+      "reviewer": null
+    },
+    {
+      "id": "CGH905",
+      "decision": null,
+      "currencyConfirmed": false,
+      "quoteDateConfirmed": false,
+      "sellerClaimVerified": false,
+      "permissionConfirmed": false,
+      "reviewer": null
+    },
+    {
+      "id": "S29529",
+      "decision": null,
+      "currencyConfirmed": false,
+      "quoteDateConfirmed": false,
+      "sellerClaimVerified": false,
+      "permissionConfirmed": false,
+      "reviewer": null
+    },
+    {
+      "id": "S24346",
+      "decision": null,
+      "currencyConfirmed": false,
+      "quoteDateConfirmed": false,
+      "sellerClaimVerified": false,
+      "permissionConfirmed": false,
+      "reviewer": null
+    },
+    {
+      "id": "GG-CEYLON-JAN2025",
+      "decision": null,
+      "currencyConfirmed": false,
+      "quoteDateConfirmed": false,
+      "sellerClaimVerified": false,
+      "permissionConfirmed": false,
+      "reviewer": null
+    },
+    {
+      "id": "CGM-2026-BLUE",
+      "decision": null,
+      "currencyConfirmed": false,
+      "quoteDateConfirmed": false,
+      "sellerClaimVerified": false,
+      "permissionConfirmed": false,
+      "reviewer": null
+    },
+    {
+      "id": "CGM-2026-YELLOW",
+      "decision": null,
+      "currencyConfirmed": false,
+      "quoteDateConfirmed": false,
+      "sellerClaimVerified": false,
+      "permissionConfirmed": false,
+      "reviewer": null
+    },
+    {
+      "id": "CGM-2026-PINK",
+      "decision": null,
+      "currencyConfirmed": false,
+      "quoteDateConfirmed": false,
+      "sellerClaimVerified": false,
+      "permissionConfirmed": false,
+      "reviewer": null
+    },
+    {
+      "id": "CGM-2026-PURPLE",
+      "decision": null,
+      "currencyConfirmed": false,
+      "quoteDateConfirmed": false,
+      "sellerClaimVerified": false,
+      "permissionConfirmed": false,
+      "reviewer": null
+    }
+  ],
+  "activationAuthorized": false
+}

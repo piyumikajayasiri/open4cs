@@ -5,7 +5,7 @@ export const EVALUATION_STEPS = ["Gemstone", "Basic Info", "Color", "Clarity", "
 export const STEP_FIELDS = [
   ["variety"], ["origin", "shape"],
   ["color.hue", "color.tone", "color.saturation", "color.distribution", "color.zoning"],
-  ["clarity.nakedEye", "clarity.loupe10x", "clarity.severity"],
+  ["clarity.nakedEye", "clarity.loupe10x", "clarity.severity", "clarity.inclusionType", "clarity.inclusionLocation", "clarity.durabilityConcern"],
   ["cut.length", "cut.width", "cut.depth", "cut.symmetry", "cut.polish", "cut.windowing", "cut.extinction", "cut.bulging"],
   ["caratWeight"], ["originReliability", "treatment"],
 ] as const;
@@ -17,7 +17,7 @@ export function observationsFromDraft(draft: ObservationDraft): EvaluationInput 
   return {
     variety: value("variety"), origin: value("origin"), shape: value("shape"), treatment: value("treatment"), originReliability: value("originReliability"), caratWeight: value("caratWeight"),
     color: Object.fromEntries(["hue", "tone", "saturation", "distribution", "zoning"].map((key) => [key, value(`color.${key}`)])),
-    clarity: Object.fromEntries(["nakedEye", "loupe10x", "severity"].map((key) => [key, value(`clarity.${key}`)])),
+    clarity: Object.fromEntries(["nakedEye", "loupe10x", "severity", "inclusionType", "inclusionLocation", "durabilityConcern"].filter((key)=>["nakedEye","loupe10x","severity"].includes(key)||draft[`clarity.${key}`]?.trim()).map((key) => [key, value(`clarity.${key}`)])),
     cut: Object.fromEntries(["length", "width", "depth", "symmetry", "polish", "windowing", "extinction", "bulging"].map((key) => [key, value(`cut.${key}`)])),
   } as EvaluationInput;
 }

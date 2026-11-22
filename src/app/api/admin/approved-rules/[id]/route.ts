@@ -24,6 +24,7 @@ export async function PATCH(request: Request, context:{params:Promise<{id:string
           if (typeof body.summary!=="string" || body.summary.trim().length<10 || body.summary.length>1000 || typeof body.evidence!=="string" || body.evidence.trim().length<20 || body.evidence.length>4000) throw new AdminError("Provide a complete summary and evidence.");
           try {rule.definition=validateApprovedDefinition(body.definition,rule.variety,rule.version);} catch(error) {throw new AdminError(error instanceof Error?error.message:"Invalid definition.");}
           if (rule.definition.approval!=="PENDING") throw new AdminError("Drafts cannot declare approval.");
+          if(rule.recordedDomainApproval)rule.recordedDomainApproval={...rule.recordedDomainApproval,appliesToDefinition:false};
           rule.summary=body.summary.trim();rule.evidence=body.evidence.trim();rule.lastEditedBy=actor.id;rule.lastEditedByName=actor.name;
         } else if (action==="SUBMIT") {
           try {validateApprovedDefinition(rule.definition,rule.variety,rule.version);} catch(error) {throw new AdminError(error instanceof Error?error.message:"Invalid definition.");}

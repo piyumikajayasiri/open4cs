@@ -20,6 +20,9 @@ export interface EvaluationInput {
     zoning: Severity;
   };
   clarity: {
+    inclusionType?: string;
+    inclusionLocation?: string;
+    durabilityConcern?: "NONE_OBSERVED" | "POSSIBLE" | "UNKNOWN";
     nakedEye: "CLEAN" | "SLIGHTLY_INCLUDED" | "INCLUDED";
     loupe10x: "MINOR" | "MODERATE" | "HEAVY";
     severity: Severity;

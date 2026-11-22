@@ -1,13 +1,13 @@
 import PDFDocument from "pdfkit";
-import { createRequire } from "node:module";
+import { join } from "node:path";
 import { readFileSync } from "node:fs";
-const require = createRequire(import.meta.url);
+
 import type { ReportSnapshot } from "./snapshot";
 const clean=(value:string)=>value.replace(/[\u2010-\u2015]/g,"-").replace(/→/g,"to").replace(/×/g,"x").replace(/−/g,"-");
 export async function renderReportPdf(snapshot:ReportSnapshot):Promise<{pdf:Buffer;pageCount:number}>{
   const doc=new PDFDocument({size:"A4",bufferPages:true,margins:{top:72,bottom:100,left:48,right:48},info:{Title:"Open 4Cs Gemstone Evaluation and Price Suggestion Report",Author:"Open 4Cs",Subject:snapshot.evaluationId,CreationDate:new Date(snapshot.generatedAt)}});
-  doc.registerFont("Body",readFileSync(require.resolve("@fontsource/noto-sans/files/noto-sans-latin-400-normal.woff")));
-  doc.registerFont("Heading",readFileSync(require.resolve("@fontsource/noto-sans/files/noto-sans-latin-700-normal.woff")));
+  doc.registerFont("Body",readFileSync(join(process.cwd(), "node_modules/@fontsource/noto-sans/files/noto-sans-latin-400-normal.woff")));
+  doc.registerFont("Heading",readFileSync(join(process.cwd(), "node_modules/@fontsource/noto-sans/files/noto-sans-latin-700-normal.woff")));
   const chunks:Buffer[]=[];
   const finished=new Promise<Buffer>((resolve,reject)=>{doc.on("data",chunk=>chunks.push(Buffer.from(chunk)));doc.on("end",()=>resolve(Buffer.concat(chunks)));doc.on("error",reject);});
   const width=doc.page.width-96;
