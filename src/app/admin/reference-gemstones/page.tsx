@@ -24,6 +24,7 @@ import {
   BarChart3,
   Scale,
   Award,
+  Download,
 } from "lucide-react";
 import ToastNotification, { ToastMessage, ToastType } from "@/components/ui/ToastNotification";
 import ReferenceGemstoneForm from "@/components/admin/ReferenceGemstoneForm";
@@ -153,6 +154,7 @@ export default function ReferenceGemstonesPage() {
   } | null>(null);
   const [rejectingRecord, setRejectingRecord] = useState<FullReferenceRecord | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [syncingEvidence, setSyncingEvidence] = useState(false);
 
   // Import State
   const [importText, setImportText] = useState("");
@@ -363,6 +365,26 @@ export default function ReferenceGemstonesPage() {
     }
   };
 
+  // Handle Sync Evidence to Registry File
+  const handleSyncEvidence = async () => {
+    try {
+      setSyncingEvidence(true);
+      const res = await fetch("/api/admin/reference-gemstones/sync-evidence", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(`Synced ${data.count} real market references from MongoDB into registry file.`);
+      } else {
+        showToast(data.message || "Failed to sync evidence file.", "error");
+      }
+    } catch {
+      showToast("Network error syncing evidence file.", "error");
+    } finally {
+      setSyncingEvidence(false);
+    }
+  };
+
   // Handle Analyze Import Preview
   const handleAnalyzeImport = async () => {
     if (!importText.trim()) {
@@ -491,6 +513,17 @@ export default function ReferenceGemstonesPage() {
           >
             <Activity className="w-3.5 h-3.5 text-indigo-600" />
             <span>Run Validation Audit</span>
+          </button>
+
+          <button
+            id="admin-sync-evidence-btn"
+            onClick={handleSyncEvidence}
+            disabled={syncingEvidence}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 text-slate-700 px-3.5 py-2 text-xs font-semibold shadow-2xs transition"
+            title="Synchronize all MongoDB real market references into data/market-references-evidence.json"
+          >
+            <Download className={`w-3.5 h-3.5 text-emerald-600 ${syncingEvidence ? "animate-bounce" : ""}`} />
+            <span>{syncingEvidence ? "Syncing..." : "Sync File"}</span>
           </button>
 
           <button
