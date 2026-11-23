@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import FourCBreakdownView from "./FourCBreakdownView";
 import ReliabilityAndColorSimilarityView from "./ReliabilityAndColorSimilarityView";
-import SuggestedB2BPriceView from "./SuggestedB2BPriceView";
+import SuggestedB2BPriceView, { ContributingComparableProp } from "./SuggestedB2BPriceView";
 import RecommendationsView from "./RecommendationsView";
 import EvaluationStatementView from "./EvaluationStatementView";
 
@@ -28,6 +28,14 @@ type EvaluationCompleteDashboardProps = {
   priceRangeMax?: string;
   pricePerCarat?: string;
   comparablesCount?: number;
+  evidenceBasis?: string;
+  dispersion?: number;
+  contributingComparables?: ContributingComparableProp[];
+  retailIndicativeRange?: {
+    benchmark: string;
+    minimum: string;
+    maximum: string;
+  };
   evaluationId?: string;
   priceStatus?: string;
   initialTab?: string;
@@ -79,6 +87,10 @@ export default function EvaluationCompleteDashboard({
   priceRangeMax = "1.68M",
   pricePerCarat = "580K – 686K",
   comparablesCount = 7,
+  evidenceBasis = "Wholesale Completed Sales",
+  dispersion = 8.5,
+  contributingComparables = [],
+  retailIndicativeRange,
   evaluationId,
   priceStatus = "UNAVAILABLE",
   initialTab = "overview",
@@ -265,6 +277,11 @@ export default function EvaluationCompleteDashboard({
                 ? `LKR ${priceRangeMin} – ${priceRangeMax}`
                 : "Unavailable"
             }
+            evidenceBasis={evidenceBasis}
+            comparablesCount={comparablesCount}
+            dispersion={dispersion}
+            contributingComparables={contributingComparables}
+            retailIndicativeRange={retailIndicativeRange}
           />
 
           <ReliabilityAndColorSimilarityView

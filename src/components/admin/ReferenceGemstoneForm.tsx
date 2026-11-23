@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Save, Loader2 } from "lucide-react";
 import { ShadcnSelect } from "@/components/ui/select";
 
@@ -96,19 +96,37 @@ const initialFormData: ReferenceFormData = {
 };
 
 interface ReferenceGemstoneFormProps {
-  onSuccess?: (createdRef: Record<string, unknown>) => void;
+  initialData?: Partial<ReferenceFormData>;
+  recordDbId?: string;
+  isEdit?: boolean;
+  onSuccess?: (savedRef: Record<string, unknown>) => void;
   onCancel?: () => void;
   isModal?: boolean;
 }
 
 export default function ReferenceGemstoneForm({
+  initialData,
+  recordDbId,
+  isEdit = false,
   onSuccess,
   onCancel,
   isModal = false,
 }: ReferenceGemstoneFormProps) {
-  const [form, setForm] = useState<ReferenceFormData>(initialFormData);
+  const [form, setForm] = useState<ReferenceFormData>(() => ({
+    ...initialFormData,
+    ...initialData,
+  }));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  const livePricePerCarat = useMemo(() => {
+    const c = Number(form.caratWeight);
+    const p = Number(form.referencePrice);
+    if (c > 0 && p > 0) {
+      return Math.round(p / c);
+    }
+    return null;
+  }, [form.caratWeight, form.referencePrice]);
 
   function updateField<K extends keyof ReferenceFormData>(
     field: K,
@@ -207,26 +225,30 @@ export default function ReferenceGemstoneForm({
         sourceEvidence: form.sourceEvidence.trim(),
         labCertificate: form.labCertificate.trim(),
         observationDate: form.observationDate,
-        // Always saved as Pending per requirements until verified by admin
-        verificationStatus: "Pending",
+        verificationStatus: isEdit ? undefined : "Pending",
       };
 
-      const res = await fetch("/api/admin/reference-gemstones", {
-        method: "POST",
+      const url = isEdit && (recordDbId || form.referenceId)
+        ? `/api/admin/reference-gemstones/${encodeURIComponent(recordDbId || form.referenceId)}`
+        : "/api/admin/reference-gemstones";
+      const method = isEdit ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.message || "Failed to create reference gemstone record.");
+        throw new Error(data.message || `Failed to ${isEdit ? "update" : "create"} reference gemstone record.`);
       }
 
       if (onSuccess) {
         onSuccess(data.reference);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create reference gemstone.");
+      setError(err instanceof Error ? err.message : `Failed to ${isEdit ? "update" : "create"} reference gemstone.`);
     } finally {
       setSaving(false);
     }
@@ -662,16 +684,27 @@ export default function ReferenceGemstoneForm({
           </div>
         </div>
 
+        {livePricePerCarat !== null && (
+          <div className="rounded-xl bg-blue-50/80 border border-blue-200/80 p-3 text-xs text-blue-900 flex items-center justify-between">
+            <span className="font-semibold">Calculated Benchmark Rate:</span>
+            <span className="font-mono font-bold text-sm text-blue-700">
+              {form.currency} {livePricePerCarat.toLocaleString()} / carat
+            </span>
+          </div>
+        )}
+
         {/* Verification Status Notice */}
         <div className="rounded-xl bg-slate-50 border border-slate-200 p-3.5 flex items-center justify-between text-xs">
           <div>
-            <span className="font-bold text-slate-800">Initial Verification State:</span>{" "}
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-              Pending
+            <span className="font-bold text-slate-800">Verification State:</span>{" "}
+            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold ${
+              isEdit ? "bg-blue-50 text-blue-800 border border-blue-200" : "bg-amber-50 text-amber-800 border border-amber-200"
+            }`}>
+              {isEdit ? "Maintains Review Status" : "Pending"}
             </span>
           </div>
           <span className="text-slate-500 text-[11px]">
-            Requires authorized CAGS sign-off before influencing pricing engine
+            {isEdit ? "Saves as new version in audit trail" : "Requires authorized CAGS sign-off before influencing pricing engine"}
           </span>
         </div>
       </section>
@@ -697,12 +730,12 @@ export default function ReferenceGemstoneForm({
           {saving ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Saving Record...</span>
+              <span>{isEdit ? "Updating Reference..." : "Saving Record..."}</span>
             </>
           ) : (
             <>
               <Save className="h-4 w-4" />
-              <span>Save Market Reference</span>
+              <span>{isEdit ? "Update Reference (New Version)" : "Save Market Reference"}</span>
             </>
           )}
         </button>

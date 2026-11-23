@@ -437,17 +437,28 @@ export async function POST(request: NextRequest) {
     const normalizedRealComparables = eligibleRealComparables
       .map((reference) => {
         let normPrice = reference.referencePrice;
+        let normPricePerCarat = reference.pricePerCarat && reference.pricePerCarat > 0
+          ? reference.pricePerCarat
+          : (reference.caratWeight > 0 ? Math.round(reference.referencePrice / reference.caratWeight) : reference.referencePrice);
         const refCurr = (reference.currency || "LKR").toUpperCase().trim();
         if (refCurr === "USD") {
           if (exchangeRate && exchangeRate.isAvailable && exchangeRate.rate > 0) {
             normPrice = reference.referencePrice * exchangeRate.rate;
+            normPricePerCarat = normPricePerCarat * exchangeRate.rate;
           } else {
             normPrice = 0; // Exclude USD reference if no verified exchange rate is available
+          }
+        } else if (refCurr === "CHF") {
+          if (exchangeRate && exchangeRate.isAvailable && exchangeRate.rate > 0) {
+            normPrice = reference.referencePrice * 1.12 * exchangeRate.rate;
+            normPricePerCarat = normPricePerCarat * 1.12 * exchangeRate.rate;
           }
         }
         return {
           ...reference,
+          referenceId: reference.referenceId || reference.referenceGemstoneId,
           referencePrice: Math.round(normPrice),
+          pricePerCarat: Math.round(normPricePerCarat),
           currency: "LKR",
         };
       })
@@ -457,22 +468,18 @@ export async function POST(request: NextRequest) {
     const bestRealMatch =
       normalizedRealComparables.length > 0 ? normalizedRealComparables[0] : null;
 
-    const comparableReferencePrice = hasRealMarketData
-      ? calculateComparableReferencePrice(normalizedRealComparables)
+    const candidateCarat = Number(data.caratWeight) || 1.0;
+    const candidateContext = {
+      caratWeight: candidateCarat,
+      treatment: data.treatment,
+      origin: data.origin,
+    };
+
+    const aggregationResult = hasRealMarketData
+      ? calculateComparableReferencePrice(normalizedRealComparables, candidateContext)
       : null;
 
-    // Relative treatment and origin adjustment calculations (relative to best real match if available)
-    const candidateTreatmentStatus = data.treatment?.status?.toLowerCase() || "unknown";
-    const refTreatmentStatus = bestRealMatch?.treatment?.status?.toLowerCase() || candidateTreatmentStatus;
-    const candidateTreatmentWeight = TREATMENT_RULES.status[candidateTreatmentStatus as keyof typeof TREATMENT_RULES.status] ?? 1.0;
-    const refTreatmentWeight = TREATMENT_RULES.status[refTreatmentStatus as keyof typeof TREATMENT_RULES.status] ?? 1.0;
-    const relativeTreatmentMultiplier = refTreatmentWeight > 0 ? (candidateTreatmentWeight / refTreatmentWeight) : 1.0;
-
-    const candidateOriginValue = (data.origin?.value || "unknown").toLowerCase().replace(/\s+/g, "");
-    const refOriginValue = (bestRealMatch?.origin?.value || data.origin?.value || "unknown").toLowerCase().replace(/\s+/g, "");
-    const candidateOriginWeight = ORIGIN_RULES.value[candidateOriginValue as keyof typeof ORIGIN_RULES.value] ?? 1.0;
-    const refOriginWeight = ORIGIN_RULES.value[refOriginValue as keyof typeof ORIGIN_RULES.value] ?? 1.0;
-    const relativeOriginMultiplier = refOriginWeight > 0 ? (candidateOriginWeight / refOriginWeight) : 1.0;
+    const comparableReferencePrice = aggregationResult?.suggestedTotalPrice ?? null;
 
     const priceSuggestion = calculatePriceSuggestion(
       hasRealMarketData && bestRealMatch ? comparableReferencePrice : null,
@@ -481,13 +488,39 @@ export async function POST(request: NextRequest) {
       evaluation.origin.adjustmentFactor,
       {
         referenceCount: normalizedRealComparables.length,
-        relativeTreatmentMultiplier,
-        relativeOriginMultiplier,
+        aggregationResult,
+        candidateCaratWeight: candidateCarat,
         exchangeRate,
         dataClassification: hasRealMarketData ? "Real" : "Demo",
         isRealMarketData: hasRealMarketData,
+        marketContext: "Wholesale",
+        evidenceBasis: hasRealMarketData ? "Wholesale Completed Sales" : "None",
       }
     );
+
+    const pricingSnapshot = {
+      engineVersion: "v4.2-explainable-per-carat",
+      timestamp: new Date().toISOString(),
+      candidateCaratWeight: candidateCarat,
+      status: priceSuggestion.status,
+      evidenceBasis: priceSuggestion.evidenceBasis || "None",
+      marketContext: priceSuggestion.marketContext || "Wholesale",
+      comparablesUsedCount: normalizedRealComparables.length,
+      benchmarkPricePerCaratLkr: priceSuggestion.pricePerCaratLkr,
+      benchmarkPricePerCaratUsd: priceSuggestion.pricePerCaratUsd,
+      suggestedTotalPriceLkr: priceSuggestion.priceLkr,
+      suggestedTotalPriceUsd: priceSuggestion.priceUsd,
+      priceRangeLkr: priceSuggestion.priceRangeLkr,
+      priceRangeUsd: priceSuggestion.priceRangeUsd,
+      priceRangePerCaratLkr: priceSuggestion.priceRangePerCaratLkr,
+      priceRangePerCaratUsd: priceSuggestion.priceRangePerCaratUsd,
+      rangePercentage: priceSuggestion.rangePercentage,
+      dispersion: priceSuggestion.dispersion,
+      exchangeRateUsed: exchangeRate,
+      contributingComparables: priceSuggestion.contributingComparables || [],
+      retailIndicativeRangeLkr: priceSuggestion.retailIndicativeRangeLkr,
+      retailIndicativeRangeUsd: priceSuggestion.retailIndicativeRangeUsd,
+    };
 
     const hasSufficientReferenceData = hasRealMarketData;
     const bestReferenceMatch =
@@ -557,6 +590,7 @@ export async function POST(request: NextRequest) {
       },
       overallScore: evaluation.overall4C.score,
       priceSuggestion,
+      pricingSnapshot,
       exchangeRate: priceSuggestion.exchangeRate ?? null,
       recommendations: evaluation.recommendations,
       timestamp: new Date().toISOString(),
@@ -572,7 +606,10 @@ export async function POST(request: NextRequest) {
         result: evaluation,
         referenceDataSufficiency,
         bestReferenceMatch,
-        priceSuggestion,
+        priceSuggestion: {
+          ...priceSuggestion,
+          pricingSnapshot,
+        },
         exchangeRate: priceSuggestion.exchangeRate ?? null,
         photoUrl: data.photoUrl || "",
         assessmentSnapshot,

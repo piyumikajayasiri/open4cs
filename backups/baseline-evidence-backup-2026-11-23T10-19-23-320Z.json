@@ -1,0 +1,3897 @@
+{
+  "timestamp": "2026-11-23T10:19:23.337Z",
+  "counts": {
+    "referencegemstones": 11,
+    "evaluations": 24,
+    "gemstonevarieties": 7
+  },
+  "referenceGemstones": [
+    {
+      "_id": "6af4c5f42a516155550338f4",
+      "referenceId": "REF-1207",
+      "__v": 0,
+      "caratWeight": 2.61,
+      "clarity": {
+        "nakedEye": "Clean",
+        "loupe10x": "Very Slight",
+        "inclusionType": "Minor silk",
+        "inclusionLocation": "Off-table",
+        "severity": "Minor"
+      },
+      "color": {
+        "hue": "Royal Blue",
+        "tone": "6",
+        "saturation": "Vivid",
+        "distribution": "Even",
+        "zoning": "None"
+      },
+      "createdAt": "2026-11-11T19:45:56.756Z",
+      "currency": "LKR",
+      "cut": {
+        "length": 8.5,
+        "width": 6.9,
+        "depth": 4.3,
+        "symmetry": "Very Good",
+        "polish": "Very Good",
+        "windowing": "None",
+        "extinction": "None",
+        "bulging": "None"
+      },
+      "labCertificate": "Pedagogical Benchmark Standard (Demo Data)",
+      "origin": {
+        "value": "Sri Lanka",
+        "reliability": "High"
+      },
+      "referencePrice": 2322900,
+      "source": "Colombo Fort Dealer Lot",
+      "sourceType": "Dealer Observation",
+      "treatment": {
+        "status": "Untreated"
+      },
+      "updatedAt": "2026-11-12T12:24:24.778Z",
+      "variety": "Blue Sapphire",
+      "verificationStatus": "Verified",
+      "verifiedAt": "Oct 24, 2026",
+      "verifiedBy": "Open 4Cs Academic Research Team",
+      "dataClassification": "Demo",
+      "marketContext": "Wholesale",
+      "observationDate": "2026-10-18",
+      "originEvidence": "Classic Ratnapura alluvial corundum suite: rutile silk, liquid feathers, rounded zircon crystals.",
+      "originalCaratWeight": 2.61,
+      "originalCurrency": "LKR",
+      "originalPrice": 2322900,
+      "reviewDate": "2026-10-24",
+      "reviewer": "Open 4Cs Academic Evaluator",
+      "sourceEvidence": "Modeled after loose unheated Ceylon Blue Sapphire dealer lots in Colombo Fort.",
+      "transactionContext": "Dealer Estimate",
+      "treatmentEvidence": "Unaltered intersecting rutile silk needle arrays without discoidal thermal tension haloes."
+    },
+    {
+      "_id": "6af4c5f42a516155550338f5",
+      "referenceId": "REF-1182",
+      "__v": 0,
+      "caratWeight": 2.52,
+      "clarity": {
+        "nakedEye": "Clean",
+        "loupe10x": "Very Slight",
+        "inclusionType": "Fine silk",
+        "inclusionLocation": "Off-table",
+        "severity": "Minor"
+      },
+      "color": {
+        "hue": "Vivid Blue",
+        "tone": "6",
+        "saturation": "Vivid",
+        "distribution": "Even",
+        "zoning": "None"
+      },
+      "createdAt": "2026-11-11T19:45:56.761Z",
+      "currency": "LKR",
+      "cut": {
+        "length": 8.3,
+        "width": 6.7,
+        "depth": 4.2,
+        "symmetry": "Good",
+        "polish": "Good",
+        "windowing": "None",
+        "extinction": "None",
+        "bulging": "None"
+      },
+      "labCertificate": "Pedagogical Benchmark Standard (Demo Data)",
+      "origin": {
+        "value": "Sri Lanka",
+        "reliability": "High"
+      },
+      "referencePrice": 1612800,
+      "source": "Beruwala Gem Market Parcel",
+      "sourceType": "Dealer Observation",
+      "treatment": {
+        "status": "Heated"
+      },
+      "updatedAt": "2026-11-12T12:24:24.782Z",
+      "variety": "Blue Sapphire",
+      "verificationStatus": "Verified",
+      "verifiedAt": "Oct 19, 2026",
+      "verifiedBy": "Open 4Cs Academic Research Team",
+      "dataClassification": "Demo",
+      "marketContext": "Wholesale",
+      "observationDate": "2026-10-15",
+      "originEvidence": "Mineralogical suite consistent with Sri Lankan highland corundum.",
+      "originalCaratWeight": 2.52,
+      "originalCurrency": "LKR",
+      "originalPrice": 1612800,
+      "reviewDate": "2026-10-19",
+      "reviewer": "Open 4Cs Academic Evaluator",
+      "sourceEvidence": "Modeled after traditional thermally treated Ceylon Blue Sapphire trade parcel clearing observations.",
+      "transactionContext": "Dealer Estimate",
+      "treatmentEvidence": "Partially resorbed rutile silk and discoidal thermal stress fractures surrounding mineral inclusions."
+    },
+    {
+      "_id": "6af4c5f42a516155550338f6",
+      "referenceId": "REF-0934",
+      "__v": 0,
+      "caratWeight": 2.38,
+      "clarity": {
+        "nakedEye": "Clean",
+        "loupe10x": "Slight",
+        "inclusionType": "Peripheral feather",
+        "inclusionLocation": "Off-table",
+        "severity": "Minor"
+      },
+      "color": {
+        "hue": "Vivid Blue",
+        "tone": "5",
+        "saturation": "Strong",
+        "distribution": "Even",
+        "zoning": "None"
+      },
+      "createdAt": "2026-11-11T19:45:56.764Z",
+      "currency": "LKR",
+      "cut": {
+        "length": 8,
+        "width": 6.5,
+        "depth": 4,
+        "symmetry": "Good",
+        "polish": "Good",
+        "windowing": "None",
+        "extinction": "None",
+        "bulging": "None"
+      },
+      "labCertificate": "Pedagogical Benchmark Standard (Demo Data)",
+      "origin": {
+        "value": "Sri Lanka",
+        "reliability": "Medium"
+      },
+      "referencePrice": 1456560,
+      "source": "Ratnapura Gem Exchange",
+      "sourceType": "Dealer Observation",
+      "treatment": {
+        "status": "Heated"
+      },
+      "updatedAt": "2026-11-12T12:24:24.785Z",
+      "variety": "Blue Sapphire",
+      "verificationStatus": "Verified",
+      "verifiedAt": "Oct 12, 2026",
+      "verifiedBy": "Open 4Cs Academic Research Team",
+      "dataClassification": "Demo",
+      "marketContext": "Wholesale",
+      "observationDate": "2026-10-10",
+      "originEvidence": "Seller declared Ceylon origin; diagnostic inclusions support Sri Lankan geological provenance.",
+      "originalCaratWeight": 2.38,
+      "originalCurrency": "LKR",
+      "originalPrice": 1456560,
+      "reviewDate": "2026-10-12",
+      "reviewer": "Open 4Cs Academic Evaluator",
+      "sourceEvidence": "Modeled after medium-tone heated Ceylon sapphire trade parcel lots.",
+      "transactionContext": "Dealer Estimate",
+      "treatmentEvidence": "Thermal alteration confirmed by internal reflective stress haloes."
+    },
+    {
+      "_id": "6af4c5f42a516155550338f7",
+      "referenceId": "REF-1099",
+      "__v": 0,
+      "caratWeight": 2.74,
+      "clarity": {
+        "nakedEye": "Slightly Included",
+        "loupe10x": "Moderate",
+        "inclusionType": "Silk needles",
+        "inclusionLocation": "Pavilion",
+        "severity": "Minor"
+      },
+      "color": {
+        "hue": "Vivid Blue",
+        "tone": "5",
+        "saturation": "Strong",
+        "distribution": "Even",
+        "zoning": "None"
+      },
+      "createdAt": "2026-11-11T19:45:56.768Z",
+      "currency": "LKR",
+      "cut": {
+        "length": 8.6,
+        "width": 7,
+        "depth": 4.4,
+        "symmetry": "Good",
+        "polish": "Good",
+        "windowing": "None",
+        "extinction": "None",
+        "bulging": "None"
+      },
+      "labCertificate": "Trader Submission - Pending Sign-off",
+      "origin": {
+        "value": "Sri Lanka",
+        "reliability": "Medium"
+      },
+      "referencePrice": 1638520,
+      "source": "Trader Submission",
+      "sourceType": "Trader Submission",
+      "treatment": {
+        "status": "Heated"
+      },
+      "updatedAt": "2026-11-12T12:24:24.789Z",
+      "variety": "Blue Sapphire",
+      "verificationStatus": "Pending",
+      "verifiedAt": "Submitted Oct 29, 2026",
+      "verifiedBy": "Pending Board Sign-off",
+      "dataClassification": "Demo",
+      "marketContext": "Wholesale",
+      "observationDate": "2026-10-29",
+      "originEvidence": "Seller declared Sri Lanka; unverified.",
+      "originalCaratWeight": 2.74,
+      "originalCurrency": "LKR",
+      "originalPrice": 1638520,
+      "reviewDate": "2026-10-29",
+      "reviewer": "Pending Reviewer",
+      "sourceEvidence": "Unverified trader submission record pending independent gemmological audit.",
+      "transactionContext": "Asking Price",
+      "treatmentEvidence": "Visual inspection notes indicate heating; formal FTIR/microscopy pending."
+    },
+    {
+      "_id": "6af4c5f42a516155550338f8",
+      "referenceId": "HIST-Q2-31",
+      "__v": 0,
+      "caratWeight": 1.75,
+      "clarity": {
+        "nakedEye": "Clean",
+        "loupe10x": "Very Slight",
+        "inclusionType": "Minor crystals",
+        "inclusionLocation": "Off-table",
+        "severity": "Minor"
+      },
+      "color": {
+        "hue": "Pinkish Orange",
+        "tone": "5",
+        "saturation": "Strong",
+        "distribution": "Even",
+        "zoning": "None"
+      },
+      "createdAt": "2026-11-11T19:45:56.772Z",
+      "currency": "LKR",
+      "cut": {
+        "length": 7.2,
+        "width": 5.8,
+        "depth": 3.7,
+        "symmetry": "Very Good",
+        "polish": "Very Good",
+        "windowing": "None",
+        "extinction": "None",
+        "bulging": "None"
+      },
+      "labCertificate": "Pedagogical Benchmark Standard (Demo Data)",
+      "origin": {
+        "value": "Sri Lanka",
+        "reliability": "High"
+      },
+      "referencePrice": 1925000,
+      "source": "Colombo Auction Aggregate",
+      "sourceType": "Dealer Observation",
+      "treatment": {
+        "status": "Untreated"
+      },
+      "updatedAt": "2026-11-12T12:24:24.791Z",
+      "variety": "Padparadscha",
+      "verificationStatus": "Verified",
+      "verifiedAt": "Sep 30, 2026",
+      "verifiedBy": "Open 4Cs Academic Research Team",
+      "dataClassification": "Demo",
+      "marketContext": "Wholesale",
+      "observationDate": "2026-09-25",
+      "originEvidence": "Classic Sri Lankan alluvial corundum inclusion suite.",
+      "originalCaratWeight": 1.75,
+      "originalCurrency": "LKR",
+      "originalPrice": 1925000,
+      "reviewDate": "2026-09-30",
+      "reviewer": "Open 4Cs Academic Evaluator",
+      "sourceEvidence": "Modeled after untreated Ceylon Padparadscha auction specimens exhibiting balanced pink-orange color.",
+      "transactionContext": "Dealer Estimate",
+      "treatmentEvidence": "Intact silk needles and natural color distribution without beryllium lattice diffusion."
+    },
+    {
+      "_id": "6af4c5f42a516155550338f9",
+      "referenceId": "REF-PAD-02",
+      "__v": 0,
+      "caratWeight": 2.15,
+      "clarity": {
+        "nakedEye": "Clean",
+        "loupe10x": "Slight",
+        "inclusionType": "Fine silk",
+        "inclusionLocation": "Near edge",
+        "severity": "Minor"
+      },
+      "color": {
+        "hue": "Orangish Pink",
+        "tone": "6",
+        "saturation": "Strong",
+        "distribution": "Even",
+        "zoning": "None"
+      },
+      "createdAt": "2026-11-11T19:45:56.854Z",
+      "currency": "LKR",
+      "cut": {
+        "length": 8.1,
+        "width": 6.2,
+        "depth": 4,
+        "symmetry": "Good",
+        "polish": "Good",
+        "windowing": "None",
+        "extinction": "None",
+        "bulging": "None"
+      },
+      "labCertificate": "Pedagogical Benchmark Standard (Demo Data)",
+      "origin": {
+        "value": "Sri Lanka",
+        "reliability": "High"
+      },
+      "referencePrice": 1827500,
+      "source": "Beruwala Trade Lot",
+      "sourceType": "Dealer Observation",
+      "treatment": {
+        "status": "Heated"
+      },
+      "updatedAt": "2026-11-12T12:24:24.793Z",
+      "variety": "Padparadscha",
+      "verificationStatus": "Verified",
+      "verifiedAt": "Aug 15, 2026",
+      "verifiedBy": "Open 4Cs Academic Research Team",
+      "dataClassification": "Demo",
+      "marketContext": "Wholesale",
+      "observationDate": "2026-08-10",
+      "originEvidence": "Inclusion profile confirms Sri Lankan geological source.",
+      "originalCaratWeight": 2.15,
+      "originalCurrency": "LKR",
+      "originalPrice": 1827500,
+      "reviewDate": "2026-08-15",
+      "reviewer": "Open 4Cs Academic Evaluator",
+      "sourceEvidence": "Modeled after heated Ceylon Padparadscha corundum trade samples.",
+      "transactionContext": "Dealer Estimate",
+      "treatmentEvidence": "Thermal alteration evident in partially dissolved rutile needles."
+    },
+    {
+      "_id": "6af4c5f42a516155550338fa",
+      "referenceId": "REF-RUBY-01",
+      "__v": 0,
+      "caratWeight": 1.6,
+      "clarity": {
+        "nakedEye": "Clean",
+        "loupe10x": "Very Slight",
+        "inclusionType": "Minor needles",
+        "inclusionLocation": "Off-table",
+        "severity": "Minor"
+      },
+      "color": {
+        "hue": "Red",
+        "tone": "6",
+        "saturation": "Vivid",
+        "distribution": "Even",
+        "zoning": "None"
+      },
+      "createdAt": "2026-11-11T19:45:56.856Z",
+      "currency": "LKR",
+      "cut": {
+        "length": 6.9,
+        "width": 5.4,
+        "depth": 3.5,
+        "symmetry": "Good",
+        "polish": "Good",
+        "windowing": "None",
+        "extinction": "None",
+        "bulging": "None"
+      },
+      "labCertificate": "Pedagogical Benchmark Standard (Demo Data)",
+      "origin": {
+        "value": "Myanmar",
+        "reliability": "High"
+      },
+      "referencePrice": 1440000,
+      "source": "Mogok Trade Lot",
+      "sourceType": "Dealer Observation",
+      "treatment": {
+        "status": "Untreated"
+      },
+      "updatedAt": "2026-11-12T12:24:24.798Z",
+      "variety": "Ruby",
+      "verificationStatus": "Verified",
+      "verifiedAt": "Jul 10, 2026",
+      "verifiedBy": "Open 4Cs Academic Research Team",
+      "dataClassification": "Demo",
+      "marketContext": "Wholesale",
+      "observationDate": "2026-07-01",
+      "originEvidence": "Calcite and swirl growth zoning diagnostic of marble-hosted Mogok ruby.",
+      "originalCaratWeight": 1.6,
+      "originalCurrency": "LKR",
+      "originalPrice": 1440000,
+      "reviewDate": "2026-07-10",
+      "reviewer": "Open 4Cs Academic Evaluator",
+      "sourceEvidence": "Modeled after natural untreated Mogok/Burma red corundum trade parcel observations.",
+      "transactionContext": "Dealer Estimate",
+      "treatmentEvidence": "Dense short rutile silk needles undisturbed by high-temperature heat treatment."
+    },
+    {
+      "_id": "6af4c5f42a516155550338fb",
+      "referenceId": "REF-RUBY-02",
+      "__v": 0,
+      "caratWeight": 2.1,
+      "clarity": {
+        "nakedEye": "Clean",
+        "loupe10x": "Slight",
+        "inclusionType": "Fine silk",
+        "inclusionLocation": "Girdle",
+        "severity": "Minor"
+      },
+      "color": {
+        "hue": "Purplish Red",
+        "tone": "6",
+        "saturation": "Strong",
+        "distribution": "Even",
+        "zoning": "None"
+      },
+      "createdAt": "2026-11-11T19:45:56.859Z",
+      "currency": "LKR",
+      "cut": {
+        "length": 7.7,
+        "width": 6,
+        "depth": 3.9,
+        "symmetry": "Good",
+        "polish": "Good",
+        "windowing": "None",
+        "extinction": "Slight",
+        "bulging": "None"
+      },
+      "labCertificate": "Pedagogical Benchmark Standard (Demo Data)",
+      "origin": {
+        "value": "Myanmar",
+        "reliability": "High"
+      },
+      "referencePrice": 1512000,
+      "source": "Burmese Ruby Trade Parcel",
+      "sourceType": "Dealer Observation",
+      "treatment": {
+        "status": "Heated"
+      },
+      "updatedAt": "2026-11-12T12:24:24.800Z",
+      "variety": "Ruby",
+      "verificationStatus": "Verified",
+      "verifiedAt": "Jun 28, 2026",
+      "verifiedBy": "Open 4Cs Academic Research Team",
+      "dataClassification": "Demo",
+      "marketContext": "Wholesale",
+      "observationDate": "2026-06-20",
+      "originEvidence": "Inclusion suite diagnostic of Burmese marble origin.",
+      "originalCaratWeight": 2.1,
+      "originalCurrency": "LKR",
+      "originalPrice": 1512000,
+      "reviewDate": "2026-06-28",
+      "reviewer": "Open 4Cs Academic Evaluator",
+      "sourceEvidence": "Modeled after thermally treated Burma ruby trade parcel clearing observations.",
+      "transactionContext": "Dealer Estimate",
+      "treatmentEvidence": "Thermal alteration in silk needles and melted calcite edges."
+    },
+    {
+      "_id": "6af5a5a52a516155550338ff",
+      "referenceId": "REF-PAD-03",
+      "__v": 0,
+      "caratWeight": 1.95,
+      "clarity": {
+        "nakedEye": "Clean",
+        "loupe10x": "Very Slight",
+        "inclusionType": "Minor crystals",
+        "inclusionLocation": "Off-table",
+        "severity": "Minor"
+      },
+      "color": {
+        "hue": "Pinkish Orange",
+        "tone": "5",
+        "saturation": "Strong",
+        "distribution": "Even",
+        "zoning": "None"
+      },
+      "createdAt": "2026-11-12T11:40:21.424Z",
+      "currency": "LKR",
+      "cut": {
+        "length": 7.6,
+        "width": 6,
+        "depth": 3.8,
+        "symmetry": "Very Good",
+        "polish": "Good",
+        "windowing": "None",
+        "extinction": "None",
+        "bulging": "None"
+      },
+      "labCertificate": "Pedagogical Benchmark Standard (Demo Data)",
+      "origin": {
+        "value": "Sri Lanka",
+        "reliability": "High"
+      },
+      "referencePrice": 2145000,
+      "source": "Ratnapura Dealer Parcel",
+      "sourceType": "Dealer Observation",
+      "treatment": {
+        "status": "Untreated"
+      },
+      "updatedAt": "2026-11-12T12:24:24.795Z",
+      "variety": "Padparadscha",
+      "verificationStatus": "Verified",
+      "verifiedAt": "Nov 02, 2026",
+      "verifiedBy": "Open 4Cs Academic Research Team",
+      "dataClassification": "Demo",
+      "marketContext": "Wholesale",
+      "observationDate": "2026-10-28",
+      "originEvidence": "Documented provenance from Ratnapura gravel pit lot.",
+      "originalCaratWeight": 1.95,
+      "originalCurrency": "LKR",
+      "originalPrice": 2145000,
+      "reviewDate": "2026-11-02",
+      "reviewer": "Open 4Cs Academic Evaluator",
+      "sourceEvidence": "Modeled after untreated Ratnapura dealer parcel observations.",
+      "transactionContext": "Dealer Estimate",
+      "treatmentEvidence": "Unaltered silk needles and prismatic apatite crystals without heat-induced halos."
+    },
+    {
+      "_id": "6af5a5a52a51615555033900",
+      "referenceId": "REF-RUBY-03",
+      "__v": 0,
+      "caratWeight": 1.85,
+      "clarity": {
+        "nakedEye": "Clean",
+        "loupe10x": "Very Slight",
+        "inclusionType": "Fine silk",
+        "inclusionLocation": "Off-table",
+        "severity": "Minor"
+      },
+      "color": {
+        "hue": "Pigeon Blood Red",
+        "tone": "6",
+        "saturation": "Vivid",
+        "distribution": "Even",
+        "zoning": "None"
+      },
+      "createdAt": "2026-11-12T11:40:21.429Z",
+      "currency": "LKR",
+      "cut": {
+        "length": 7.3,
+        "width": 5.7,
+        "depth": 3.7,
+        "symmetry": "Very Good",
+        "polish": "Good",
+        "windowing": "None",
+        "extinction": "None",
+        "bulging": "None"
+      },
+      "labCertificate": "Pedagogical Benchmark Standard (Demo Data)",
+      "origin": {
+        "value": "Myanmar",
+        "reliability": "High"
+      },
+      "referencePrice": 1980000,
+      "source": "Colombo Wholesale Trade Benchmark",
+      "sourceType": "Dealer Observation",
+      "treatment": {
+        "status": "Untreated"
+      },
+      "updatedAt": "2026-11-12T12:24:24.803Z",
+      "variety": "Ruby",
+      "verificationStatus": "Verified",
+      "verifiedAt": "Nov 04, 2026",
+      "verifiedBy": "Open 4Cs Academic Research Team",
+      "dataClassification": "Demo",
+      "marketContext": "Wholesale",
+      "observationDate": "2026-10-30",
+      "originEvidence": "High chromium fluorescence and marble-hosted inclusion morphology typical of Mogok.",
+      "originalCaratWeight": 1.85,
+      "originalCurrency": "LKR",
+      "originalPrice": 1980000,
+      "reviewDate": "2026-11-04",
+      "reviewer": "Open 4Cs Academic Evaluator",
+      "sourceEvidence": "Modeled after unheated Pigeon Blood ruby trade parcel clearing observations.",
+      "transactionContext": "Dealer Estimate",
+      "treatmentEvidence": "Unaltered rutile silk, unexpanded negative crystals, absence of glass residue or flux."
+    },
+    {
+      "_id": "6afdbf1b6e4cb09fc8f09cbc",
+      "referenceId": "REF-SRI-2026-B91",
+      "variety": "Blue Sapphire",
+      "caratWeight": 2.85,
+      "color": {
+        "hue": "Royal Blue",
+        "tone": "6",
+        "saturation": "Vivid",
+        "distribution": "Even",
+        "zoning": "None"
+      },
+      "clarity": {
+        "nakedEye": "Clean",
+        "loupe10x": "Very Slight",
+        "inclusionType": "Silk needles",
+        "inclusionLocation": "",
+        "severity": "Minor"
+      },
+      "cut": {
+        "length": null,
+        "width": null,
+        "depth": null,
+        "symmetry": "Good",
+        "polish": "Good",
+        "windowing": "None",
+        "extinction": "None",
+        "bulging": "None"
+      },
+      "treatment": {
+        "status": "Heated"
+      },
+      "origin": {
+        "value": "Sri Lanka",
+        "reliability": "High"
+      },
+      "referencePrice": 2450000,
+      "currency": "LKR",
+      "source": "Ratnapura Wholesale Trade RegisterRatnapura Wholesale Trade Register",
+      "status": "INACTIVE",
+      "isActive": false,
+      "sourceType": "Dealer Report",
+      "verificationStatus": "Verified",
+      "labCertificate": "",
+      "verifiedBy": "CAGS Admin",
+      "verifiedAt": "2026-11-18T15:07:08.976Z",
+      "dataClassification": "Demo",
+      "sourceEvidence": "Automated browser test journey fixture (Demo data only - quarantined)",
+      "observationDate": "2026-11-18",
+      "transactionContext": "Completed Sale",
+      "marketContext": "Wholesale",
+      "originalCurrency": "LKR",
+      "originalPrice": 2450000,
+      "originalCaratWeight": 2.85,
+      "treatmentEvidence": "",
+      "originEvidence": "",
+      "reviewer": "CAGS Admin",
+      "reviewDate": "2026-11-18",
+      "createdAt": "2026-11-18T15:07:07.674Z",
+      "updatedAt": "2026-11-18T15:07:13.681Z",
+      "__v": 0
+    }
+  ],
+  "evaluations": [
+    {
+      "_id": "6abf74d62d37565f33c03bff",
+      "gemstoneId": "6abf74d62d37565f33c03bfe",
+      "ruleVersion": "prototype-v1",
+      "status": "COMPLETED",
+      "result": {
+        "status": "COMPLETED",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "COMPLETED",
+          "reason": "Prototype Overall 4C score calculated from Color, Clarity, Cut, and Carat Weight.",
+          "score": 96,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "COMPLETED",
+          "reason": "Prototype Color score calculated from hue, tone, saturation, distribution, and zoning.",
+          "score": 100
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 100
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 100,
+          "measurements": {
+            "lengthToWidthRatio": 1.36,
+            "depthPercentage": 69.09
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band. Gemstone dimensions are recorded separately and are not yet included in scoring.",
+          "score": 80,
+          "caratWeight": 1.6,
+          "dimensions": {
+            "length": 7.5,
+            "width": 5.5,
+            "depth": 3.8
+          }
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 0.9
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Seller Provided",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "SUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 2
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6abf55bd2d37565f33c03bfc",
+        "variety": "Blue Sapphire",
+        "caratWeight": 1.6,
+        "referencePrice": 1500,
+        "currency": "USD",
+        "similarity": {
+          "color": 100,
+          "clarity": 100,
+          "cut": 100,
+          "cutDimensions": 100,
+          "carat": 100,
+          "overall": 100
+        }
+      },
+      "priceSuggestion": {
+        "status": "COMPLETED",
+        "reason": "Prototype B2B price suggestion calculated from the reference price, treatment adjustment, and origin adjustment.",
+        "currency": "USD",
+        "referencePrice": 1500,
+        "suggestedPrice": 1350,
+        "priceRange": {
+          "minimum": 1215,
+          "maximum": 1485
+        },
+        "adjustmentFactors": {
+          "treatment": 0.9,
+          "origin": 1
+        }
+      },
+      "createdAt": "2026-10-02T09:09:42.654Z",
+      "updatedAt": "2026-10-02T09:09:42.654Z",
+      "__v": 0
+    },
+    {
+      "_id": "6abf7ea92d37565f33c03c01",
+      "gemstoneId": "6abf7ea92d37565f33c03c00",
+      "ruleVersion": "prototype-v1",
+      "status": "COMPLETED",
+      "result": {
+        "status": "COMPLETED",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "COMPLETED",
+          "reason": "Prototype Overall 4C score calculated from Color, Clarity, Cut, and Carat Weight.",
+          "score": 96,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "COMPLETED",
+          "reason": "Prototype Color score calculated from hue, tone, saturation, distribution, and zoning.",
+          "score": 100
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 100
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 100,
+          "measurements": {
+            "lengthToWidthRatio": 1.36,
+            "depthPercentage": 69.09
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band. Gemstone dimensions are recorded separately and are not yet included in scoring.",
+          "score": 80,
+          "caratWeight": 1.7,
+          "dimensions": {
+            "length": 7.5,
+            "width": 5.5,
+            "depth": 3.8
+          }
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 0.9
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Seller Provided",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "SUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 2
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6abf55bd2d37565f33c03bfc",
+        "variety": "Blue Sapphire",
+        "caratWeight": 1.6,
+        "referencePrice": 1500,
+        "currency": "USD",
+        "similarity": {
+          "color": 100,
+          "clarity": 100,
+          "cut": 100,
+          "cutDimensions": 100,
+          "carat": 94.12,
+          "overall": 98.82
+        }
+      },
+      "priceSuggestion": {
+        "status": "COMPLETED",
+        "reason": "Prototype B2B price suggestion calculated from the reference price, treatment adjustment, and origin adjustment.",
+        "currency": "USD",
+        "referencePrice": 1500,
+        "suggestedPrice": 1350,
+        "priceRange": {
+          "minimum": 1215,
+          "maximum": 1485
+        },
+        "adjustmentFactors": {
+          "treatment": 0.9,
+          "origin": 1
+        }
+      },
+      "createdAt": "2026-10-02T09:51:37.999Z",
+      "updatedAt": "2026-10-02T09:51:37.999Z",
+      "__v": 0
+    },
+    {
+      "_id": "6abf86242d37565f33c03c03",
+      "gemstoneId": "6abf86242d37565f33c03c02",
+      "ruleVersion": "prototype-v1",
+      "status": "COMPLETED",
+      "result": {
+        "status": "COMPLETED",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "COMPLETED",
+          "reason": "Prototype Overall 4C score calculated from Color, Clarity, Cut, and Carat Weight.",
+          "score": 96,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "COMPLETED",
+          "reason": "Prototype Color score calculated from hue, tone, saturation, distribution, and zoning.",
+          "score": 100
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 100
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 100,
+          "measurements": {
+            "lengthToWidthRatio": 1.36,
+            "depthPercentage": 69.09
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band. Gemstone dimensions are recorded separately and are not yet included in scoring.",
+          "score": 80,
+          "caratWeight": 1.6,
+          "dimensions": {
+            "length": 7.5,
+            "width": 5.5,
+            "depth": 3.8
+          }
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 0.9
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Seller Provided",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "SUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 2
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6abf55bd2d37565f33c03bfc",
+        "variety": "Blue Sapphire",
+        "caratWeight": 1.6,
+        "referencePrice": 1500,
+        "currency": "USD",
+        "similarity": {
+          "color": 100,
+          "clarity": 100,
+          "cut": 100,
+          "cutDimensions": 100,
+          "carat": 100,
+          "overall": 100
+        }
+      },
+      "priceSuggestion": {
+        "status": "COMPLETED",
+        "reason": "Prototype B2B price suggestion calculated from the reference price, treatment adjustment, and origin adjustment.",
+        "currency": "USD",
+        "referencePrice": 1500,
+        "suggestedPrice": 1350,
+        "priceRange": {
+          "minimum": 1215,
+          "maximum": 1485
+        },
+        "adjustmentFactors": {
+          "treatment": 0.9,
+          "origin": 1
+        }
+      },
+      "createdAt": "2026-10-02T10:23:32.807Z",
+      "updatedAt": "2026-10-02T10:23:32.807Z",
+      "__v": 0
+    },
+    {
+      "_id": "6abf86362d37565f33c03c05",
+      "gemstoneId": "6abf86362d37565f33c03c04",
+      "ruleVersion": "prototype-v1",
+      "status": "COMPLETED",
+      "result": {
+        "status": "COMPLETED",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "COMPLETED",
+          "reason": "Prototype Overall 4C score calculated from Color, Clarity, Cut, and Carat Weight.",
+          "score": 96,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "COMPLETED",
+          "reason": "Prototype Color score calculated from hue, tone, saturation, distribution, and zoning.",
+          "score": 100
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 100
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 100,
+          "measurements": {
+            "lengthToWidthRatio": 1.36,
+            "depthPercentage": 69.09
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band. Gemstone dimensions are recorded separately and are not yet included in scoring.",
+          "score": 80,
+          "caratWeight": 1.6,
+          "dimensions": {
+            "length": 7.5,
+            "width": 5.5,
+            "depth": 3.8
+          }
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 0.9
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Seller Provided",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "SUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 2
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6abf55bd2d37565f33c03bfc",
+        "variety": "Blue Sapphire",
+        "caratWeight": 1.6,
+        "referencePrice": 1500,
+        "currency": "USD",
+        "similarity": {
+          "color": 100,
+          "clarity": 100,
+          "cut": 100,
+          "cutDimensions": 100,
+          "carat": 100,
+          "overall": 100
+        }
+      },
+      "priceSuggestion": {
+        "status": "COMPLETED",
+        "reason": "Prototype B2B price suggestion calculated from the reference price, treatment adjustment, and origin adjustment.",
+        "currency": "USD",
+        "referencePrice": 1500,
+        "suggestedPrice": 1350,
+        "priceRange": {
+          "minimum": 1215,
+          "maximum": 1485
+        },
+        "adjustmentFactors": {
+          "treatment": 0.9,
+          "origin": 1
+        }
+      },
+      "createdAt": "2026-10-02T10:23:50.814Z",
+      "updatedAt": "2026-10-02T10:23:50.814Z",
+      "__v": 0
+    },
+    {
+      "_id": "6abf86f32d37565f33c03c07",
+      "gemstoneId": "6abf86f32d37565f33c03c06",
+      "ruleVersion": "prototype-v1",
+      "status": "COMPLETED",
+      "result": {
+        "status": "COMPLETED",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "COMPLETED",
+          "reason": "Prototype Overall 4C score calculated from Color, Clarity, Cut, and Carat Weight.",
+          "score": 96,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "COMPLETED",
+          "reason": "Prototype Color score calculated from hue, tone, saturation, distribution, and zoning.",
+          "score": 100
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 100
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 100,
+          "measurements": {
+            "lengthToWidthRatio": 1.36,
+            "depthPercentage": 69.09
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band. Gemstone dimensions are recorded separately and are not yet included in scoring.",
+          "score": 80,
+          "caratWeight": 1.6,
+          "dimensions": {
+            "length": 7.5,
+            "width": 5.5,
+            "depth": 3.8
+          }
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 0.9
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Seller Provided",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "SUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 2
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6abf55bd2d37565f33c03bfc",
+        "variety": "Blue Sapphire",
+        "caratWeight": 1.6,
+        "referencePrice": 1500,
+        "currency": "USD",
+        "similarity": {
+          "color": 100,
+          "clarity": 100,
+          "cut": 100,
+          "cutDimensions": 100,
+          "carat": 100,
+          "overall": 100
+        }
+      },
+      "priceSuggestion": {
+        "status": "COMPLETED",
+        "reason": "Prototype B2B price suggestion calculated from the reference price, treatment adjustment, and origin adjustment.",
+        "currency": "USD",
+        "referencePrice": 1500,
+        "suggestedPrice": 1350,
+        "priceRange": {
+          "minimum": 1215,
+          "maximum": 1485
+        },
+        "adjustmentFactors": {
+          "treatment": 0.9,
+          "origin": 1
+        }
+      },
+      "createdAt": "2026-10-02T10:26:59.597Z",
+      "updatedAt": "2026-10-02T10:26:59.597Z",
+      "__v": 0
+    },
+    {
+      "_id": "6abf8ae52d37565f33c03c09",
+      "gemstoneId": "6abf8ae52d37565f33c03c08",
+      "ruleVersion": "prototype-v1",
+      "status": "COMPLETED",
+      "result": {
+        "status": "COMPLETED",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "COMPLETED",
+          "reason": "Prototype Overall 4C score calculated from Color, Clarity, Cut, and Carat Weight.",
+          "score": 96,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "COMPLETED",
+          "reason": "Prototype Color score calculated from hue, tone, saturation, distribution, and zoning.",
+          "score": 100
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 100
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 100,
+          "measurements": {
+            "lengthToWidthRatio": 1.36,
+            "depthPercentage": 69.09
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band. Dimensions are also used to calculate a size-consistency indicator but do not currently change the Carat score.",
+          "score": 80,
+          "caratWeight": 1.6,
+          "dimensions": {
+            "length": 7.5,
+            "width": 5.5,
+            "depth": 3.8
+          },
+          "sizeConsistency": 97.97
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 0.9
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Seller Provided",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "SUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 2
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6abf55bd2d37565f33c03bfc",
+        "variety": "Blue Sapphire",
+        "caratWeight": 1.6,
+        "referencePrice": 1500,
+        "currency": "USD",
+        "similarity": {
+          "color": 100,
+          "clarity": 100,
+          "cut": 100,
+          "cutDimensions": 100,
+          "carat": 100,
+          "overall": 100
+        }
+      },
+      "priceSuggestion": {
+        "status": "COMPLETED",
+        "reason": "Prototype B2B price suggestion calculated from the reference price, treatment adjustment, and origin adjustment.",
+        "currency": "USD",
+        "referencePrice": 1500,
+        "suggestedPrice": 1350,
+        "priceRange": {
+          "minimum": 1215,
+          "maximum": 1485
+        },
+        "adjustmentFactors": {
+          "treatment": 0.9,
+          "origin": 1
+        }
+      },
+      "createdAt": "2026-10-02T10:43:49.342Z",
+      "updatedAt": "2026-10-02T10:43:49.342Z",
+      "__v": 0
+    },
+    {
+      "_id": "6abf90582d37565f33c03c0b",
+      "gemstoneId": "6abf90572d37565f33c03c0a",
+      "ruleVersion": "prototype-v1",
+      "status": "COMPLETED",
+      "result": {
+        "status": "COMPLETED",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "COMPLETED",
+          "reason": "Prototype Overall 4C score calculated from Color, Clarity, Cut, and Carat Weight.",
+          "score": 96,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "COMPLETED",
+          "reason": "Prototype Color score calculated from hue, tone, saturation, distribution, and zoning.",
+          "score": 100
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 100
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 100,
+          "measurements": {
+            "lengthToWidthRatio": 1.36,
+            "depthPercentage": 69.09
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band. Dimensions are also used to calculate a size-consistency indicator but do not currently change the Carat score.",
+          "score": 80,
+          "caratWeight": 1.6,
+          "dimensions": {
+            "length": 7.5,
+            "width": 5.5,
+            "depth": 3.8
+          },
+          "sizeConsistency": 97.97
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 0.9
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Seller Provided",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "SUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 2
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6abf55bd2d37565f33c03bfc",
+        "variety": "Blue Sapphire",
+        "caratWeight": 1.6,
+        "referencePrice": 1500,
+        "currency": "USD",
+        "similarity": {
+          "color": 100,
+          "clarity": 100,
+          "cut": 100,
+          "cutDimensions": 100,
+          "carat": 100,
+          "overall": 100
+        }
+      },
+      "priceSuggestion": {
+        "status": "COMPLETED",
+        "reason": "Prototype B2B price suggestion calculated from the reference price, treatment adjustment, and origin adjustment.",
+        "currency": "USD",
+        "referencePrice": 1500,
+        "suggestedPrice": 1350,
+        "priceRange": {
+          "minimum": 1215,
+          "maximum": 1485
+        },
+        "adjustmentFactors": {
+          "treatment": 0.9,
+          "origin": 1
+        }
+      },
+      "createdAt": "2026-10-02T11:07:04.034Z",
+      "updatedAt": "2026-10-02T11:07:04.034Z",
+      "__v": 0
+    },
+    {
+      "_id": "6abf98c33097d06fa6b11334",
+      "userId": "6abf97e23097d06fa6b11331",
+      "gemstoneId": "6abf98c33097d06fa6b11333",
+      "ruleVersion": "prototype-v1",
+      "status": "COMPLETED",
+      "result": {
+        "status": "COMPLETED",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "COMPLETED",
+          "reason": "Prototype Overall 4C score calculated from Color, Clarity, Cut, and Carat Weight.",
+          "score": 96,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "COMPLETED",
+          "reason": "Prototype Color score calculated from hue, tone, saturation, distribution, and zoning.",
+          "score": 100
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 100
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 100,
+          "measurements": {
+            "lengthToWidthRatio": 1.36,
+            "depthPercentage": 69.09
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band. Dimensions are also used to calculate a size-consistency indicator but do not currently change the Carat score.",
+          "score": 80,
+          "caratWeight": 1.6,
+          "dimensions": {
+            "length": 7.5,
+            "width": 5.5,
+            "depth": 3.8
+          },
+          "sizeConsistency": 97.97
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 0.9
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Seller Provided",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "SUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 2
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6abf55bd2d37565f33c03bfc",
+        "variety": "Blue Sapphire",
+        "caratWeight": 1.6,
+        "referencePrice": 1500,
+        "currency": "USD",
+        "similarity": {
+          "color": 100,
+          "clarity": 100,
+          "cut": 100,
+          "cutDimensions": 100,
+          "carat": 100,
+          "overall": 100
+        }
+      },
+      "priceSuggestion": {
+        "status": "COMPLETED",
+        "reason": "Prototype B2B price suggestion calculated from the reference price, treatment adjustment, and origin adjustment.",
+        "currency": "USD",
+        "referencePrice": 1500,
+        "suggestedPrice": 1350,
+        "priceRange": {
+          "minimum": 1215,
+          "maximum": 1485
+        },
+        "adjustmentFactors": {
+          "treatment": 0.9,
+          "origin": 1
+        }
+      },
+      "createdAt": "2026-10-02T11:42:59.276Z",
+      "updatedAt": "2026-10-02T11:42:59.276Z",
+      "__v": 0
+    },
+    {
+      "_id": "6abf9eed3097d06fa6b11336",
+      "userId": "6abf97e23097d06fa6b11331",
+      "gemstoneId": "6abf9eed3097d06fa6b11335",
+      "ruleVersion": "prototype-v1",
+      "status": "COMPLETED",
+      "result": {
+        "status": "COMPLETED",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "COMPLETED",
+          "reason": "Prototype Overall 4C score calculated from Color, Clarity, Cut, and Carat Weight.",
+          "score": 96,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "COMPLETED",
+          "reason": "Prototype Color score calculated from hue, tone, saturation, distribution, and zoning.",
+          "score": 100
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 100
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 100,
+          "measurements": {
+            "lengthToWidthRatio": 1.36,
+            "depthPercentage": 69.09
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band. Dimensions are also used to calculate a size-consistency indicator but do not currently change the Carat score.",
+          "score": 80,
+          "caratWeight": 1.6,
+          "dimensions": {
+            "length": 7.5,
+            "width": 5.5,
+            "depth": 3.8
+          },
+          "sizeConsistency": 97.97
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 0.9
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Seller Provided",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "SUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 2
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6abf55bd2d37565f33c03bfc",
+        "variety": "Blue Sapphire",
+        "caratWeight": 1.6,
+        "referencePrice": 1500,
+        "currency": "USD",
+        "similarity": {
+          "color": 100,
+          "clarity": 100,
+          "cut": 100,
+          "cutDimensions": 100,
+          "carat": 100,
+          "overall": 100
+        }
+      },
+      "priceSuggestion": {
+        "status": "COMPLETED",
+        "reason": "Prototype B2B price suggestion calculated from the reference price, treatment adjustment, and origin adjustment.",
+        "currency": "USD",
+        "referencePrice": 1500,
+        "suggestedPrice": 1350,
+        "priceRange": {
+          "minimum": 1215,
+          "maximum": 1485
+        },
+        "adjustmentFactors": {
+          "treatment": 0.9,
+          "origin": 1
+        }
+      },
+      "createdAt": "2026-10-02T12:09:17.126Z",
+      "updatedAt": "2026-10-02T12:09:17.126Z",
+      "__v": 0
+    },
+    {
+      "_id": "6ac27fb03097d06fa6b1133b",
+      "userId": "6ac27fae3097d06fa6b1133a",
+      "gemstoneId": "6abf55bd2d37565f33c03bfc",
+      "ruleVersion": "prototype-v1",
+      "status": "UNAVAILABLE",
+      "result": {
+        "status": "UNAVAILABLE",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "UNAVAILABLE",
+          "reason": "Overall 4C score could not be calculated because one or more 4C scores are unavailable.",
+          "score": null,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "UNAVAILABLE",
+          "reason": "Color score could not be calculated because one or more Color values are unsupported.",
+          "score": null
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 92.75
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 93.25,
+          "measurements": {
+            "lengthToWidthRatio": 1.33,
+            "depthPercentage": 66.67
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band. Dimensions are also used to calculate a size-consistency indicator but do not currently change the Carat score.",
+          "score": 90,
+          "caratWeight": 2.5,
+          "dimensions": {
+            "length": 8,
+            "width": 6,
+            "depth": 4
+          },
+          "sizeConsistency": 76.8
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 1
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Seller Provided",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "SUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 2
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6abf55bd2d37565f33c03bfc",
+        "variety": "Blue Sapphire",
+        "caratWeight": 1.6,
+        "referencePrice": 1500,
+        "currency": "USD",
+        "similarity": {
+          "color": 40,
+          "clarity": 60,
+          "cut": 68.37,
+          "cutDimensions": 93.47,
+          "carat": 64,
+          "overall": 55.47
+        }
+      },
+      "priceSuggestion": {
+        "status": "UNAVAILABLE",
+        "reason": "Price suggestion is unavailable because required reference or adjustment data is missing.",
+        "currency": null,
+        "referencePrice": null,
+        "suggestedPrice": null,
+        "priceRange": {
+          "minimum": null,
+          "maximum": null
+        },
+        "adjustmentFactors": {
+          "treatment": 1,
+          "origin": 1
+        }
+      },
+      "createdAt": "2026-10-04T16:32:48.089Z",
+      "updatedAt": "2026-10-04T16:32:48.089Z",
+      "__v": 0
+    },
+    {
+      "_id": "6ac280b13097d06fa6b1133e",
+      "userId": "6ac280b03097d06fa6b1133d",
+      "gemstoneId": "6abf55bd2d37565f33c03bfc",
+      "ruleVersion": "prototype-v1",
+      "status": "UNAVAILABLE",
+      "result": {
+        "status": "UNAVAILABLE",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "UNAVAILABLE",
+          "reason": "Overall 4C score could not be calculated because one or more 4C scores are unavailable.",
+          "score": null,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "UNAVAILABLE",
+          "reason": "Color score could not be calculated because one or more Color values are unsupported.",
+          "score": null
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 92.75
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 93.25,
+          "measurements": {
+            "lengthToWidthRatio": 1.33,
+            "depthPercentage": 66.67
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band. Dimensions are also used to calculate a size-consistency indicator but do not currently change the Carat score.",
+          "score": 90,
+          "caratWeight": 2.5,
+          "dimensions": {
+            "length": 8,
+            "width": 6,
+            "depth": 4
+          },
+          "sizeConsistency": 76.8
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 1
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Seller Provided",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "SUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 2
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6abf55bd2d37565f33c03bfc",
+        "variety": "Blue Sapphire",
+        "caratWeight": 1.6,
+        "referencePrice": 1500,
+        "currency": "USD",
+        "similarity": {
+          "color": 40,
+          "clarity": 60,
+          "cut": 68.37,
+          "cutDimensions": 93.47,
+          "carat": 64,
+          "overall": 55.47
+        }
+      },
+      "priceSuggestion": {
+        "status": "UNAVAILABLE",
+        "reason": "Price suggestion is unavailable because required reference or adjustment data is missing.",
+        "currency": null,
+        "referencePrice": null,
+        "suggestedPrice": null,
+        "priceRange": {
+          "minimum": null,
+          "maximum": null
+        },
+        "adjustmentFactors": {
+          "treatment": 1,
+          "origin": 1
+        }
+      },
+      "createdAt": "2026-10-04T16:37:05.236Z",
+      "updatedAt": "2026-10-04T16:37:05.236Z",
+      "__v": 0
+    },
+    {
+      "_id": "6ac2833a3097d06fa6b11341",
+      "userId": "6ac283393097d06fa6b11340",
+      "gemstoneId": "6abf55bd2d37565f33c03bfc",
+      "ruleVersion": "prototype-v1",
+      "status": "UNAVAILABLE",
+      "result": {
+        "status": "UNAVAILABLE",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "UNAVAILABLE",
+          "reason": "Overall 4C score could not be calculated because one or more 4C scores are unavailable.",
+          "score": null,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "UNAVAILABLE",
+          "reason": "Color score could not be calculated because one or more Color values are unsupported.",
+          "score": null
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 92.75
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 93.25,
+          "measurements": {
+            "lengthToWidthRatio": 1.33,
+            "depthPercentage": 66.67
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band. Dimensions are also used to calculate a size-consistency indicator but do not currently change the Carat score.",
+          "score": 90,
+          "caratWeight": 2.5,
+          "dimensions": {
+            "length": 8,
+            "width": 6,
+            "depth": 4
+          },
+          "sizeConsistency": 76.8
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 1
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Seller Provided",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "SUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 2
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6abf55bd2d37565f33c03bfc",
+        "variety": "Blue Sapphire",
+        "caratWeight": 1.6,
+        "referencePrice": 1500,
+        "currency": "USD",
+        "similarity": {
+          "color": 40,
+          "clarity": 60,
+          "cut": 68.37,
+          "cutDimensions": 93.47,
+          "carat": 64,
+          "overall": 55.47
+        }
+      },
+      "priceSuggestion": {
+        "status": "UNAVAILABLE",
+        "reason": "Price suggestion is unavailable because required reference or adjustment data is missing.",
+        "currency": null,
+        "referencePrice": null,
+        "suggestedPrice": null,
+        "priceRange": {
+          "minimum": null,
+          "maximum": null
+        },
+        "adjustmentFactors": {
+          "treatment": 1,
+          "origin": 1
+        }
+      },
+      "createdAt": "2026-10-04T16:47:54.574Z",
+      "updatedAt": "2026-10-04T16:47:54.574Z",
+      "__v": 0
+    },
+    {
+      "_id": "6ac283e53097d06fa6b11344",
+      "userId": "6ac283e43097d06fa6b11343",
+      "gemstoneId": "6abf55bd2d37565f33c03bfc",
+      "ruleVersion": "prototype-v1",
+      "status": "UNAVAILABLE",
+      "result": {
+        "status": "UNAVAILABLE",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "UNAVAILABLE",
+          "reason": "Overall 4C score could not be calculated because one or more 4C scores are unavailable.",
+          "score": null,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "UNAVAILABLE",
+          "reason": "Color score could not be calculated because one or more Color values are unsupported.",
+          "score": null
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 92.75
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 93.25,
+          "measurements": {
+            "lengthToWidthRatio": 1.33,
+            "depthPercentage": 66.67
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band. Dimensions are also used to calculate a size-consistency indicator but do not currently change the Carat score.",
+          "score": 90,
+          "caratWeight": 2.5,
+          "dimensions": {
+            "length": 8,
+            "width": 6,
+            "depth": 4
+          },
+          "sizeConsistency": 76.8
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 1
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Seller Provided",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "SUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 2
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6abf55bd2d37565f33c03bfc",
+        "variety": "Blue Sapphire",
+        "caratWeight": 1.6,
+        "referencePrice": 1500,
+        "currency": "USD",
+        "similarity": {
+          "color": 40,
+          "clarity": 60,
+          "cut": 68.37,
+          "cutDimensions": 93.47,
+          "carat": 64,
+          "overall": 55.47
+        }
+      },
+      "priceSuggestion": {
+        "status": "UNAVAILABLE",
+        "reason": "Price suggestion is unavailable because required reference or adjustment data is missing.",
+        "currency": null,
+        "referencePrice": null,
+        "suggestedPrice": null,
+        "priceRange": {
+          "minimum": null,
+          "maximum": null
+        },
+        "adjustmentFactors": {
+          "treatment": 1,
+          "origin": 1
+        }
+      },
+      "createdAt": "2026-10-04T16:50:45.710Z",
+      "updatedAt": "2026-10-04T16:50:45.710Z",
+      "__v": 0
+    },
+    {
+      "_id": "6af5a7140caabdedbf62797d",
+      "userId": "6af469d8b7b06ef24d7c3fbb",
+      "gemstoneId": "6af5a7140caabdedbf62797c",
+      "ruleVersion": "prototype-v1",
+      "status": "UNAVAILABLE",
+      "result": {
+        "status": "UNAVAILABLE",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "UNAVAILABLE",
+          "reason": "Overall 4C score could not be calculated because one or more 4C scores are unavailable.",
+          "score": null,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "UNAVAILABLE",
+          "reason": "Color score could not be calculated because one or more Color values are unsupported.",
+          "score": null
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 92.75
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 98.75,
+          "measurements": {
+            "lengthToWidthRatio": 1.21,
+            "depthPercentage": 72.06
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band (90/100). The entered dimensions have an unusual relationship with the entered carat weight under the current prototype rule. Check that the measurements and carat weight were entered correctly. The dimension check applies only a small adjustment and does not verify gemstone density, authenticity, or carat weight.",
+          "score": 85,
+          "caratWeight": 2.45,
+          "dimensions": {
+            "length": 8.2,
+            "width": 6.8,
+            "depth": 4.9
+          },
+          "sizeConsistency": 111.52
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 1
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Laboratory Verified",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "SUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 3
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6af4c5f42a516155550338f4",
+        "variety": "Blue Sapphire",
+        "caratWeight": 2.61,
+        "referencePrice": 2322900,
+        "currency": "LKR",
+        "treatment": {
+          "status": "Untreated"
+        },
+        "origin": {
+          "value": "Sri Lanka",
+          "reliability": "High"
+        },
+        "similarity": {
+          "color": 60,
+          "clarity": 60,
+          "cut": 68.56,
+          "cutDimensions": 94.26,
+          "carat": 93.87,
+          "overall": 68.49
+        }
+      },
+      "priceSuggestion": {
+        "status": "UNAVAILABLE",
+        "reason": "Insufficient verified market data: At least 3 verified market references are required (found 0).",
+        "currency": null,
+        "referencePrice": null,
+        "suggestedPrice": null,
+        "priceRange": {
+          "minimum": null,
+          "maximum": null
+        },
+        "adjustmentFactors": {
+          "treatment": 1,
+          "origin": 1
+        }
+      },
+      "photoUrl": "https://images.unsplash.com/photo-1599707367072-cd6ada2bc375?w=800&auto=format&fit=crop&q=80",
+      "createdAt": "2026-11-12T11:46:28.257Z",
+      "updatedAt": "2026-11-12T11:46:28.257Z",
+      "__v": 0
+    },
+    {
+      "_id": "6af5a72b0caabdedbf62797f",
+      "userId": "6af469d8b7b06ef24d7c3fbb",
+      "gemstoneId": "6af5a72b0caabdedbf62797e",
+      "ruleVersion": "prototype-v1",
+      "status": "UNAVAILABLE",
+      "result": {
+        "status": "UNAVAILABLE",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "UNAVAILABLE",
+          "reason": "Overall 4C score could not be calculated because one or more 4C scores are unavailable.",
+          "score": null,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "UNAVAILABLE",
+          "reason": "Color score could not be calculated because one or more Color values are unsupported.",
+          "score": null
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 92.75
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 98.75,
+          "measurements": {
+            "lengthToWidthRatio": 1.21,
+            "depthPercentage": 72.06
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band (90/100). The entered dimensions have an unusual relationship with the entered carat weight under the current prototype rule. Check that the measurements and carat weight were entered correctly. The dimension check applies only a small adjustment and does not verify gemstone density, authenticity, or carat weight.",
+          "score": 85,
+          "caratWeight": 2.45,
+          "dimensions": {
+            "length": 8.2,
+            "width": 6.8,
+            "depth": 4.9
+          },
+          "sizeConsistency": 111.52
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 1
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Laboratory Verified",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "SUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 3
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6af4c5f42a516155550338f4",
+        "variety": "Blue Sapphire",
+        "caratWeight": 2.61,
+        "referencePrice": 2322900,
+        "currency": "LKR",
+        "treatment": {
+          "status": "Untreated"
+        },
+        "origin": {
+          "value": "Sri Lanka",
+          "reliability": "High"
+        },
+        "similarity": {
+          "color": 60,
+          "clarity": 60,
+          "cut": 68.56,
+          "cutDimensions": 94.26,
+          "carat": 93.87,
+          "overall": 68.49
+        }
+      },
+      "priceSuggestion": {
+        "status": "UNAVAILABLE",
+        "reason": "Insufficient verified market data: At least 3 verified market references are required (found 0).",
+        "currency": null,
+        "referencePrice": null,
+        "suggestedPrice": null,
+        "priceRange": {
+          "minimum": null,
+          "maximum": null
+        },
+        "adjustmentFactors": {
+          "treatment": 1,
+          "origin": 1
+        }
+      },
+      "photoUrl": "https://images.unsplash.com/photo-1599707367072-cd6ada2bc375?w=800&auto=format&fit=crop&q=80",
+      "createdAt": "2026-11-12T11:46:51.956Z",
+      "updatedAt": "2026-11-12T11:46:51.956Z",
+      "__v": 0
+    },
+    {
+      "_id": "6af5a75a0caabdedbf627981",
+      "userId": "6af469d8b7b06ef24d7c3fbb",
+      "gemstoneId": "6af5a75a0caabdedbf627980",
+      "ruleVersion": "prototype-v1",
+      "status": "COMPLETED",
+      "result": {
+        "status": "COMPLETED",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "COMPLETED",
+          "reason": "Prototype Overall 4C score calculated from Color, Clarity, Cut, and Carat Weight.",
+          "score": 94.94,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "COMPLETED",
+          "reason": "Prototype Color score calculated from hue, tone, saturation, distribution, and zoning.",
+          "score": 100
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 92.75
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 98.75,
+          "measurements": {
+            "lengthToWidthRatio": 1.21,
+            "depthPercentage": 72.06
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band (90/100). The entered dimensions have an unusual relationship with the entered carat weight under the current prototype rule. Check that the measurements and carat weight were entered correctly. The dimension check applies only a small adjustment and does not verify gemstone density, authenticity, or carat weight.",
+          "score": 85,
+          "caratWeight": 2.45,
+          "dimensions": {
+            "length": 8.2,
+            "width": 6.8,
+            "depth": 4.9
+          },
+          "sizeConsistency": 111.52
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 1
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Laboratory Verified",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "SUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 3
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6af4c5f42a516155550338f4",
+        "variety": "Blue Sapphire",
+        "caratWeight": 2.61,
+        "referencePrice": 2322900,
+        "currency": "LKR",
+        "treatment": {
+          "status": "Untreated"
+        },
+        "origin": {
+          "value": "Sri Lanka",
+          "reliability": "High"
+        },
+        "similarity": {
+          "color": 80,
+          "clarity": 60,
+          "cut": 68.56,
+          "cutDimensions": 94.26,
+          "carat": 93.87,
+          "overall": 75.49
+        }
+      },
+      "priceSuggestion": {
+        "status": "UNAVAILABLE",
+        "reason": "Insufficient verified market data: At least 3 verified market references are required (found 1).",
+        "currency": "LKR",
+        "referencePrice": 2322900,
+        "suggestedPrice": null,
+        "priceRange": {
+          "minimum": null,
+          "maximum": null
+        },
+        "adjustmentFactors": {
+          "treatment": 1,
+          "origin": 1
+        }
+      },
+      "photoUrl": "https://images.unsplash.com/photo-1599707367072-cd6ada2bc375?w=800&auto=format&fit=crop&q=80",
+      "createdAt": "2026-11-12T11:47:38.725Z",
+      "updatedAt": "2026-11-12T11:47:38.725Z",
+      "__v": 0
+    },
+    {
+      "_id": "6afd95973f71ad4227d00f6d",
+      "userId": "6ac54f413097d06fa6b11346",
+      "gemstoneId": "6afd95973f71ad4227d00f6c",
+      "ruleVersion": "prototype-v1",
+      "status": "COMPLETED",
+      "result": {
+        "status": "COMPLETED",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "COMPLETED",
+          "reason": "Prototype Overall 4C score calculated from Color, Clarity, Cut, and Carat Weight.",
+          "score": 94.94,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "COMPLETED",
+          "reason": "Prototype Color score calculated from hue, tone, saturation, distribution, and zoning.",
+          "score": 100
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 92.75
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 98.75,
+          "measurements": {
+            "lengthToWidthRatio": 1.21,
+            "depthPercentage": 72.06
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band (90/100). The entered dimensions have an unusual relationship with the entered carat weight under the current prototype rule. Check that the measurements and carat weight were entered correctly. The dimension check applies only a small adjustment and does not verify gemstone density, authenticity, or carat weight.",
+          "score": 85,
+          "caratWeight": 2.45,
+          "dimensions": {
+            "length": 8.2,
+            "width": 6.8,
+            "depth": 4.9
+          },
+          "sizeConsistency": 111.52
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 1
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Laboratory Verified",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "INSUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 3
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6af4c5f42a516155550338f4",
+        "variety": "Blue Sapphire",
+        "caratWeight": 2.61,
+        "referencePrice": 2322900,
+        "currency": "LKR",
+        "treatment": {
+          "status": "Untreated"
+        },
+        "origin": {
+          "value": "Sri Lanka",
+          "reliability": "High"
+        },
+        "dataClassification": "Demo",
+        "transactionContext": "Dealer Estimate",
+        "marketContext": "Wholesale",
+        "sourceEvidence": "Modeled after loose unheated Ceylon Blue Sapphire dealer lots in Colombo Fort.",
+        "observationDate": "2026-10-18",
+        "similarity": {
+          "color": 100,
+          "clarity": 60,
+          "cut": 83.56,
+          "cutDimensions": 94.26,
+          "carat": 93.87,
+          "overall": 85.49
+        }
+      },
+      "priceSuggestion": {
+        "status": "COMPLETED",
+        "available": true,
+        "suggestedPrice": 2322900,
+        "minimumPrice": 2090610,
+        "maximumPrice": 2555190,
+        "currency": "LKR",
+        "priceLkr": 2322900,
+        "priceUsd": 7635,
+        "priceRangeLkr": {
+          "minimum": 2090610,
+          "maximum": 2555190
+        },
+        "priceRangeUsd": {
+          "minimum": 6871,
+          "maximum": 8398
+        },
+        "exchangeRate": {
+          "rate": 304.25,
+          "source": "Central Bank of Sri Lanka (CBSL) - Indicative Spot Exchange Rate",
+          "asOfDate": "2026-11-12",
+          "isAvailable": true
+        },
+        "isRealMarketData": false,
+        "dataClassification": "Demo",
+        "marketLevel": "Illustrative price range (Pedagogical Demo Reference REF-1181)",
+        "reason": "Illustrative wholesale price range modeled from verified pedagogical demonstration references.",
+        "formattedPriceRange": "LKR 2,090,610 – 2,555,190 (Illustrative)"
+      },
+      "exchangeRate": null,
+      "photoUrl": "/images/gemstones/ceylon-blue-sapphire.jpg",
+      "assessmentSnapshot": {
+        "variety": "Blue Sapphire",
+        "caratWeight": 2.45,
+        "color": {
+          "hue": "Royal Blue",
+          "tone": "6",
+          "saturation": "Vivid",
+          "distribution": "Even",
+          "zoning": "None"
+        },
+        "clarity": {
+          "nakedEye": "Eye-clean",
+          "loupe10x": "Very Slight",
+          "inclusionType": "Silk needles",
+          "inclusionLocation": "Off-table",
+          "severity": "Minor"
+        },
+        "cut": {
+          "length": 8.2,
+          "width": 6.8,
+          "depth": 4.9,
+          "symmetry": "Very Good",
+          "polish": "Excellent",
+          "windowing": "None",
+          "extinction": "None",
+          "bulging": "None"
+        },
+        "treatment": {
+          "status": "Untreated",
+          "type": "None"
+        },
+        "origin": {
+          "value": "Sri Lanka",
+          "reliability": "Laboratory Verified"
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Laboratory Verified",
+          "origin": "Laboratory Verified"
+        }
+      },
+      "createdAt": "2026-11-18T14:11:05.976Z",
+      "updatedAt": "2026-11-18T12:09:59.368Z",
+      "__v": 0
+    },
+    {
+      "_id": "6afd95973f71ad4227d00f6f",
+      "userId": "6ac54f413097d06fa6b11346",
+      "gemstoneId": "6afd95973f71ad4227d00f6e",
+      "ruleVersion": "prototype-v1",
+      "status": "COMPLETED",
+      "result": {
+        "status": "COMPLETED",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "COMPLETED",
+          "reason": "Prototype Overall 4C score calculated from Color, Clarity, Cut, and Carat Weight.",
+          "score": 91.46,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "COMPLETED",
+          "reason": "Prototype Color score calculated from hue, tone, saturation, distribution, and zoning.",
+          "score": 97.5
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 92.75
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 95.75,
+          "measurements": {
+            "lengthToWidthRatio": 1.27,
+            "depthPercentage": 63.33
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band (80/100). The entered dimensions have an unusual relationship with the entered carat weight under the current prototype rule. Check that the measurements and carat weight were entered correctly. The dimension check applies only a small adjustment and does not verify gemstone density, authenticity, or carat weight.",
+          "score": 75,
+          "caratWeight": 1.85,
+          "dimensions": {
+            "length": 7.6,
+            "width": 6,
+            "depth": 3.8
+          },
+          "sizeConsistency": 93.66
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 1
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Laboratory Verified",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "INSUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 3
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6af5a5a52a516155550338ff",
+        "variety": "Padparadscha",
+        "caratWeight": 1.95,
+        "referencePrice": 2145000,
+        "currency": "LKR",
+        "treatment": {
+          "status": "Untreated"
+        },
+        "origin": {
+          "value": "Sri Lanka",
+          "reliability": "High"
+        },
+        "dataClassification": "Demo",
+        "transactionContext": "Dealer Estimate",
+        "marketContext": "Wholesale",
+        "sourceEvidence": "Modeled after untreated Ratnapura dealer parcel observations.",
+        "observationDate": "2026-10-28",
+        "similarity": {
+          "color": 100,
+          "clarity": 60,
+          "cut": 100,
+          "cutDimensions": 100,
+          "carat": 94.87,
+          "overall": 88.97
+        }
+      },
+      "priceSuggestion": {
+        "status": "COMPLETED",
+        "available": true,
+        "suggestedPrice": 1550000,
+        "minimumPrice": 1395000,
+        "maximumPrice": 1705000,
+        "currency": "LKR",
+        "priceLkr": 1550000,
+        "priceUsd": 5095,
+        "priceRangeLkr": {
+          "minimum": 1395000,
+          "maximum": 1705000
+        },
+        "priceRangeUsd": {
+          "minimum": 4585,
+          "maximum": 5604
+        },
+        "exchangeRate": {
+          "rate": 304.25,
+          "source": "Central Bank of Sri Lanka (CBSL) - Indicative Spot Exchange Rate",
+          "asOfDate": "2026-11-12",
+          "isAvailable": true
+        },
+        "isRealMarketData": false,
+        "dataClassification": "Demo",
+        "marketLevel": "Illustrative price range (Pedagogical Demo Reference REF-PAD-02)",
+        "reason": "Illustrative wholesale price range modeled from verified pedagogical demonstration references.",
+        "formattedPriceRange": "LKR 1,395,000 – 1,705,000 (Illustrative)"
+      },
+      "exchangeRate": null,
+      "photoUrl": "/images/gemstones/padparadscha-sapphire.jpg",
+      "assessmentSnapshot": {
+        "variety": "Padparadscha",
+        "caratWeight": 1.85,
+        "color": {
+          "hue": "Pinkish Orange",
+          "tone": "5",
+          "saturation": "Strong",
+          "distribution": "Even",
+          "zoning": "None"
+        },
+        "clarity": {
+          "nakedEye": "Eye-clean",
+          "loupe10x": "Very Slight",
+          "inclusionType": "Silk needles",
+          "inclusionLocation": "Off-table",
+          "severity": "Minor"
+        },
+        "cut": {
+          "length": 7.6,
+          "width": 6,
+          "depth": 3.8,
+          "symmetry": "Very Good",
+          "polish": "Good",
+          "windowing": "None",
+          "extinction": "None",
+          "bulging": "None"
+        },
+        "treatment": {
+          "status": "Untreated",
+          "type": "None"
+        },
+        "origin": {
+          "value": "Sri Lanka",
+          "reliability": "Laboratory Verified"
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Laboratory Verified",
+          "origin": "Laboratory Verified"
+        }
+      },
+      "createdAt": "2026-11-18T14:01:05.976Z",
+      "updatedAt": "2026-11-18T12:09:59.381Z",
+      "__v": 0
+    },
+    {
+      "_id": "6afd95973f71ad4227d00f71",
+      "userId": "6ac54f413097d06fa6b11346",
+      "gemstoneId": "6afd95973f71ad4227d00f70",
+      "ruleVersion": "prototype-v1",
+      "status": "COMPLETED",
+      "result": {
+        "status": "COMPLETED",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "COMPLETED",
+          "reason": "Prototype Overall 4C score calculated from Color, Clarity, Cut, and Carat Weight.",
+          "score": 85.58,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "COMPLETED",
+          "reason": "Prototype Color score calculated from hue, tone, saturation, distribution, and zoning.",
+          "score": 100
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 72.5
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 87.25,
+          "measurements": {
+            "lengthToWidthRatio": 1.27,
+            "depthPercentage": 65.45
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band (80/100). The entered dimensions have an unusual relationship with the entered carat weight under the current prototype rule. Check that the measurements and carat weight were entered correctly. The dimension check applies only a small adjustment and does not verify gemstone density, authenticity, or carat weight.",
+          "score": 75,
+          "caratWeight": 1.5,
+          "dimensions": {
+            "length": 7,
+            "width": 5.5,
+            "depth": 3.6
+          },
+          "sizeConsistency": 92.4
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 1
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 0.25
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Unverified",
+          "origin": "Unverified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": [
+            {
+              "category": "VERIFICATION",
+              "message": "Origin information has low or unknown reliability. Consider laboratory verification before relying on the stated origin for pricing or evaluation."
+            },
+            {
+              "category": "VERIFICATION",
+              "message": "Treatment information is unverified. Request treatment assessment from a qualified gemmological laboratory."
+            },
+            {
+              "category": "VERIFICATION",
+              "message": "Origin information is unverified. Consider laboratory verification where appropriate."
+            }
+          ]
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "INSUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 3
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6af5a5a52a51615555033900",
+        "variety": "Ruby",
+        "caratWeight": 1.85,
+        "referencePrice": 1980000,
+        "currency": "LKR",
+        "treatment": {
+          "status": "Untreated"
+        },
+        "origin": {
+          "value": "Myanmar",
+          "reliability": "High"
+        },
+        "dataClassification": "Demo",
+        "transactionContext": "Dealer Estimate",
+        "marketContext": "Wholesale",
+        "sourceEvidence": "Modeled after unheated Pigeon Blood ruby trade parcel clearing observations.",
+        "observationDate": "2026-10-30",
+        "similarity": {
+          "color": 100,
+          "clarity": 0,
+          "cut": 54.14,
+          "cutDimensions": 96.56,
+          "carat": 81.08,
+          "overall": 62.04
+        }
+      },
+      "priceSuggestion": {
+        "status": "UNAVAILABLE",
+        "reason": "Market price suggestion is unavailable: Open 4Cs data integrity rules strictly require verified real-market completed sales. Demonstration records and dealer estimates are excluded from commercial price suggestions.",
+        "currency": "LKR",
+        "referencePrice": null,
+        "suggestedPrice": null,
+        "priceRange": {
+          "minimum": null,
+          "maximum": null
+        },
+        "priceLkr": null,
+        "priceUsd": null,
+        "priceRangeLkr": null,
+        "priceRangeUsd": null,
+        "adjustmentFactors": {
+          "treatment": 1,
+          "origin": 1
+        },
+        "exchangeRate": null
+      },
+      "exchangeRate": null,
+      "photoUrl": "/images/gemstones/ceylon-ruby.jpg",
+      "assessmentSnapshot": {
+        "variety": "Ruby",
+        "caratWeight": 1.5,
+        "color": {
+          "hue": "Pigeon Blood Red",
+          "tone": "6",
+          "saturation": "Vivid",
+          "distribution": "Even",
+          "zoning": "None"
+        },
+        "clarity": {
+          "nakedEye": "Slightly Included",
+          "loupe10x": "Slight",
+          "inclusionType": "Feather",
+          "inclusionLocation": "Under table",
+          "severity": "Moderate"
+        },
+        "cut": {
+          "length": 7,
+          "width": 5.5,
+          "depth": 3.6,
+          "symmetry": "Good",
+          "polish": "Good",
+          "windowing": "Slight",
+          "extinction": "Slight",
+          "bulging": "None"
+        },
+        "treatment": {
+          "status": "Unknown",
+          "type": "Unknown"
+        },
+        "origin": {
+          "value": "Unknown",
+          "reliability": "Unknown"
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Unverified",
+          "origin": "Unverified"
+        }
+      },
+      "createdAt": "2026-11-18T13:51:05.976Z",
+      "updatedAt": "2026-11-18T12:09:59.391Z",
+      "__v": 0
+    },
+    {
+      "_id": "6afd95973f71ad4227d00f73",
+      "userId": "6ac54f413097d06fa6b11346",
+      "gemstoneId": "6afd95973f71ad4227d00f72",
+      "ruleVersion": "prototype-v1",
+      "status": "COMPLETED",
+      "result": {
+        "status": "COMPLETED",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "COMPLETED",
+          "reason": "Prototype Overall 4C score calculated from Color, Clarity, Cut, and Carat Weight.",
+          "score": 96.94,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "COMPLETED",
+          "reason": "Prototype Color score calculated from hue, tone, saturation, distribution, and zoning.",
+          "score": 100
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 92.75
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 98.75,
+          "measurements": {
+            "lengthToWidthRatio": 1.2,
+            "depthPercentage": 68.24
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band (100/100). The entered dimensions have an unusual relationship with the entered carat weight under the current prototype rule. Check that the measurements and carat weight were entered correctly. The dimension check applies only a small adjustment and does not verify gemstone density, authenticity, or carat weight.",
+          "score": 95,
+          "caratWeight": 4.25,
+          "dimensions": {
+            "length": 10.2,
+            "width": 8.5,
+            "depth": 5.8
+          },
+          "sizeConsistency": 118.32
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 1
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 1
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Laboratory Verified",
+          "origin": "Laboratory Verified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": []
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "INSUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 3
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6af4c5f42a516155550338f4",
+        "variety": "Blue Sapphire",
+        "caratWeight": 2.61,
+        "referencePrice": 2322900,
+        "currency": "LKR",
+        "treatment": {
+          "status": "Untreated"
+        },
+        "origin": {
+          "value": "Sri Lanka",
+          "reliability": "High"
+        },
+        "dataClassification": "Demo",
+        "transactionContext": "Dealer Estimate",
+        "marketContext": "Wholesale",
+        "sourceEvidence": "Modeled after loose unheated Ceylon Blue Sapphire dealer lots in Colombo Fort.",
+        "observationDate": "2026-10-18",
+        "similarity": {
+          "color": 100,
+          "clarity": 60,
+          "cut": 79.89,
+          "cutDimensions": 79.55,
+          "carat": 61.41,
+          "overall": 78.26
+        }
+      },
+      "priceSuggestion": {
+        "status": "UNAVAILABLE",
+        "reason": "Market price suggestion is unavailable: Open 4Cs data integrity rules strictly require verified real-market completed sales. Demonstration records and dealer estimates are excluded from commercial price suggestions.",
+        "currency": "LKR",
+        "referencePrice": null,
+        "suggestedPrice": null,
+        "priceRange": {
+          "minimum": null,
+          "maximum": null
+        },
+        "priceLkr": null,
+        "priceUsd": null,
+        "priceRangeLkr": null,
+        "priceRangeUsd": null,
+        "adjustmentFactors": {
+          "treatment": 1,
+          "origin": 1
+        },
+        "exchangeRate": null
+      },
+      "exchangeRate": null,
+      "photoUrl": "/images/gemstones/yellow-sapphire.jpg",
+      "assessmentSnapshot": {
+        "variety": "Blue Sapphire",
+        "caratWeight": 4.25,
+        "color": {
+          "hue": "Royal Blue",
+          "tone": "6",
+          "saturation": "Vivid",
+          "distribution": "Even",
+          "zoning": "None"
+        },
+        "clarity": {
+          "nakedEye": "Eye-clean",
+          "loupe10x": "Very Slight",
+          "inclusionType": "Silk needles",
+          "inclusionLocation": "Off-table",
+          "severity": "Minor"
+        },
+        "cut": {
+          "length": 10.2,
+          "width": 8.5,
+          "depth": 5.8,
+          "symmetry": "Very Good",
+          "polish": "Excellent",
+          "windowing": "None",
+          "extinction": "None",
+          "bulging": "None"
+        },
+        "treatment": {
+          "status": "Untreated",
+          "type": "None"
+        },
+        "origin": {
+          "value": "Sri Lanka",
+          "reliability": "Laboratory Verified"
+        },
+        "informationReliability": {
+          "measurements": "Measured",
+          "treatment": "Laboratory Verified",
+          "origin": "Laboratory Verified"
+        }
+      },
+      "createdAt": "2026-11-18T13:41:05.976Z",
+      "updatedAt": "2026-11-18T12:09:59.398Z",
+      "__v": 0
+    },
+    {
+      "_id": "6afdbf046e4cb09fc8f09cbb",
+      "userId": "6af5ed532a51615555033907",
+      "gemstoneId": "6afdbf046e4cb09fc8f09cba",
+      "ruleVersion": "prototype-v1",
+      "status": "COMPLETED",
+      "result": {
+        "status": "COMPLETED",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "COMPLETED",
+          "reason": "Prototype Overall 4C score calculated from Color, Clarity, Cut, and Carat Weight.",
+          "score": 93.84,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "COMPLETED",
+          "reason": "Prototype Color score calculated from hue, tone, saturation, distribution, and zoning.",
+          "score": 100
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 92.75
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 93.25,
+          "measurements": {
+            "lengthToWidthRatio": 1.21,
+            "depthPercentage": 72.06
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band (90/100). The entered dimensions have an unusual relationship with the entered carat weight under the current prototype rule. Check that the measurements and carat weight were entered correctly. The dimension check applies only a small adjustment and does not verify gemstone density, authenticity, or carat weight.",
+          "score": 85,
+          "caratWeight": 2.45,
+          "dimensions": {
+            "length": 8.2,
+            "width": 6.8,
+            "depth": 4.9
+          },
+          "sizeConsistency": 111.52
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 1
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 0.25
+        },
+        "informationReliability": {
+          "measurements": "Unverified",
+          "treatment": "Unverified",
+          "origin": "Unverified"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": [
+            {
+              "category": "VERIFICATION",
+              "message": "Origin information has low or unknown reliability. Consider laboratory verification before relying on the stated origin for pricing or evaluation."
+            },
+            {
+              "category": "VERIFICATION",
+              "message": "Gemstone measurements are unverified. Verify the measurements before relying on the evaluation."
+            },
+            {
+              "category": "VERIFICATION",
+              "message": "Treatment information is unverified. Request treatment assessment from a qualified gemmological laboratory."
+            },
+            {
+              "category": "VERIFICATION",
+              "message": "Origin information is unverified. Consider laboratory verification where appropriate."
+            }
+          ]
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "INSUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 3
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6af4c5f42a516155550338f4",
+        "variety": "Blue Sapphire",
+        "caratWeight": 2.61,
+        "referencePrice": 2322900,
+        "currency": "LKR",
+        "treatment": {
+          "status": "Untreated"
+        },
+        "origin": {
+          "value": "Sri Lanka",
+          "reliability": "High"
+        },
+        "dataClassification": "Demo",
+        "transactionContext": "Dealer Estimate",
+        "marketContext": "Wholesale",
+        "sourceEvidence": "Modeled after loose unheated Ceylon Blue Sapphire dealer lots in Colombo Fort.",
+        "observationDate": "2026-10-18",
+        "similarity": {
+          "color": 100,
+          "clarity": 60,
+          "cut": 68.56,
+          "cutDimensions": 94.26,
+          "carat": 93.87,
+          "overall": 82.49
+        }
+      },
+      "priceSuggestion": {
+        "status": "UNAVAILABLE",
+        "reason": "Market price suggestion is unavailable: Open 4Cs data integrity rules strictly require verified real-market completed sales. Demonstration records and dealer estimates are excluded from commercial price suggestions.",
+        "currency": "LKR",
+        "referencePrice": null,
+        "suggestedPrice": null,
+        "priceRange": {
+          "minimum": null,
+          "maximum": null
+        },
+        "priceLkr": null,
+        "priceUsd": null,
+        "priceRangeLkr": null,
+        "priceRangeUsd": null,
+        "adjustmentFactors": {
+          "treatment": 1,
+          "origin": 1
+        },
+        "exchangeRate": null
+      },
+      "exchangeRate": null,
+      "photoUrl": "",
+      "assessmentSnapshot": {
+        "ownerId": "6af5ed532a51615555033907",
+        "gemstone": {
+          "variety": "Blue Sapphire",
+          "caratWeight": 2.45,
+          "color": {
+            "hue": "Royal Blue",
+            "tone": "6",
+            "saturation": "Vivid",
+            "distribution": "Even",
+            "zoning": "None"
+          },
+          "clarity": {
+            "nakedEye": "Clean",
+            "loupe10x": "Very Slight",
+            "inclusionType": "Silk needles",
+            "inclusionLocation": "Near edge — low impact",
+            "severity": "Minor"
+          },
+          "cut": {
+            "length": 8.2,
+            "width": 6.8,
+            "depth": 4.9,
+            "symmetry": "Good",
+            "polish": "Good",
+            "windowing": "None",
+            "extinction": "None",
+            "bulging": "None"
+          },
+          "treatment": {
+            "status": "Unknown",
+            "type": "Unverified"
+          },
+          "origin": {
+            "value": "Unknown",
+            "reliability": "Unknown"
+          },
+          "informationReliability": {
+            "measurements": "Unverified",
+            "treatment": "Unverified",
+            "origin": "Unverified"
+          },
+          "photoUrl": "",
+          "naturalStatus": "Natural"
+        },
+        "ruleVersion": "prototype-v1",
+        "scores": {
+          "color": 100,
+          "clarity": 92.75,
+          "cut": 93.25,
+          "carat": 85,
+          "overall": 93.84
+        },
+        "overallScore": 93.84,
+        "priceSuggestion": {
+          "status": "UNAVAILABLE",
+          "reason": "Market price suggestion is unavailable: Open 4Cs data integrity rules strictly require verified real-market completed sales. Demonstration records and dealer estimates are excluded from commercial price suggestions.",
+          "currency": "LKR",
+          "referencePrice": null,
+          "suggestedPrice": null,
+          "priceRange": {
+            "minimum": null,
+            "maximum": null
+          },
+          "priceLkr": null,
+          "priceUsd": null,
+          "priceRangeLkr": null,
+          "priceRangeUsd": null,
+          "adjustmentFactors": {
+            "treatment": 1,
+            "origin": 1
+          },
+          "exchangeRate": null
+        },
+        "exchangeRate": null,
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": [
+            {
+              "category": "VERIFICATION",
+              "message": "Origin information has low or unknown reliability. Consider laboratory verification before relying on the stated origin for pricing or evaluation."
+            },
+            {
+              "category": "VERIFICATION",
+              "message": "Gemstone measurements are unverified. Verify the measurements before relying on the evaluation."
+            },
+            {
+              "category": "VERIFICATION",
+              "message": "Treatment information is unverified. Request treatment assessment from a qualified gemmological laboratory."
+            },
+            {
+              "category": "VERIFICATION",
+              "message": "Origin information is unverified. Consider laboratory verification where appropriate."
+            }
+          ]
+        },
+        "timestamp": "2026-11-18T15:06:44.730Z"
+      },
+      "createdAt": "2026-11-18T15:06:44.730Z",
+      "updatedAt": "2026-11-18T15:06:44.730Z",
+      "__v": 0
+    },
+    {
+      "_id": "6afdbf10ec74e17680236358",
+      "userId": "6af5ed532a51615555033907",
+      "gemstoneId": "6afdbf10ec74e17680236357",
+      "ruleVersion": "v4.2-deterministic",
+      "status": "COMPLETED",
+      "result": {
+        "overall4C": {
+          "score": 91.46,
+          "grade": "Excellent"
+        },
+        "color": {
+          "score": 97.5
+        },
+        "clarity": {
+          "score": 92.75
+        },
+        "cut": {
+          "score": 95.75
+        },
+        "carat": {
+          "score": 75
+        }
+      },
+      "referenceDataSufficiency": null,
+      "bestReferenceMatch": null,
+      "priceSuggestion": {
+        "status": "UNAVAILABLE",
+        "available": false,
+        "reason": "Insufficient market evidence"
+      },
+      "exchangeRate": null,
+      "photoUrl": "",
+      "assessmentSnapshot": {
+        "variety": "Padparadscha",
+        "caratWeight": 1.95,
+        "cut": {
+          "length": 7.6,
+          "width": 6,
+          "depth": 3.8
+        }
+      },
+      "createdAt": "2026-11-18T14:36:56.891Z",
+      "updatedAt": "2026-11-18T14:36:56.891Z",
+      "__v": 0
+    },
+    {
+      "_id": "6afdbf10ec74e1768023635a",
+      "userId": "6af5ed532a51615555033907",
+      "gemstoneId": "6afdbf10ec74e17680236359",
+      "ruleVersion": "v4.2-deterministic",
+      "status": "COMPLETED",
+      "result": {
+        "overall4C": {
+          "score": 91.84,
+          "grade": "Excellent"
+        },
+        "color": {
+          "score": 100
+        },
+        "clarity": {
+          "score": 92.75
+        },
+        "cut": {
+          "score": 93.25
+        },
+        "carat": {
+          "score": 75
+        }
+      },
+      "referenceDataSufficiency": null,
+      "bestReferenceMatch": null,
+      "priceSuggestion": {
+        "status": "UNAVAILABLE",
+        "available": false,
+        "reason": "Insufficient market evidence"
+      },
+      "exchangeRate": null,
+      "photoUrl": "",
+      "assessmentSnapshot": {
+        "variety": "Ruby",
+        "caratWeight": 1.5,
+        "cut": {
+          "length": 7.2,
+          "width": 5.8,
+          "depth": 4.1
+        }
+      },
+      "createdAt": "2026-11-18T14:06:56.897Z",
+      "updatedAt": "2026-11-18T14:06:56.897Z",
+      "__v": 0
+    },
+    {
+      "_id": "6b03166901f020560f505e2f",
+      "userId": "6ac54f413097d06fa6b11346",
+      "gemstoneId": "6b03166901f020560f505e2e",
+      "ruleVersion": "prototype-v1",
+      "status": "COMPLETED",
+      "result": {
+        "status": "COMPLETED",
+        "ruleVersion": "prototype-v1",
+        "overall4C": {
+          "status": "COMPLETED",
+          "reason": "Prototype Overall 4C score calculated from Color, Clarity, Cut, and Carat Weight.",
+          "score": 77.99,
+          "weights": {
+            "color": 0.35,
+            "clarity": 0.25,
+            "cut": 0.2,
+            "carat": 0.2
+          }
+        },
+        "color": {
+          "status": "COMPLETED",
+          "reason": "Prototype Color score calculated from hue, tone, saturation, distribution, and zoning.",
+          "score": 76.5
+        },
+        "clarity": {
+          "status": "COMPLETED",
+          "reason": "Prototype Clarity score calculated from naked-eye observation, 10× loupe observation, and inclusion severity. Inclusion type and location are not yet applied.",
+          "score": 91.25
+        },
+        "cut": {
+          "status": "COMPLETED",
+          "reason": "Prototype Cut score calculated from symmetry, polish, windowing, extinction, and bulging. Proportion measurements are reported separately and are not yet included in scoring.",
+          "score": 77,
+          "measurements": {
+            "lengthToWidthRatio": 1.52,
+            "depthPercentage": 71.77
+          }
+        },
+        "carat": {
+          "status": "COMPLETED",
+          "reason": "Prototype Carat score calculated from the Carat Weight band (70/100). The entered dimensions have an unusual relationship with the entered carat weight under the current prototype rule. Check that the measurements and carat weight were entered correctly. The dimension check applies only a small adjustment and does not verify gemstone density, authenticity, or carat weight.",
+          "score": 65,
+          "caratWeight": 0.61,
+          "dimensions": {
+            "length": 6.37,
+            "width": 4.18,
+            "depth": 3
+          },
+          "sizeConsistency": 130.95
+        },
+        "treatment": {
+          "status": "COMPLETED",
+          "reason": "Prototype Treatment price adjustment factor determined from the treatment status.",
+          "adjustmentFactor": 1
+        },
+        "origin": {
+          "status": "COMPLETED",
+          "reason": "Prototype Origin adjustment and reliability factors determined from the supplied origin information.",
+          "adjustmentFactor": 1,
+          "reliabilityFactor": 0.25
+        },
+        "informationReliability": {
+          "measurements": "Unverified",
+          "treatment": "User Observed",
+          "origin": "User Observed"
+        },
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": [
+            {
+              "category": "COLOR",
+              "message": "Uneven color distribution was observed. Review the gemstone's color distribution when assessing overall quality."
+            },
+            {
+              "category": "COLOR",
+              "message": "Noticeable color zoning was observed. Consider further examination of the zoning and its effect on the gemstone's appearance."
+            },
+            {
+              "category": "CUT",
+              "message": "Noticeable windowing was observed. Consider professional assessment of whether recutting could improve the gemstone's appearance."
+            },
+            {
+              "category": "CUT",
+              "message": "Noticeable extinction was observed. Review its effect on brilliance and overall appearance."
+            },
+            {
+              "category": "CUT",
+              "message": "Noticeable bulging was reported. Consider professional assessment of the gemstone's proportions and possible recutting considerations."
+            },
+            {
+              "category": "VERIFICATION",
+              "message": "Origin information has low or unknown reliability. Consider laboratory verification before relying on the stated origin for pricing or evaluation."
+            },
+            {
+              "category": "VERIFICATION",
+              "message": "Gemstone measurements are unverified. Verify the measurements before relying on the evaluation."
+            }
+          ]
+        }
+      },
+      "referenceDataSufficiency": {
+        "status": "INSUFFICIENT",
+        "availableReferences": 3,
+        "requiredReferences": 3
+      },
+      "bestReferenceMatch": {
+        "referenceGemstoneId": "6af4c5f42a516155550338f4",
+        "variety": "Blue Sapphire",
+        "caratWeight": 2.61,
+        "referencePrice": 2322900,
+        "currency": "LKR",
+        "treatment": {
+          "status": "Untreated"
+        },
+        "origin": {
+          "value": "Sri Lanka",
+          "reliability": "High"
+        },
+        "dataClassification": "Demo",
+        "transactionContext": "Dealer Estimate",
+        "marketContext": "Wholesale",
+        "sourceEvidence": "Modeled after loose unheated Ceylon Blue Sapphire dealer lots in Colombo Fort.",
+        "observationDate": "2026-10-18",
+        "similarity": {
+          "color": 20,
+          "clarity": 20,
+          "cut": 32.11,
+          "cutDimensions": 68.43,
+          "carat": 23.37,
+          "overall": 23.1
+        }
+      },
+      "priceSuggestion": {
+        "status": "UNAVAILABLE",
+        "reason": "Market price suggestion is unavailable: Open 4Cs data integrity rules strictly require verified real-market completed sales. Demonstration records and dealer estimates are excluded from commercial price suggestions.",
+        "currency": "LKR",
+        "referencePrice": null,
+        "suggestedPrice": null,
+        "priceRange": {
+          "minimum": null,
+          "maximum": null
+        },
+        "priceLkr": null,
+        "priceUsd": null,
+        "priceRangeLkr": null,
+        "priceRangeUsd": null,
+        "adjustmentFactors": {
+          "treatment": 1,
+          "origin": 1
+        },
+        "exchangeRate": null
+      },
+      "exchangeRate": null,
+      "photoUrl": "",
+      "assessmentSnapshot": {
+        "ownerId": "6ac54f413097d06fa6b11346",
+        "gemstone": {
+          "variety": "Blue Sapphire",
+          "caratWeight": 0.61,
+          "color": {
+            "hue": "Cornflower Blue",
+            "tone": "9",
+            "saturation": "Vivid",
+            "distribution": "Uneven",
+            "zoning": "Severe"
+          },
+          "clarity": {
+            "nakedEye": "Clean",
+            "loupe10x": "Slight",
+            "inclusionType": "Color zoning planes",
+            "inclusionLocation": "",
+            "severity": "None"
+          },
+          "cut": {
+            "length": 6.37,
+            "width": 4.18,
+            "depth": 3,
+            "symmetry": "Excellent",
+            "polish": "Very Good",
+            "windowing": "Moderate",
+            "extinction": "Moderate",
+            "bulging": "Moderate"
+          },
+          "treatment": {
+            "status": "Untreated",
+            "type": "Unverified"
+          },
+          "origin": {
+            "value": "Sri Lanka",
+            "reliability": "Unknown"
+          },
+          "informationReliability": {
+            "measurements": "Unverified",
+            "treatment": "User Observed",
+            "origin": "User Observed"
+          },
+          "photoUrl": "",
+          "naturalStatus": "Natural"
+        },
+        "ruleVersion": "prototype-v1",
+        "scores": {
+          "color": 76.5,
+          "clarity": 91.25,
+          "cut": 77,
+          "carat": 65,
+          "overall": 77.99
+        },
+        "overallScore": 77.99,
+        "priceSuggestion": {
+          "status": "UNAVAILABLE",
+          "reason": "Market price suggestion is unavailable: Open 4Cs data integrity rules strictly require verified real-market completed sales. Demonstration records and dealer estimates are excluded from commercial price suggestions.",
+          "currency": "LKR",
+          "referencePrice": null,
+          "suggestedPrice": null,
+          "priceRange": {
+            "minimum": null,
+            "maximum": null
+          },
+          "priceLkr": null,
+          "priceUsd": null,
+          "priceRangeLkr": null,
+          "priceRangeUsd": null,
+          "adjustmentFactors": {
+            "treatment": 1,
+            "origin": 1
+          },
+          "exchangeRate": null
+        },
+        "exchangeRate": null,
+        "recommendations": {
+          "status": "COMPLETED",
+          "recommendations": [
+            {
+              "category": "COLOR",
+              "message": "Uneven color distribution was observed. Review the gemstone's color distribution when assessing overall quality."
+            },
+            {
+              "category": "COLOR",
+              "message": "Noticeable color zoning was observed. Consider further examination of the zoning and its effect on the gemstone's appearance."
+            },
+            {
+              "category": "CUT",
+              "message": "Noticeable windowing was observed. Consider professional assessment of whether recutting could improve the gemstone's appearance."
+            },
+            {
+              "category": "CUT",
+              "message": "Noticeable extinction was observed. Review its effect on brilliance and overall appearance."
+            },
+            {
+              "category": "CUT",
+              "message": "Noticeable bulging was reported. Consider professional assessment of the gemstone's proportions and possible recutting considerations."
+            },
+            {
+              "category": "VERIFICATION",
+              "message": "Origin information has low or unknown reliability. Consider laboratory verification before relying on the stated origin for pricing or evaluation."
+            },
+            {
+              "category": "VERIFICATION",
+              "message": "Gemstone measurements are unverified. Verify the measurements before relying on the evaluation."
+            }
+          ]
+        },
+        "timestamp": "2026-11-22T16:20:57.952Z"
+      },
+      "createdAt": "2026-11-22T16:20:57.955Z",
+      "updatedAt": "2026-11-22T16:20:57.955Z",
+      "__v": 0
+    }
+  ],
+  "gemstonevarieties": [
+    {
+      "_id": "6ac2a440e2b88dbfc3fe4c47",
+      "name": "Blue Sapphire",
+      "description": "Premier Ceylon benchmark variety with comprehensive color, clarity, and cut rule calibration.",
+      "isActive": true,
+      "engineSupported": true,
+      "createdAt": "2026-10-04T19:08:48.494Z",
+      "updatedAt": "2026-11-12T12:24:24.726Z",
+      "referenceCount": 214,
+      "ruleVersion": "v4.2",
+      "species": "Corundum",
+      "supportedShapes": [
+        "Oval",
+        "Round"
+      ]
+    },
+    {
+      "_id": "6ac2a440e2b88dbfc3fe4c48",
+      "name": "Padparadscha",
+      "description": "Delicate pinkish-orange corundum with strict spectral saturation bounds.",
+      "isActive": true,
+      "engineSupported": true,
+      "createdAt": "2026-10-04T19:08:48.519Z",
+      "updatedAt": "2026-11-12T12:24:24.735Z",
+      "referenceCount": 88,
+      "ruleVersion": "v4.2",
+      "species": "Corundum",
+      "supportedShapes": [
+        "Oval"
+      ]
+    },
+    {
+      "_id": "6ac2a440e2b88dbfc3fe4c49",
+      "name": "Ruby",
+      "description": "Chromium red corundum calibrated for standard market valuation.",
+      "isActive": true,
+      "engineSupported": true,
+      "createdAt": "2026-10-04T19:08:48.525Z",
+      "updatedAt": "2026-11-12T12:24:24.740Z",
+      "referenceCount": 45,
+      "ruleVersion": "v4.2",
+      "species": "Corundum",
+      "supportedShapes": [
+        "Oval",
+        "Cushion"
+      ]
+    },
+    {
+      "_id": "6af456702a516155550338e6",
+      "name": "Yellow Sapphire",
+      "__v": 0,
+      "createdAt": "2026-11-11T11:50:08.065Z",
+      "description": "Canary and golden yellow corundum with iron trace element modifiers.",
+      "engineSupported": false,
+      "isActive": true,
+      "updatedAt": "2026-11-12T12:24:24.745Z",
+      "referenceCount": 98,
+      "ruleVersion": "v4.2",
+      "species": "Corundum",
+      "supportedShapes": [
+        "Oval"
+      ]
+    },
+    {
+      "_id": "6af456702a516155550338e7",
+      "name": "Pink Sapphire",
+      "__v": 0,
+      "createdAt": "2026-11-11T11:50:08.067Z",
+      "description": "Vibrant hot-to-pastel pink corundum calibrated under Rule Version 4.1 standards.",
+      "engineSupported": false,
+      "isActive": true,
+      "updatedAt": "2026-11-12T12:24:24.743Z",
+      "referenceCount": 132,
+      "ruleVersion": "v4.1",
+      "species": "Corundum",
+      "supportedShapes": [
+        "Oval",
+        "Cushion"
+      ]
+    },
+    {
+      "_id": "6af456702a516155550338e8",
+      "name": "White Sapphire",
+      "__v": 0,
+      "createdAt": "2026-11-11T11:50:08.070Z",
+      "description": "Colorless natural sapphire frequently cut into brilliant rounds for diamond alternatives.",
+      "engineSupported": false,
+      "isActive": true,
+      "updatedAt": "2026-11-12T12:24:24.747Z",
+      "referenceCount": 64,
+      "ruleVersion": "v4.0",
+      "species": "Corundum",
+      "supportedShapes": [
+        "Round"
+      ]
+    },
+    {
+      "_id": "6af456702a516155550338e9",
+      "name": "Star Sapphire",
+      "__v": 0,
+      "createdAt": "2026-11-11T11:50:08.075Z",
+      "description": "Phenomenal corundum exhibiting 6-ray asterism; pending CAGS board rule sign-off.",
+      "engineSupported": false,
+      "isActive": false,
+      "updatedAt": "2026-11-12T12:24:24.748Z",
+      "referenceCount": 21,
+      "ruleVersion": "—",
+      "species": "Corundum",
+      "supportedShapes": [
+        "Cabochon"
+      ]
+    }
+  ]
+}

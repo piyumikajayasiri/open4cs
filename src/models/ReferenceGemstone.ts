@@ -9,14 +9,50 @@ const ReferenceGemstoneSchema = new Schema(
       trim: true,
     },
 
+    lotId: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    species: {
+      type: String,
+      default: "Corundum",
+      trim: true,
+    },
+
     variety: {
       type: String,
       required: true,
+      trim: true,
+    },
+
+    naturalStatus: {
+      type: String,
+      enum: ["Natural", "Synthetic", "Lab-Grown"],
+      default: "Natural",
     },
 
     caratWeight: {
       type: Number,
       required: true,
+    },
+
+    shape: {
+      type: String,
+      default: "Oval",
+      trim: true,
+    },
+
+    dimensions: {
+      length: { type: Number, default: null },
+      width: { type: Number, default: null },
+      depth: { type: Number, default: null },
+    },
+
+    sourceColor: {
+      type: String,
+      default: "",
     },
 
     color: {
@@ -40,6 +76,11 @@ const ReferenceGemstoneSchema = new Schema(
         type: String,
         required: true,
       },
+    },
+
+    claritySystem: {
+      type: String,
+      default: "CAGS / GIA Corundum Scale",
     },
 
     clarity: {
@@ -107,6 +148,21 @@ const ReferenceGemstoneSchema = new Schema(
       },
     },
 
+    treatmentEvidence: {
+      type: String,
+      default: "",
+    },
+
+    claimedOrigin: {
+      type: String,
+      default: "",
+    },
+
+    labOrigin: {
+      type: String,
+      default: "",
+    },
+
     origin: {
       value: {
         type: String,
@@ -118,9 +174,50 @@ const ReferenceGemstoneSchema = new Schema(
       },
     },
 
+    originEvidence: {
+      type: String,
+      default: "",
+    },
+
+    labName: {
+      type: String,
+      default: "",
+    },
+
+    labReportNumber: {
+      type: String,
+      default: "",
+    },
+
+    labReportUrl: {
+      type: String,
+      default: "",
+    },
+
+    labCertificate: {
+      type: String,
+      default: "",
+    },
+
     referencePrice: {
       type: Number,
       required: true,
+    },
+
+    priceAmount: {
+      type: Number,
+      default: null,
+    },
+
+    pricePerCarat: {
+      type: Number,
+      default: null,
+    },
+
+    priceUnit: {
+      type: String,
+      enum: ["total", "per_carat"],
+      default: "total",
     },
 
     currency: {
@@ -129,9 +226,49 @@ const ReferenceGemstoneSchema = new Schema(
       default: "LKR",
     },
 
+    feesDisclosed: {
+      type: String,
+      default: "",
+    },
+
+    taxesDisclosed: {
+      type: String,
+      default: "",
+    },
+
+    netPrice: {
+      type: Number,
+      default: null,
+    },
+
     source: {
       type: String,
       default: "Desk",
+    },
+
+    sourceType: {
+      type: String,
+      default: "Desk",
+    },
+
+    sourceUrl: {
+      type: String,
+      default: "",
+    },
+
+    publisher: {
+      type: String,
+      default: "",
+    },
+
+    evidenceNotes: {
+      type: String,
+      default: "",
+    },
+
+    evidenceAttachments: {
+      type: [String],
+      default: [],
     },
 
     status: {
@@ -145,18 +282,13 @@ const ReferenceGemstoneSchema = new Schema(
       default: true,
     },
 
-    sourceType: {
-      type: String,
-      default: "Desk",
-    },
-
     verificationStatus: {
       type: String,
-      enum: ["Verified", "Pending", "Rejected"],
+      enum: ["Draft", "Pending", "Verified", "Rejected", "Archived"],
       default: "Pending",
     },
 
-    labCertificate: {
+    rejectionReason: {
       type: String,
       default: "",
     },
@@ -167,6 +299,16 @@ const ReferenceGemstoneSchema = new Schema(
     },
 
     verifiedAt: {
+      type: String,
+      default: "",
+    },
+
+    reviewer: {
+      type: String,
+      default: "",
+    },
+
+    reviewDate: {
       type: String,
       default: "",
     },
@@ -188,9 +330,38 @@ const ReferenceGemstoneSchema = new Schema(
       default: "",
     },
 
+    saleDate: {
+      type: String,
+      default: "",
+    },
+
+    listingDate: {
+      type: String,
+      default: "",
+    },
+
+    retrievalDate: {
+      type: String,
+      default: "",
+    },
+
+    marketLocation: {
+      type: String,
+      default: "",
+    },
+
     transactionContext: {
       type: String,
-      enum: ["Completed Sale", "Asking Price", "Dealer Estimate"],
+      enum: [
+        "Completed Sale",
+        "Auction Hammer",
+        "Auction Realised (With Premium)",
+        "Retail Asking Price",
+        "Dealer Quotation",
+        "Guide Estimate",
+        "Demonstration Data",
+        "Dealer Estimate",
+      ],
       default: "Dealer Estimate",
     },
 
@@ -215,24 +386,40 @@ const ReferenceGemstoneSchema = new Schema(
       default: null,
     },
 
-    treatmentEvidence: {
+    photoUrl: {
       type: String,
       default: "",
     },
 
-    originEvidence: {
+    photoAttribution: {
       type: String,
       default: "",
     },
 
-    reviewer: {
+    photoReusePermitted: {
+      type: Boolean,
+      default: true,
+    },
+
+    limitations: {
       type: String,
       default: "",
     },
 
-    reviewDate: {
-      type: String,
-      default: "",
+    missingFields: {
+      type: [String],
+      default: [],
+    },
+
+    version: {
+      type: Number,
+      default: 1,
+    },
+
+    previousVersionId: {
+      type: Schema.Types.ObjectId,
+      ref: "ReferenceGemstone",
+      default: null,
     },
   },
   {
@@ -240,11 +427,11 @@ const ReferenceGemstoneSchema = new Schema(
   }
 );
 
+ReferenceGemstoneSchema.index({ variety: 1, dataClassification: 1, verificationStatus: 1 });
+ReferenceGemstoneSchema.index({ referenceId: 1 }, { unique: true, sparse: true });
+
 const ReferenceGemstone =
   mongoose.models.ReferenceGemstone ||
-  mongoose.model(
-    "ReferenceGemstone",
-    ReferenceGemstoneSchema
-  );
+  mongoose.model("ReferenceGemstone", ReferenceGemstoneSchema);
 
 export default ReferenceGemstone;

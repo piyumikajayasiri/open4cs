@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PortalSidebar from "@/components/layout/PortalSidebar";
 import EvaluationCompleteDashboard from "@/components/gemstone/EvaluationCompleteDashboard";
+import { ContributingComparableProp } from "@/components/gemstone/SuggestedB2BPriceView";
 
 type EvaluationRecord = {
   _id: string;
@@ -259,6 +260,14 @@ export default function EvaluationResultPage({
           priceRangeMax={maxPriceFormatted}
           pricePerCarat={perCaratFormatted}
           priceStatus={pricing?.status || "UNAVAILABLE"}
+          evidenceBasis={(pricing as unknown as { evidenceBasis?: string })?.evidenceBasis || (isPricingAvailable ? "Wholesale Completed Sales" : "None")}
+          dispersion={(pricing as unknown as { dispersion?: number })?.dispersion || 8.5}
+          contributingComparables={(pricing as unknown as { contributingComparables?: ContributingComparableProp[] })?.contributingComparables || []}
+          retailIndicativeRange={(pricing as unknown as { retailIndicativeRangeLkr?: { benchmark: number; minimum: number; maximum: number } })?.retailIndicativeRangeLkr ? {
+            benchmark: `${((pricing as unknown as { retailIndicativeRangeLkr: { benchmark: number } }).retailIndicativeRangeLkr.benchmark / 1000000).toFixed(2)}M`,
+            minimum: `${((pricing as unknown as { retailIndicativeRangeLkr: { minimum: number } }).retailIndicativeRangeLkr.minimum / 1000000).toFixed(2)}M`,
+            maximum: `${((pricing as unknown as { retailIndicativeRangeLkr: { maximum: number } }).retailIndicativeRangeLkr.maximum / 1000000).toFixed(2)}M`,
+          } : undefined}
           initialTab={
             id === "statement" || id === "report"
               ? "report"
