@@ -42,6 +42,7 @@ export type ContributingComparable = {
   treatmentMultiplier: number;
   originValue: string;
   originMultiplier: number;
+  sizeMultiplier?: number;
   adjustedPricePerCarat: number;
   similarityScore: number;
   effectiveWeight: number;
@@ -134,6 +135,28 @@ function getOriginMultiplier(candidateOrigin?: string, referenceOrigin?: string)
 }
 
 /**
+ * Resolves weight-band tier size multiplier for corundum.
+ * Gemological trade benchmarks:
+ *   Tier 1 (< 2.0 ct): Base 1.00
+ *   Tier 2 (2.0 - 2.99 ct): 1.15
+ *   Tier 3 (3.0 - 4.99 ct): 1.35
+ *   Tier 4 (>= 5.0 ct): 1.65
+ */
+export function getSizeTierFactor(carat: number): number {
+  if (carat < 2.0) return 1.0;
+  if (carat < 3.0) return 1.15;
+  if (carat < 5.0) return 1.35;
+  return 1.65;
+}
+
+export function getSizeMultiplier(candidateCarat: number, referenceCarat: number): number {
+  if (candidateCarat <= 0 || referenceCarat <= 0) return 1.0;
+  const candTier = getSizeTierFactor(candidateCarat);
+  const refTier = getSizeTierFactor(referenceCarat);
+  return Number((candTier / refTier).toFixed(4));
+}
+
+/**
  * Robust explainable comparable price aggregation engine.
  * Computes individual per-comparable adjustments, price-per-carat normalization,
  * multi-factor weights, and actual variance-derived price ranges.
@@ -174,8 +197,12 @@ export function calculateComparableReferencePrice(
       ? getOriginMultiplier(candidateContext.origin?.value, refOriginValue)
       : 1.0;
 
+    const sizeMultiplier = candidateCarat > 0 && ref.caratWeight > 0
+      ? getSizeMultiplier(candidateCarat, ref.caratWeight)
+      : 1.0;
+
     const adjustedPricePerCarat = Math.round(
-      rawPricePerCarat * treatmentMultiplier * originMultiplier
+      rawPricePerCarat * treatmentMultiplier * originMultiplier * sizeMultiplier
     );
 
     const similarity = (ref.similarity.overall ?? 70) / 100;
@@ -195,6 +222,7 @@ export function calculateComparableReferencePrice(
       treatmentMultiplier,
       originValue: refOriginValue,
       originMultiplier,
+      sizeMultiplier,
       adjustedPricePerCarat,
       similarityScore: ref.similarity.overall ?? 0,
       effectiveWeight,
@@ -205,6 +233,23 @@ export function calculateComparableReferencePrice(
       source: ref.source || "Market Registry",
     };
   });
+
+  // Outlier moderation when pool >= 5
+  if (preparedComparables.length >= 5) {
+    const sortedRates = [...preparedComparables]
+      .map((c) => c.adjustedPricePerCarat)
+      .sort((a, b) => a - b);
+    const medianRate = sortedRates[Math.floor(sortedRates.length / 2)];
+
+    for (const comp of preparedComparables) {
+      if (medianRate > 0) {
+        const dev = Math.abs(comp.adjustedPricePerCarat - medianRate) / medianRate;
+        if (dev > 0.65) {
+          comp.effectiveWeight = Number((comp.effectiveWeight * 0.4).toFixed(4));
+        }
+      }
+    }
+  }
 
   const totalWeight = preparedComparables.reduce(
     (acc, comp) => acc + comp.effectiveWeight,

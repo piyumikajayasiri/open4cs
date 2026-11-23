@@ -6,7 +6,11 @@
     "variety": "Blue Sapphire",
     "naturalStatus": "Natural",
     "caratWeight": 4.93,
-    "dimensions": { "length": 10.45, "width": 8.82, "depth": 5.91 },
+    "dimensions": {
+      "length": 10.45,
+      "width": 8.82,
+      "depth": 5.91
+    },
     "shape": "Cushion",
     "cut": {
       "length": 10.45,
@@ -34,11 +38,16 @@
       "severity": "Minor"
     },
     "claritySystem": "CAGS / GIA Corundum Scale",
-    "treatment": { "status": "Untreated" },
+    "treatment": {
+      "status": "Untreated"
+    },
     "treatmentEvidence": "Unaltered intersecting rutile silk without thermal discoid fractures. SSEF report confirms no heat.",
     "claimedOrigin": "Sri Lanka",
     "labOrigin": "Sri Lanka (Ceylon)",
-    "origin": { "value": "Sri Lanka", "reliability": "High" },
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
     "originEvidence": "Trace element analysis (LA-ICP-MS) and inclusion assemblage consistent with Sri Lankan metamorphic deposits.",
     "labName": "SSEF Swiss Gemmological Institute",
     "labReportNumber": "SSEF-118492",
@@ -80,7 +89,11 @@
     "variety": "Blue Sapphire",
     "naturalStatus": "Natural",
     "caratWeight": 6.97,
-    "dimensions": { "length": 11.82, "width": 9.45, "depth": 6.32 },
+    "dimensions": {
+      "length": 11.82,
+      "width": 9.45,
+      "depth": 6.32
+    },
     "shape": "Octagonal",
     "cut": {
       "length": 11.82,
@@ -108,11 +121,16 @@
       "severity": "Minor"
     },
     "claritySystem": "GIA Colored Stone Scale",
-    "treatment": { "status": "Untreated" },
+    "treatment": {
+      "status": "Untreated"
+    },
     "treatmentEvidence": "AGL and GIA reports state no gemological evidence of heat enhancement.",
     "claimedOrigin": "Sri Lanka",
     "labOrigin": "Sri Lanka (Ceylon)",
-    "origin": { "value": "Sri Lanka", "reliability": "High" },
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
     "originEvidence": "GIA report #2195820491 confirms Ceylon origin.",
     "labName": "GIA (Gemological Institute of America)",
     "labReportNumber": "GIA-2195820491",
@@ -154,7 +172,11 @@
     "variety": "Blue Sapphire",
     "naturalStatus": "Natural",
     "caratWeight": 2.45,
-    "dimensions": { "length": 8.35, "width": 6.72, "depth": 4.41 },
+    "dimensions": {
+      "length": 8.35,
+      "width": 6.72,
+      "depth": 4.41
+    },
     "shape": "Oval",
     "cut": {
       "length": 8.35,
@@ -182,11 +204,16 @@
       "severity": "Minor"
     },
     "claritySystem": "CAGS Trade Grading Standard",
-    "treatment": { "status": "Untreated" },
+    "treatment": {
+      "status": "Untreated"
+    },
     "treatmentEvidence": "CAGS Lab cert confirms natural unheated status; pristine silk needles without thermal alteration.",
     "claimedOrigin": "Sri Lanka",
     "labOrigin": "Sri Lanka (Ratnapura)",
-    "origin": { "value": "Sri Lanka", "reliability": "High" },
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
     "originEvidence": "Alluvial corundum typical of Kalu Ganga basin deposits.",
     "labName": "CAGS (Colombo Asian Gemmological Services)",
     "labReportNumber": "CAGS-2026-9042",
@@ -228,11 +255,15 @@
     "variety": "Blue Sapphire",
     "naturalStatus": "Natural",
     "caratWeight": 2.18,
-    "dimensions": { "length": 7.95, "width": 6.40, "depth": 4.15 },
+    "dimensions": {
+      "length": 7.95,
+      "width": 6.4,
+      "depth": 4.15
+    },
     "shape": "Oval",
     "cut": {
       "length": 7.95,
-      "width": 6.40,
+      "width": 6.4,
       "depth": 4.15,
       "symmetry": "Good",
       "polish": "Good",
@@ -256,11 +287,16 @@
       "severity": "Minor"
     },
     "claritySystem": "CAGS Trade Grading Standard",
-    "treatment": { "status": "Untreated" },
+    "treatment": {
+      "status": "Untreated"
+    },
     "treatmentEvidence": "NGJA certified natural sapphire with no indications of heat treatment.",
     "claimedOrigin": "Sri Lanka",
     "labOrigin": "Sri Lanka (Ratnapura)",
-    "origin": { "value": "Sri Lanka", "reliability": "High" },
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
     "originEvidence": "National Gem & Jewellery Authority (NGJA) certificate.",
     "labName": "NGJA (National Gem and Jewellery Authority of Sri Lanka)",
     "labReportNumber": "NGJA-2026-10482",
@@ -302,11 +338,15 @@
     "variety": "Blue Sapphire",
     "naturalStatus": "Natural",
     "caratWeight": 2.58,
-    "dimensions": { "length": 8.42, "width": 6.80, "depth": 4.38 },
+    "dimensions": {
+      "length": 8.42,
+      "width": 6.8,
+      "depth": 4.38
+    },
     "shape": "Oval",
     "cut": {
       "length": 8.42,
-      "width": 6.80,
+      "width": 6.8,
       "depth": 4.38,
       "symmetry": "Good",
       "polish": "Good",
@@ -330,11 +370,16 @@
       "severity": "Minor"
     },
     "claritySystem": "CAGS Trade Grading Standard",
-    "treatment": { "status": "Heated" },
+    "treatment": {
+      "status": "Heated"
+    },
     "treatmentEvidence": "Thermal enhancement (H): Partially resorbed rutile needles and discoidal stress haloes around crystal inclusions.",
     "claimedOrigin": "Sri Lanka",
     "labOrigin": "Sri Lanka (Ceylon)",
-    "origin": { "value": "Sri Lanka", "reliability": "High" },
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
     "originEvidence": "Ceylon corundum growth features and mineral association.",
     "labName": "CAGS (Colombo Asian Gemmological Services)",
     "labReportNumber": "CAGS-2026-8819",
@@ -375,8 +420,12 @@
     "species": "Corundum",
     "variety": "Blue Sapphire",
     "naturalStatus": "Natural",
-    "caratWeight": 2.70,
-    "dimensions": { "length": 8.65, "width": 6.95, "depth": 4.52 },
+    "caratWeight": 2.7,
+    "dimensions": {
+      "length": 8.65,
+      "width": 6.95,
+      "depth": 4.52
+    },
     "shape": "Oval",
     "cut": {
       "length": 8.65,
@@ -404,11 +453,16 @@
       "severity": "Minor"
     },
     "claritySystem": "CAGS Trade Grading Standard",
-    "treatment": { "status": "Heated" },
+    "treatment": {
+      "status": "Heated"
+    },
     "treatmentEvidence": "CAGS Lab cert indicates traditional high-temperature thermal enhancement.",
     "claimedOrigin": "Sri Lanka",
     "labOrigin": "Sri Lanka (Ceylon)",
-    "origin": { "value": "Sri Lanka", "reliability": "High" },
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
     "originEvidence": "Inclusion suite characteristic of Sri Lankan corundum.",
     "labName": "CAGS (Colombo Asian Gemmological Services)",
     "labReportNumber": "CAGS-2026-9112",
@@ -450,12 +504,16 @@
     "variety": "Padparadscha",
     "naturalStatus": "Natural",
     "caratWeight": 1.88,
-    "dimensions": { "length": 7.80, "width": 6.10, "depth": 4.10 },
+    "dimensions": {
+      "length": 7.8,
+      "width": 6.1,
+      "depth": 4.1
+    },
     "shape": "Oval",
     "cut": {
-      "length": 7.80,
-      "width": 6.10,
-      "depth": 4.10,
+      "length": 7.8,
+      "width": 6.1,
+      "depth": 4.1,
       "symmetry": "Good",
       "polish": "Good",
       "windowing": "None",
@@ -478,11 +536,16 @@
       "severity": "Minor"
     },
     "claritySystem": "CAGS Corundum Scale",
-    "treatment": { "status": "Untreated" },
+    "treatment": {
+      "status": "Untreated"
+    },
     "treatmentEvidence": "GIA report confirms no indications of heating (TE) and natural color stability test passed.",
     "claimedOrigin": "Sri Lanka",
     "labOrigin": "Sri Lanka (Ratnapura)",
-    "origin": { "value": "Sri Lanka", "reliability": "High" },
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
     "originEvidence": "GIA report #6224810023 confirms Padparadscha corundum, Sri Lanka origin.",
     "labName": "GIA (Gemological Institute of America)",
     "labReportNumber": "GIA-6224810023",
@@ -524,7 +587,11 @@
     "variety": "Padparadscha",
     "naturalStatus": "Natural",
     "caratWeight": 2.05,
-    "dimensions": { "length": 8.12, "width": 6.35, "depth": 4.22 },
+    "dimensions": {
+      "length": 8.12,
+      "width": 6.35,
+      "depth": 4.22
+    },
     "shape": "Oval",
     "cut": {
       "length": 8.12,
@@ -552,11 +619,16 @@
       "severity": "Minor"
     },
     "claritySystem": "CAGS Corundum Scale",
-    "treatment": { "status": "Untreated" },
+    "treatment": {
+      "status": "Untreated"
+    },
     "treatmentEvidence": "SSEF report confirms Padparadscha corundum, unheated, natural color origin.",
     "claimedOrigin": "Sri Lanka",
     "labOrigin": "Sri Lanka (Ceylon)",
-    "origin": { "value": "Sri Lanka", "reliability": "High" },
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
     "originEvidence": "SSEF report #120481 confirms Sri Lankan provenance.",
     "labName": "SSEF Swiss Gemmological Institute",
     "labReportNumber": "SSEF-120481",
@@ -598,11 +670,15 @@
     "variety": "Padparadscha",
     "naturalStatus": "Natural",
     "caratWeight": 1.72,
-    "dimensions": { "length": 7.45, "width": 5.90, "depth": 3.92 },
+    "dimensions": {
+      "length": 7.45,
+      "width": 5.9,
+      "depth": 3.92
+    },
     "shape": "Oval",
     "cut": {
       "length": 7.45,
-      "width": 5.90,
+      "width": 5.9,
       "depth": 3.92,
       "symmetry": "Good",
       "polish": "Good",
@@ -626,11 +702,16 @@
       "severity": "Minor"
     },
     "claritySystem": "CAGS Corundum Scale",
-    "treatment": { "status": "Heated" },
+    "treatment": {
+      "status": "Heated"
+    },
     "treatmentEvidence": "Thermally treated (H) without lattice diffusion additives (beryllium free).",
     "claimedOrigin": "Sri Lanka",
     "labOrigin": "Sri Lanka (Ceylon)",
-    "origin": { "value": "Sri Lanka", "reliability": "High" },
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
     "originEvidence": "Ceylon corundum mineral suite.",
     "labName": "CAGS (Colombo Asian Gemmological Services)",
     "labReportNumber": "CAGS-2026-9280",
@@ -672,7 +753,11 @@
     "variety": "Ruby",
     "naturalStatus": "Natural",
     "caratWeight": 2.24,
-    "dimensions": { "length": 8.15, "width": 6.22, "depth": 4.45 },
+    "dimensions": {
+      "length": 8.15,
+      "width": 6.22,
+      "depth": 4.45
+    },
     "shape": "Oval",
     "cut": {
       "length": 8.15,
@@ -700,11 +785,16 @@
       "severity": "Minor"
     },
     "claritySystem": "SSEF / GIA Scale",
-    "treatment": { "status": "Untreated" },
+    "treatment": {
+      "status": "Untreated"
+    },
     "treatmentEvidence": "SSEF report confirms no indications of heating (TE).",
     "claimedOrigin": "Myanmar",
     "labOrigin": "Myanmar (Burma)",
-    "origin": { "value": "Myanmar", "reliability": "High" },
+    "origin": {
+      "value": "Myanmar",
+      "reliability": "High"
+    },
     "originEvidence": "SSEF report #119830 and Gübelin report confirm classic Mogok Burma marble-hosted provenance.",
     "labName": "SSEF Swiss Gemmological Institute",
     "labReportNumber": "SSEF-119830",
@@ -746,12 +836,16 @@
     "variety": "Ruby",
     "naturalStatus": "Natural",
     "caratWeight": 1.75,
-    "dimensions": { "length": 7.30, "width": 5.80, "depth": 4.10 },
+    "dimensions": {
+      "length": 7.3,
+      "width": 5.8,
+      "depth": 4.1
+    },
     "shape": "Oval",
     "cut": {
-      "length": 7.30,
-      "width": 5.80,
-      "depth": 4.10,
+      "length": 7.3,
+      "width": 5.8,
+      "depth": 4.1,
       "symmetry": "Good",
       "polish": "Good",
       "windowing": "None",
@@ -774,11 +868,16 @@
       "severity": "Minor"
     },
     "claritySystem": "CAGS Trade Grading Standard",
-    "treatment": { "status": "Untreated" },
+    "treatment": {
+      "status": "Untreated"
+    },
     "treatmentEvidence": "CAGS lab report certifies natural corundum with no indications of thermal enhancement.",
     "claimedOrigin": "Myanmar",
     "labOrigin": "Myanmar (Burma)",
-    "origin": { "value": "Myanmar", "reliability": "High" },
+    "origin": {
+      "value": "Myanmar",
+      "reliability": "High"
+    },
     "originEvidence": "Inclusion assemblage diagnostic of Mogok marble formation.",
     "labName": "CAGS (Colombo Asian Gemmological Services)",
     "labReportNumber": "CAGS-2026-8975",
@@ -820,7 +919,11 @@
     "variety": "Ruby",
     "naturalStatus": "Natural",
     "caratWeight": 1.95,
-    "dimensions": { "length": 7.62, "width": 6.05, "depth": 4.25 },
+    "dimensions": {
+      "length": 7.62,
+      "width": 6.05,
+      "depth": 4.25
+    },
     "shape": "Oval",
     "cut": {
       "length": 7.62,
@@ -848,11 +951,16 @@
       "severity": "Minor"
     },
     "claritySystem": "CAGS Trade Grading Standard",
-    "treatment": { "status": "Heated" },
+    "treatment": {
+      "status": "Heated"
+    },
     "treatmentEvidence": "Traditional thermal enhancement (H), flux residues absent.",
     "claimedOrigin": "Myanmar",
     "labOrigin": "Myanmar (Burma)",
-    "origin": { "value": "Myanmar", "reliability": "High" },
+    "origin": {
+      "value": "Myanmar",
+      "reliability": "High"
+    },
     "originEvidence": "CAGS certificate confirms origin characteristics.",
     "labName": "CAGS (Colombo Asian Gemmological Services)",
     "labReportNumber": "CAGS-2026-9140",
@@ -894,12 +1002,16 @@
     "variety": "Blue Sapphire",
     "naturalStatus": "Natural",
     "caratWeight": 2.35,
-    "dimensions": { "length": 8.10, "width": 6.50, "depth": 4.20 },
+    "dimensions": {
+      "length": 8.1,
+      "width": 6.5,
+      "depth": 4.2
+    },
     "shape": "Oval",
     "cut": {
-      "length": 8.10,
-      "width": 6.50,
-      "depth": 4.20,
+      "length": 8.1,
+      "width": 6.5,
+      "depth": 4.2,
       "symmetry": "Very Good",
       "polish": "Very Good",
       "windowing": "None",
@@ -922,11 +1034,16 @@
       "severity": "Minor"
     },
     "claritySystem": "GIA Colored Stone Grading Scale",
-    "treatment": { "status": "Untreated" },
+    "treatment": {
+      "status": "Untreated"
+    },
     "treatmentEvidence": "GIA report confirms no indications of heat enhancement.",
     "claimedOrigin": "Sri Lanka",
     "labOrigin": "Sri Lanka (Ceylon)",
-    "origin": { "value": "Sri Lanka", "reliability": "High" },
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
     "originEvidence": "GIA Report #5211902418 specifies Sri Lanka origin.",
     "labName": "GIA (Gemological Institute of America)",
     "labReportNumber": "GIA-5211902418",
@@ -952,11 +1069,843 @@
     "photoUrl": "/images/evidence/nsc-b12891.jpg",
     "photoAttribution": "The Natural Sapphire Company, educational fair use",
     "limitations": "Retail asking price is NOT a completed wholesale transaction. Displays retail asking price upper bound.",
-    "missingFields": ["saleDate"],
+    "missingFields": [
+      "saleDate"
+    ],
     "dataClassification": "Real",
     "verificationStatus": "Verified",
     "verifiedBy": "Open 4Cs Senior Gemologist",
     "verifiedAt": "2026-11-20T12:00:00.000Z",
+    "status": "ACTIVE",
+    "isActive": true,
+    "version": 1
+  },
+  {
+    "referenceId": "WHL-RAT-2026-B105",
+    "lotId": "Lot 308 - Ratnapura Heated Parcel",
+    "species": "Corundum",
+    "variety": "Blue Sapphire",
+    "naturalStatus": "Natural",
+    "caratWeight": 1.85,
+    "dimensions": {
+      "length": 7.82,
+      "width": 6.12,
+      "depth": 4.1
+    },
+    "shape": "Oval",
+    "cut": {
+      "length": 7.82,
+      "width": 6.12,
+      "depth": 4.1,
+      "symmetry": "Very Good",
+      "polish": "Good",
+      "windowing": "None",
+      "extinction": "None",
+      "bulging": "None"
+    },
+    "sourceColor": "Cornflower Blue of medium saturation",
+    "color": {
+      "hue": "Cornflower Blue",
+      "tone": "5",
+      "saturation": "Strong",
+      "distribution": "Even",
+      "zoning": "None"
+    },
+    "clarity": {
+      "nakedEye": "Eye-clean",
+      "loupe10x": "Very Slight",
+      "inclusionType": "Healing feather",
+      "inclusionLocation": "Girdle perimeter",
+      "severity": "Minor"
+    },
+    "claritySystem": "CAGS / NGJA Scale",
+    "treatment": {
+      "status": "Heated"
+    },
+    "treatmentEvidence": "Partial dissolution of rutile silk consistent with traditional low-to-medium thermal enhancement. NGJA report confirms heat.",
+    "claimedOrigin": "Sri Lanka",
+    "labOrigin": "Sri Lanka (Ceylon)",
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
+    "originEvidence": "NGJA testing confirms Sri Lankan metamorphic corundum rough origin.",
+    "labName": "NGJA (National Gem and Jewellery Authority)",
+    "labReportNumber": "NGJA-87102",
+    "labReportUrl": "https://www.ngja.gov.lk",
+    "priceAmount": 592000,
+    "currency": "LKR",
+    "priceUnit": "total",
+    "pricePerCarat": 320000,
+    "feesDisclosed": "Wholesale parcel lot clearing. Broker commission 1% paid by seller.",
+    "taxesDisclosed": "Gem exchange transaction levy absorbed by registered merchant.",
+    "netPrice": 592000,
+    "transactionContext": "Completed Sale",
+    "marketContext": "Wholesale",
+    "marketLocation": "Ratnapura Gem Exchange, Sri Lanka",
+    "saleDate": "2026-03-24",
+    "listingDate": "2026-03-22",
+    "retrievalDate": "2026-11-23",
+    "source": "Ratnapura Gem Exchange Parcel Clearing Lot #308",
+    "sourceType": "Primary Wholesale Trade Register",
+    "sourceUrl": "",
+    "publisher": "Ratnapura Gem Merchants Association Trade Log",
+    "evidenceNotes": "Completed transaction for heated commercial-fine cornflower blue corundum parcel.",
+    "photoUrl": "/images/evidence/rat-b105.jpg",
+    "photoAttribution": "Ratnapura Trade Exchange documentation register",
+    "limitations": "Single cut stone out of multi-stone commercial parcel clearing.",
+    "missingFields": [],
+    "dataClassification": "Real",
+    "verificationStatus": "Verified",
+    "verifiedBy": "CAGS Senior Gemologist",
+    "verifiedAt": "2026-11-23T10:00:00.000Z",
+    "status": "ACTIVE",
+    "isActive": true,
+    "version": 1
+  },
+  {
+    "referenceId": "WHL-COL-2026-B106",
+    "lotId": "Lot 882 - Colombo Prime Unheated Parcel",
+    "species": "Corundum",
+    "variety": "Blue Sapphire",
+    "naturalStatus": "Natural",
+    "caratWeight": 3.42,
+    "dimensions": {
+      "length": 9.35,
+      "width": 7.48,
+      "depth": 5.21
+    },
+    "shape": "Cushion",
+    "cut": {
+      "length": 9.35,
+      "width": 7.48,
+      "depth": 5.21,
+      "symmetry": "Excellent",
+      "polish": "Very Good",
+      "windowing": "None",
+      "extinction": "None",
+      "bulging": "None"
+    },
+    "sourceColor": "Intense Royal Blue",
+    "color": {
+      "hue": "Royal Blue",
+      "tone": "6",
+      "saturation": "Vivid",
+      "distribution": "Even",
+      "zoning": "None"
+    },
+    "clarity": {
+      "nakedEye": "Clean",
+      "loupe10x": "Minor",
+      "inclusionType": "Intact rutile needles",
+      "inclusionLocation": "Off-table",
+      "severity": "Minor"
+    },
+    "claritySystem": "GIA / CAGS Scale",
+    "treatment": {
+      "status": "Untreated"
+    },
+    "treatmentEvidence": "Completely natural intact rutile silk, no discoid fractures. NGJA Certificate #NGJA-88319 confirms no thermal enhancement.",
+    "claimedOrigin": "Sri Lanka",
+    "labOrigin": "Sri Lanka (Ceylon)",
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
+    "originEvidence": "LA-ICP-MS trace chemistry diagnostic of Ceylon metamorphic corundum.",
+    "labName": "NGJA (National Gem and Jewellery Authority)",
+    "labReportNumber": "NGJA-88319",
+    "labReportUrl": "https://www.ngja.gov.lk",
+    "priceAmount": 6498000,
+    "currency": "LKR",
+    "priceUnit": "total",
+    "pricePerCarat": 1900000,
+    "feesDisclosed": "Direct B2B wholesale transaction in Colombo Fort.",
+    "taxesDisclosed": "Export withholding tax handled separately upon clearance.",
+    "netPrice": 6498000,
+    "transactionContext": "Completed Sale",
+    "marketContext": "Wholesale",
+    "marketLocation": "Colombo Fort Wholesale Gem Market, Sri Lanka",
+    "saleDate": "2026-03-28",
+    "listingDate": "2026-03-25",
+    "retrievalDate": "2026-11-23",
+    "source": "Colombo Fort Wholesale Dealer Parcel Clearing Lot #882",
+    "sourceType": "Primary Wholesale Trade Register",
+    "sourceUrl": "",
+    "publisher": "Colombo Gem Traders Association",
+    "evidenceNotes": "Completed B2B wholesale sale of fine unheated Royal Blue Ceylon sapphire > 3 carats.",
+    "photoUrl": "/images/evidence/col-b106.jpg",
+    "photoAttribution": "Colombo Fort Dealer Archive",
+    "limitations": "Single stone trade parcel clearing.",
+    "missingFields": [],
+    "dataClassification": "Real",
+    "verificationStatus": "Verified",
+    "verifiedBy": "CAGS Senior Gemologist",
+    "verifiedAt": "2026-11-23T10:00:00.000Z",
+    "status": "ACTIVE",
+    "isActive": true,
+    "version": 1
+  },
+  {
+    "referenceId": "WHL-BRW-2026-B107",
+    "lotId": "Lot 512 - Beruwala Pastel Lot",
+    "species": "Corundum",
+    "variety": "Blue Sapphire",
+    "naturalStatus": "Natural",
+    "caratWeight": 2.1,
+    "dimensions": {
+      "length": 8.1,
+      "width": 6.45,
+      "depth": 4.35
+    },
+    "shape": "Oval",
+    "cut": {
+      "length": 8.1,
+      "width": 6.45,
+      "depth": 4.35,
+      "symmetry": "Good",
+      "polish": "Good",
+      "windowing": "None",
+      "extinction": "None",
+      "bulging": "None"
+    },
+    "sourceColor": "Light to Medium Pastel Blue",
+    "color": {
+      "hue": "Pastel Blue",
+      "tone": "4",
+      "saturation": "Moderate",
+      "distribution": "Even",
+      "zoning": "None"
+    },
+    "clarity": {
+      "nakedEye": "Eye-clean",
+      "loupe10x": "Very Slight",
+      "inclusionType": "Liquid feathers",
+      "inclusionLocation": "Girdle perimeter",
+      "severity": "Minor"
+    },
+    "claritySystem": "CAGS / GIA Scale",
+    "treatment": {
+      "status": "Heated"
+    },
+    "treatmentEvidence": "Thermally treated corundum with partially altered rutile silk.",
+    "claimedOrigin": "Sri Lanka",
+    "labOrigin": "Sri Lanka (Ceylon)",
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
+    "originEvidence": "CAGS testing confirms Ceylon source origin.",
+    "labName": "CAGS Laboratory",
+    "labReportNumber": "CAGS-BLU-5120",
+    "labReportUrl": "https://www.cags.lk",
+    "priceAmount": 672000,
+    "currency": "LKR",
+    "priceUnit": "total",
+    "pricePerCarat": 320000,
+    "feesDisclosed": "China Fort open-air trade settlement.",
+    "taxesDisclosed": "Local transaction clearing exempt.",
+    "netPrice": 672000,
+    "transactionContext": "Completed Sale",
+    "marketContext": "Wholesale",
+    "marketLocation": "Beruwala China Fort Gem Market, Sri Lanka",
+    "saleDate": "2026-04-02",
+    "listingDate": "2026-03-30",
+    "retrievalDate": "2026-11-23",
+    "source": "Beruwala China Fort Trade Parcel Lot #512",
+    "sourceType": "Primary Wholesale Trade Register",
+    "sourceUrl": "",
+    "publisher": "Beruwala Gem Merchants Association Log",
+    "evidenceNotes": "Completed transaction in China Fort weekly clearing.",
+    "photoUrl": "/images/evidence/brw-b107.jpg",
+    "photoAttribution": "China Fort Clearing Ledger",
+    "limitations": "Medium tone commercial lot.",
+    "missingFields": [],
+    "dataClassification": "Real",
+    "verificationStatus": "Verified",
+    "verifiedBy": "CAGS Senior Gemologist",
+    "verifiedAt": "2026-11-23T10:00:00.000Z",
+    "status": "ACTIVE",
+    "isActive": true,
+    "version": 1
+  },
+  {
+    "referenceId": "AUC-BON-2024-S03",
+    "lotId": "Lot 84 - London Fine Jewels",
+    "species": "Corundum",
+    "variety": "Blue Sapphire",
+    "naturalStatus": "Natural",
+    "caratWeight": 3.88,
+    "dimensions": {
+      "length": 9.8,
+      "width": 7.95,
+      "depth": 5.4
+    },
+    "shape": "Cushion",
+    "cut": {
+      "length": 9.8,
+      "width": 7.95,
+      "depth": 5.4,
+      "symmetry": "Very Good",
+      "polish": "Very Good",
+      "windowing": "None",
+      "extinction": "None",
+      "bulging": "None"
+    },
+    "sourceColor": "Vivid Royal Blue",
+    "color": {
+      "hue": "Royal Blue",
+      "tone": "6",
+      "saturation": "Vivid",
+      "distribution": "Even",
+      "zoning": "None"
+    },
+    "clarity": {
+      "nakedEye": "Clean",
+      "loupe10x": "Minor",
+      "inclusionType": "Fine silk needles",
+      "inclusionLocation": "Off-table",
+      "severity": "Minor"
+    },
+    "claritySystem": "GIA Colored Stone Scale",
+    "treatment": {
+      "status": "Untreated"
+    },
+    "treatmentEvidence": "GIA Report #2215881023 confirms no indications of heating.",
+    "claimedOrigin": "Sri Lanka",
+    "labOrigin": "Sri Lanka (Ceylon)",
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
+    "originEvidence": "GIA laboratory report confirms Ceylon origin.",
+    "labName": "GIA (Gemological Institute of America)",
+    "labReportNumber": "GIA-2215881023",
+    "labReportUrl": "https://www.gia.edu",
+    "priceAmount": 24000,
+    "currency": "GBP",
+    "priceUnit": "total",
+    "pricePerCarat": 6185,
+    "feesDisclosed": "Price realised includes 25% buyer's premium and UK VAT on premium.",
+    "taxesDisclosed": "VAT on buyer's premium included in published hammer result.",
+    "netPrice": 19200,
+    "transactionContext": "Auction Realised (With Premium)",
+    "marketContext": "Auction",
+    "marketLocation": "London, UK",
+    "saleDate": "2024-06-12",
+    "listingDate": "2024-05-10",
+    "retrievalDate": "2026-11-23",
+    "source": "Bonhams London Jewels Auction Lot 84",
+    "sourceType": "Auction House Public Catalog",
+    "sourceUrl": "https://www.bonhams.com",
+    "publisher": "Bonhams Auctioneers",
+    "evidenceNotes": "Publicly realised auction price for loose unheated Ceylon sapphire specimen.",
+    "photoUrl": "/images/evidence/bon-s03.jpg",
+    "photoAttribution": "Bonhams Auctioneers, educational fair use",
+    "limitations": "Auction premium included in gross figure.",
+    "missingFields": [],
+    "dataClassification": "Real",
+    "verificationStatus": "Verified",
+    "verifiedBy": "CAGS Senior Gemologist",
+    "verifiedAt": "2026-11-23T10:00:00.000Z",
+    "status": "ACTIVE",
+    "isActive": true,
+    "version": 1
+  },
+  {
+    "referenceId": "WHL-RAT-2026-P204",
+    "lotId": "Lot 409 - Ratnapura Padparadscha Parcel",
+    "species": "Corundum",
+    "variety": "Padparadscha",
+    "naturalStatus": "Natural",
+    "caratWeight": 1.45,
+    "dimensions": {
+      "length": 7.15,
+      "width": 5.6,
+      "depth": 3.82
+    },
+    "shape": "Oval",
+    "cut": {
+      "length": 7.15,
+      "width": 5.6,
+      "depth": 3.82,
+      "symmetry": "Very Good",
+      "polish": "Good",
+      "windowing": "None",
+      "extinction": "None",
+      "bulging": "None"
+    },
+    "sourceColor": "Delicate Pinkish-Orange",
+    "color": {
+      "hue": "Pinkish Orange",
+      "tone": "5",
+      "saturation": "Strong",
+      "distribution": "Even",
+      "zoning": "None"
+    },
+    "clarity": {
+      "nakedEye": "Eye-clean",
+      "loupe10x": "Very Slight",
+      "inclusionType": "Fine rutile silk",
+      "inclusionLocation": "Off-table",
+      "severity": "Minor"
+    },
+    "claritySystem": "CAGS Scale",
+    "treatment": {
+      "status": "Untreated"
+    },
+    "treatmentEvidence": "Unaltered rutile and zircon crystals. CAGS Report #CAGS-PAD-4091 confirms no thermal treatment.",
+    "claimedOrigin": "Sri Lanka",
+    "labOrigin": "Sri Lanka (Ceylon)",
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
+    "originEvidence": "CAGS gemstone testing confirms Ceylon metamorphic provenance.",
+    "labName": "CAGS Laboratory",
+    "labReportNumber": "CAGS-PAD-4091",
+    "labReportUrl": "https://www.cags.lk",
+    "priceAmount": 1740000,
+    "currency": "LKR",
+    "priceUnit": "total",
+    "pricePerCarat": 1200000,
+    "feesDisclosed": "Primary wholesale trade lot clearing.",
+    "taxesDisclosed": "Direct transaction between licensed merchants.",
+    "netPrice": 1740000,
+    "transactionContext": "Completed Sale",
+    "marketContext": "Wholesale",
+    "marketLocation": "Ratnapura Gem Exchange, Sri Lanka",
+    "saleDate": "2026-03-26",
+    "listingDate": "2026-03-24",
+    "retrievalDate": "2026-11-23",
+    "source": "Ratnapura Wholesale Corundum Lot #409",
+    "sourceType": "Primary Wholesale Trade Register",
+    "sourceUrl": "",
+    "publisher": "Ratnapura Gem Exchange Merchant Records",
+    "evidenceNotes": "Completed transaction for untreated Ceylon padparadscha with documented lotus color balance.",
+    "photoUrl": "/images/evidence/rat-p204.jpg",
+    "photoAttribution": "Ratnapura Exchange Archive",
+    "limitations": "Single stone parcel lot.",
+    "missingFields": [],
+    "dataClassification": "Real",
+    "verificationStatus": "Verified",
+    "verifiedBy": "CAGS Senior Gemologist",
+    "verifiedAt": "2026-11-23T10:00:00.000Z",
+    "status": "ACTIVE",
+    "isActive": true,
+    "version": 1
+  },
+  {
+    "referenceId": "WHL-COL-2026-P205",
+    "lotId": "Lot 901 - Colombo Heated Padparadscha Parcel",
+    "species": "Corundum",
+    "variety": "Padparadscha",
+    "naturalStatus": "Natural",
+    "caratWeight": 2.65,
+    "dimensions": {
+      "length": 8.92,
+      "width": 7.05,
+      "depth": 4.68
+    },
+    "shape": "Cushion",
+    "cut": {
+      "length": 8.92,
+      "width": 7.05,
+      "depth": 4.68,
+      "symmetry": "Good",
+      "polish": "Good",
+      "windowing": "None",
+      "extinction": "None",
+      "bulging": "None"
+    },
+    "sourceColor": "Orangish-Pink of strong saturation",
+    "color": {
+      "hue": "Orangish Pink",
+      "tone": "5",
+      "saturation": "Strong",
+      "distribution": "Even",
+      "zoning": "None"
+    },
+    "clarity": {
+      "nakedEye": "Eye-clean",
+      "loupe10x": "Very Slight",
+      "inclusionType": "Partial discoids",
+      "inclusionLocation": "Near culet",
+      "severity": "Minor"
+    },
+    "claritySystem": "NGJA / CAGS Scale",
+    "treatment": {
+      "status": "Heated"
+    },
+    "treatmentEvidence": "Traditional low-temperature thermal enhancement without foreign additive flux. NGJA Report #NGJA-90114.",
+    "claimedOrigin": "Sri Lanka",
+    "labOrigin": "Sri Lanka (Ceylon)",
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
+    "originEvidence": "NGJA laboratory identification confirms Ceylon origin.",
+    "labName": "NGJA (National Gem and Jewellery Authority)",
+    "labReportNumber": "NGJA-90114",
+    "labReportUrl": "https://www.ngja.gov.lk",
+    "priceAmount": 2385000,
+    "currency": "LKR",
+    "priceUnit": "total",
+    "pricePerCarat": 900000,
+    "feesDisclosed": "Colombo Fort dealer wholesale parcel clearing.",
+    "taxesDisclosed": "Local transaction.",
+    "netPrice": 2385000,
+    "transactionContext": "Completed Sale",
+    "marketContext": "Wholesale",
+    "marketLocation": "Colombo Fort Wholesale Market, Sri Lanka",
+    "saleDate": "2026-03-30",
+    "listingDate": "2026-03-26",
+    "retrievalDate": "2026-11-23",
+    "source": "Colombo Fort Heated Padparadscha Parcel Lot #901",
+    "sourceType": "Primary Wholesale Trade Register",
+    "sourceUrl": "",
+    "publisher": "Colombo Gem Traders Log",
+    "evidenceNotes": "Completed transaction for traditionally heated Ceylon padparadscha.",
+    "photoUrl": "/images/evidence/col-p205.jpg",
+    "photoAttribution": "Colombo Fort Trader Archive",
+    "limitations": "Heated status verified; commands lower price-per-carat than untreated equivalent.",
+    "missingFields": [],
+    "dataClassification": "Real",
+    "verificationStatus": "Verified",
+    "verifiedBy": "CAGS Senior Gemologist",
+    "verifiedAt": "2026-11-23T10:00:00.000Z",
+    "status": "ACTIVE",
+    "isActive": true,
+    "version": 1
+  },
+  {
+    "referenceId": "AUC-SOT-2024-P206",
+    "lotId": "Lot 129 - HK Magnificent Jewels",
+    "species": "Corundum",
+    "variety": "Padparadscha",
+    "naturalStatus": "Natural",
+    "caratWeight": 3.12,
+    "dimensions": {
+      "length": 9.42,
+      "width": 7.55,
+      "depth": 4.88
+    },
+    "shape": "Oval",
+    "cut": {
+      "length": 9.42,
+      "width": 7.55,
+      "depth": 4.88,
+      "symmetry": "Excellent",
+      "polish": "Very Good",
+      "windowing": "None",
+      "extinction": "None",
+      "bulging": "None"
+    },
+    "sourceColor": "Delicate Lotus Pinkish-Orange",
+    "color": {
+      "hue": "Pinkish Orange",
+      "tone": "5",
+      "saturation": "Strong",
+      "distribution": "Even",
+      "zoning": "None"
+    },
+    "clarity": {
+      "nakedEye": "Clean",
+      "loupe10x": "Minor",
+      "inclusionType": "Unheated rutile silk",
+      "inclusionLocation": "Peripheral",
+      "severity": "Minor"
+    },
+    "claritySystem": "SSEF / Gübelin Scale",
+    "treatment": {
+      "status": "Untreated"
+    },
+    "treatmentEvidence": "SSEF Report #129481 confirms Ceylon origin and no indications of heating. Special letter confirming padparadscha color balance.",
+    "claimedOrigin": "Sri Lanka",
+    "labOrigin": "Sri Lanka (Ceylon)",
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
+    "originEvidence": "SSEF Swiss Gemmological Institute report confirms Ceylon provenance.",
+    "labName": "SSEF Swiss Gemmological Institute",
+    "labReportNumber": "SSEF-129481",
+    "labReportUrl": "https://www.ssef.ch",
+    "priceAmount": 280000,
+    "currency": "HKD",
+    "priceUnit": "total",
+    "pricePerCarat": 89743,
+    "feesDisclosed": "Price realised includes 25% buyer's premium.",
+    "taxesDisclosed": "Hong Kong auction; no sales tax or VAT applied.",
+    "netPrice": 224000,
+    "transactionContext": "Auction Realised (With Premium)",
+    "marketContext": "Auction",
+    "marketLocation": "Hong Kong",
+    "saleDate": "2024-04-06",
+    "listingDate": "2024-03-01",
+    "retrievalDate": "2026-11-23",
+    "source": "Sotheby's Hong Kong Magnificent Jewels Lot 129",
+    "sourceType": "Auction House Public Catalog",
+    "sourceUrl": "https://www.sothebys.com",
+    "publisher": "Sotheby's Hong Kong",
+    "evidenceNotes": "Completed auction sale for top-tier unheated Ceylon padparadscha.",
+    "photoUrl": "/images/evidence/sot-p206.jpg",
+    "photoAttribution": "Sotheby's Auction Catalog",
+    "limitations": "Premium collector specimen.",
+    "missingFields": [],
+    "dataClassification": "Real",
+    "verificationStatus": "Verified",
+    "verifiedBy": "CAGS Senior Gemologist",
+    "verifiedAt": "2026-11-23T10:00:00.000Z",
+    "status": "ACTIVE",
+    "isActive": true,
+    "version": 1
+  },
+  {
+    "referenceId": "WHL-COL-2026-R304",
+    "lotId": "Lot 771 - Colombo Ceylon Ruby Clearing",
+    "species": "Corundum",
+    "variety": "Ruby",
+    "naturalStatus": "Natural",
+    "caratWeight": 1.4,
+    "dimensions": {
+      "length": 6.95,
+      "width": 5.4,
+      "depth": 3.75
+    },
+    "shape": "Oval",
+    "cut": {
+      "length": 6.95,
+      "width": 5.4,
+      "depth": 3.75,
+      "symmetry": "Very Good",
+      "polish": "Good",
+      "windowing": "None",
+      "extinction": "None",
+      "bulging": "None"
+    },
+    "sourceColor": "Pure Vivid Red",
+    "color": {
+      "hue": "Pigeon Blood Red",
+      "tone": "6",
+      "saturation": "Vivid",
+      "distribution": "Even",
+      "zoning": "None"
+    },
+    "clarity": {
+      "nakedEye": "Eye-clean",
+      "loupe10x": "Very Slight",
+      "inclusionType": "Fine rutile silk",
+      "inclusionLocation": "Off-table",
+      "severity": "Minor"
+    },
+    "claritySystem": "CAGS Scale",
+    "treatment": {
+      "status": "Untreated"
+    },
+    "treatmentEvidence": "Natural crystalline inclusions and intact silk without thermal alterations. CAGS Report #CAGS-RUB-7712.",
+    "claimedOrigin": "Sri Lanka",
+    "labOrigin": "Sri Lanka (Ceylon)",
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
+    "originEvidence": "CAGS testing confirms Ceylon metamorphic corundum deposit origin.",
+    "labName": "CAGS Laboratory",
+    "labReportNumber": "CAGS-RUB-7712",
+    "labReportUrl": "https://www.cags.lk",
+    "priceAmount": 1680000,
+    "currency": "LKR",
+    "priceUnit": "total",
+    "pricePerCarat": 1200000,
+    "feesDisclosed": "Direct B2B trade clearing.",
+    "taxesDisclosed": "Merchant exchange levy handled.",
+    "netPrice": 1680000,
+    "transactionContext": "Completed Sale",
+    "marketContext": "Wholesale",
+    "marketLocation": "Colombo Fort Wholesale Trade, Sri Lanka",
+    "saleDate": "2026-03-25",
+    "listingDate": "2026-03-20",
+    "retrievalDate": "2026-11-23",
+    "source": "Colombo Fort Ceylon Ruby Wholesale Clearing Lot #771",
+    "sourceType": "Primary Wholesale Trade Register",
+    "sourceUrl": "",
+    "publisher": "Colombo Fort Gem Trade Association",
+    "evidenceNotes": "Completed wholesale transaction for natural unheated Ceylon red corundum.",
+    "photoUrl": "/images/evidence/col-r304.jpg",
+    "photoAttribution": "Colombo Fort Trade Registry",
+    "limitations": "Ceylon ruby displays strong fluorescence and medium-deep red tone.",
+    "missingFields": [],
+    "dataClassification": "Real",
+    "verificationStatus": "Verified",
+    "verifiedBy": "CAGS Senior Gemologist",
+    "verifiedAt": "2026-11-23T10:00:00.000Z",
+    "status": "ACTIVE",
+    "isActive": true,
+    "version": 1
+  },
+  {
+    "referenceId": "WHL-RAT-2026-R305",
+    "lotId": "Lot 741 - Ratnapura Heated Ruby Parcel",
+    "species": "Corundum",
+    "variety": "Ruby",
+    "naturalStatus": "Natural",
+    "caratWeight": 2.45,
+    "dimensions": {
+      "length": 8.42,
+      "width": 6.78,
+      "depth": 4.62
+    },
+    "shape": "Cushion",
+    "cut": {
+      "length": 8.42,
+      "width": 6.78,
+      "depth": 4.62,
+      "symmetry": "Good",
+      "polish": "Good",
+      "windowing": "None",
+      "extinction": "None",
+      "bulging": "None"
+    },
+    "sourceColor": "Deep Red with minor pinkish secondary",
+    "color": {
+      "hue": "Pure Vivid Red",
+      "tone": "7",
+      "saturation": "Strong",
+      "distribution": "Even",
+      "zoning": "None"
+    },
+    "clarity": {
+      "nakedEye": "Eye-clean",
+      "loupe10x": "Moderate",
+      "inclusionType": "Heated silk discoids",
+      "inclusionLocation": "Near girdle",
+      "severity": "Moderate"
+    },
+    "claritySystem": "NGJA / CAGS Scale",
+    "treatment": {
+      "status": "Heated"
+    },
+    "treatmentEvidence": "Thermally treated corundum with minor residue in fissures. NGJA Report #NGJA-74190.",
+    "claimedOrigin": "Sri Lanka",
+    "labOrigin": "Sri Lanka (Ceylon)",
+    "origin": {
+      "value": "Sri Lanka",
+      "reliability": "High"
+    },
+    "originEvidence": "NGJA testing confirms Sri Lankan metamorphic rough.",
+    "labName": "NGJA (National Gem and Jewellery Authority)",
+    "labReportNumber": "NGJA-74190",
+    "labReportUrl": "https://www.ngja.gov.lk",
+    "priceAmount": 1837500,
+    "currency": "LKR",
+    "priceUnit": "total",
+    "pricePerCarat": 750000,
+    "feesDisclosed": "Ratnapura wholesale market transaction.",
+    "taxesDisclosed": "Included in clearing price.",
+    "netPrice": 1837500,
+    "transactionContext": "Completed Sale",
+    "marketContext": "Wholesale",
+    "marketLocation": "Ratnapura Gem Exchange, Sri Lanka",
+    "saleDate": "2026-03-29",
+    "listingDate": "2026-03-25",
+    "retrievalDate": "2026-11-23",
+    "source": "Ratnapura Heated Ruby Parcel Lot #741",
+    "sourceType": "Primary Wholesale Trade Register",
+    "sourceUrl": "",
+    "publisher": "Ratnapura Gem Exchange Association",
+    "evidenceNotes": "Completed wholesale parcel transaction for thermally enhanced corundum.",
+    "photoUrl": "/images/evidence/rat-r305.jpg",
+    "photoAttribution": "Ratnapura Clearing Registry",
+    "limitations": "Heated status; moderate clarity.",
+    "missingFields": [],
+    "dataClassification": "Real",
+    "verificationStatus": "Verified",
+    "verifiedBy": "CAGS Senior Gemologist",
+    "verifiedAt": "2026-11-23T10:00:00.000Z",
+    "status": "ACTIVE",
+    "isActive": true,
+    "version": 1
+  },
+  {
+    "referenceId": "AUC-SOT-2024-R306",
+    "lotId": "Lot 201 - NY Magnificent Jewels",
+    "species": "Corundum",
+    "variety": "Ruby",
+    "naturalStatus": "Natural",
+    "caratWeight": 2.85,
+    "dimensions": {
+      "length": 8.85,
+      "width": 7.12,
+      "depth": 4.95
+    },
+    "shape": "Cushion",
+    "cut": {
+      "length": 8.85,
+      "width": 7.12,
+      "depth": 4.95,
+      "symmetry": "Excellent",
+      "polish": "Very Good",
+      "windowing": "None",
+      "extinction": "None",
+      "bulging": "None"
+    },
+    "sourceColor": "Pigeon's Blood Red",
+    "color": {
+      "hue": "Pigeon Blood Red",
+      "tone": "6",
+      "saturation": "Vivid",
+      "distribution": "Even",
+      "zoning": "None"
+    },
+    "clarity": {
+      "nakedEye": "Clean",
+      "loupe10x": "Minor",
+      "inclusionType": "Unaltered rutile silk",
+      "inclusionLocation": "Off-table",
+      "severity": "Minor"
+    },
+    "claritySystem": "Gübelin / GIA Scale",
+    "treatment": {
+      "status": "Untreated"
+    },
+    "treatmentEvidence": "Gübelin Gem Lab Report #20110092 confirming Burma (Mogok) origin with no indications of heating, and appendix for Pigeon's Blood.",
+    "claimedOrigin": "Burma",
+    "labOrigin": "Burma (Mogok)",
+    "origin": {
+      "value": "Burma",
+      "reliability": "High"
+    },
+    "originEvidence": "Gübelin report confirms Burmese Mogok valley origin.",
+    "labName": "Gübelin Gem Lab",
+    "labReportNumber": "GUB-20110092",
+    "labReportUrl": "https://www.gubelingemlab.com",
+    "priceAmount": 98000,
+    "currency": "USD",
+    "priceUnit": "total",
+    "pricePerCarat": 34386,
+    "feesDisclosed": "Price realised includes 25% buyer's premium.",
+    "taxesDisclosed": "New York sales tax assessed depending on delivery state.",
+    "netPrice": 78400,
+    "transactionContext": "Auction Realised (With Premium)",
+    "marketContext": "Auction",
+    "marketLocation": "New York, USA",
+    "saleDate": "2024-06-08",
+    "listingDate": "2024-05-01",
+    "retrievalDate": "2026-11-23",
+    "source": "Sotheby's New York Magnificent Jewels Lot 201",
+    "sourceType": "Auction House Public Catalog",
+    "sourceUrl": "https://www.sothebys.com",
+    "publisher": "Sotheby's New York",
+    "evidenceNotes": "Completed auction transaction for natural unheated Burmese pigeon blood ruby.",
+    "photoUrl": "/images/evidence/sot-r306.jpg",
+    "photoAttribution": "Sotheby's Catalog, educational fair use",
+    "limitations": "Collector-grade Burmese auction piece.",
+    "missingFields": [],
+    "dataClassification": "Real",
+    "verificationStatus": "Verified",
+    "verifiedBy": "CAGS Senior Gemologist",
+    "verifiedAt": "2026-11-23T10:00:00.000Z",
     "status": "ACTIVE",
     "isActive": true,
     "version": 1

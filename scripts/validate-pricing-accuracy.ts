@@ -106,6 +106,8 @@ const FX_RATES: Record<string, number> = {
   LKR: 1.0,
   USD: 304.25,
   CHF: 341.50,
+  GBP: 398.00,
+  HKD: 39.00,
 };
 
 function normalizeToLkr(amount: number, currency: string): number {
@@ -271,8 +273,8 @@ function calculateImprovedPrice(
       treatment: r.treatment,
       origin: r.origin,
       dataClassification: (r.dataClassification as "Real" | "Demo") || "Real",
-      transactionContext: r.transactionContext as any,
-      marketContext: r.marketContext as any,
+      transactionContext: r.transactionContext as ReferenceForComparison["transactionContext"],
+      marketContext: r.marketContext as "Wholesale" | "Retail" | "Auction",
       source: r.source,
       saleDate: r.saleDate,
     };
@@ -404,7 +406,8 @@ async function runValidation() {
   console.log("-------------------------------------------------------------------------------\n");
 
   const wholesaleSales = completedSales.filter((r) => r.marketContext === "Wholesale" && r.transactionContext === "Completed Sale");
-  const varieties = ["Blue Sapphire", "Padparadscha", "Ruby"];
+  const _varieties = ["Blue Sapphire", "Padparadscha", "Ruby"];
+  void _varieties;
 
   const resultsExp1: ValidationResult[] = [];
 

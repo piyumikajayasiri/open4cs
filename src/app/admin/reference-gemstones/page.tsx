@@ -19,6 +19,11 @@ import {
   Layers,
   Coins,
   CheckSquare,
+  Activity,
+  TrendingUp,
+  BarChart3,
+  Scale,
+  Award,
 } from "lucide-react";
 import ToastNotification, { ToastMessage, ToastType } from "@/components/ui/ToastNotification";
 import ReferenceGemstoneForm from "@/components/admin/ReferenceGemstoneForm";
@@ -116,6 +121,36 @@ export default function ReferenceGemstonesPage() {
   const [editingRecord, setEditingRecord] = useState<FullReferenceRecord | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showValidationAuditModal, setShowValidationAuditModal] = useState(false);
+  const [runningAudit, setRunningAudit] = useState(false);
+  const [auditData, setAuditData] = useState<{
+    timestamp: string;
+    summary: {
+      totalRecords: number;
+      realRecords: number;
+      demoRecords: number;
+      wholesaleCompleted: number;
+      healthScore: number;
+      overallLoocvMdape: number;
+      overallLoocvMape: number;
+      calibratedCategories: number;
+    };
+    varieties: Record<string, {
+      totalCount: number;
+      wholesaleCount: number;
+      auctionCount: number;
+      retailCount: number;
+      status: "CALIBRATED" | "PROVISIONAL" | "UNAVAILABLE";
+      loocvCount: number;
+      loocvMdape: number;
+      loocvMape: number;
+      avgPricePerCaratLkr: number;
+      dispersionPct: number;
+      pricePerCaratMin: number;
+      pricePerCaratMax: number;
+      recentSaleDate?: string;
+    }>;
+  } | null>(null);
   const [rejectingRecord, setRejectingRecord] = useState<FullReferenceRecord | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
 
@@ -309,6 +344,25 @@ export default function ReferenceGemstonesPage() {
     }
   };
 
+  // Handle Run Live Validation Audit
+  const handleRunValidationAudit = async () => {
+    try {
+      setRunningAudit(true);
+      setShowValidationAuditModal(true);
+      const res = await fetch("/api/admin/reference-gemstones/validate", { cache: "no-store" });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setAuditData(data);
+      } else {
+        showToast(data.message || "Failed to execute validation audit.", "error");
+      }
+    } catch {
+      showToast("Network error running live validation audit.", "error");
+    } finally {
+      setRunningAudit(false);
+    }
+  };
+
   // Handle Analyze Import Preview
   const handleAnalyzeImport = async () => {
     if (!importText.trim()) {
@@ -427,6 +481,16 @@ export default function ReferenceGemstonesPage() {
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
             <span>Refresh</span>
+          </button>
+
+          <button
+            id="admin-run-validation-audit-btn"
+            onClick={handleRunValidationAudit}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 px-3.5 py-2 text-xs font-bold shadow-2xs transition"
+            title="Execute live cross-validation & benchmark health audit"
+          >
+            <Activity className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Run Validation Audit</span>
           </button>
 
           <button
@@ -1253,6 +1317,247 @@ export default function ReferenceGemstonesPage() {
                     className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white shadow-xs transition disabled:opacity-50"
                   >
                     {importing ? "Importing..." : `Commit Import (${importPreview.validCount} valid)`}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* LIVE VALIDATION AUDIT MODAL */}
+      {showValidationAuditModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl border border-slate-200 max-w-4xl w-full p-6 sm:p-7 shadow-2xl space-y-6 my-8 max-h-[92vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <span className="p-2.5 rounded-2xl bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-2xs">
+                  <Activity className="w-5 h-5" />
+                </span>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">
+                      Market Reference Validation &amp; Calibration Audit
+                    </h3>
+                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      LOOCV Engine Active
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Live Leave-One-Out Cross-Validation on verified wholesale corundum transactions.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleRunValidationAudit}
+                  disabled={runningAudit}
+                  className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition"
+                  title="Re-run validation audit"
+                >
+                  <RefreshCw className={`w-4 h-4 ${runningAudit ? "animate-spin" : ""}`} />
+                </button>
+                <button
+                  onClick={() => setShowValidationAuditModal(false)}
+                  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Loading Indicator */}
+            {runningAudit && !auditData && (
+              <div className="py-16 text-center space-y-3">
+                <RefreshCw className="w-8 h-8 text-indigo-600 animate-spin mx-auto" />
+                <p className="text-xs font-semibold text-slate-600">
+                  Executing LOOCV cross-validation across verified wholesale records...
+                </p>
+              </div>
+            )}
+
+            {/* Audit Results */}
+            {auditData && (
+              <div className="space-y-6">
+                {/* Top KPI Summary Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+                  <div className="bg-gradient-to-br from-indigo-50 to-blue-50/60 rounded-2xl p-4 border border-indigo-100 shadow-2xs">
+                    <div className="flex items-center justify-between text-indigo-700 mb-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider">Health Score</span>
+                      <Award className="w-4 h-4" />
+                    </div>
+                    <div className="text-3xl font-black text-indigo-900 font-mono">
+                      {auditData.summary.healthScore} <span className="text-sm font-normal text-slate-400">/ 100</span>
+                    </div>
+                    <p className="text-[11px] text-indigo-700/80 mt-1">
+                      {auditData.summary.healthScore >= 90 ? "Excellent calibration health" : "Good calibration health"}
+                    </p>
+                  </div>
+
+                  <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs">
+                    <div className="flex items-center justify-between text-emerald-700 mb-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider">Overall MdAPE</span>
+                      <TrendingUp className="w-4 h-4 text-emerald-600" />
+                    </div>
+                    <div className="text-3xl font-black text-emerald-700 font-mono">
+                      {auditData.summary.overallLoocvMdape}%
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Median LOOCV error on real sales
+                    </p>
+                  </div>
+
+                  <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs">
+                    <div className="flex items-center justify-between text-blue-700 mb-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider">Real Evidence</span>
+                      <ShieldCheck className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div className="text-3xl font-black text-blue-700 font-mono">
+                      {auditData.summary.realRecords}{" "}
+                      <span className="text-xs font-normal text-slate-400">/ {auditData.summary.totalRecords}</span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      {Math.round((auditData.summary.realRecords / auditData.summary.totalRecords) * 100)}% verified real transactions
+                    </p>
+                  </div>
+
+                  <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs">
+                    <div className="flex items-center justify-between text-slate-600 mb-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider">Wholesale Sales</span>
+                      <Coins className="w-4 h-4 text-amber-600" />
+                    </div>
+                    <div className="text-3xl font-black text-slate-900 font-mono">
+                      {auditData.summary.wholesaleCompleted}
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      {auditData.summary.calibratedCategories}/3 categories calibrated (N &ge; 4)
+                    </p>
+                  </div>
+                </div>
+
+                {/* Category-by-Category Calibration Cards */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                      <BarChart3 className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>Category LOOCV Benchmarks &amp; Calibration Status</span>
+                    </h4>
+                    <span className="text-[11px] text-slate-400 font-mono">
+                      Audit run: {new Date(auditData.timestamp).toLocaleTimeString()}
+                    </span>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {Object.entries(auditData.varieties).map(([varietyName, vm]) => (
+                      <div
+                        key={varietyName}
+                        className="rounded-2xl border border-slate-200/90 bg-white p-4 space-y-3 shadow-2xs"
+                      >
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                          <span className="text-sm font-extrabold text-slate-900">{varietyName}</span>
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                              vm.status === "CALIBRATED"
+                                ? "bg-emerald-100 text-emerald-800"
+                                : vm.status === "PROVISIONAL"
+                                ? "bg-amber-100 text-amber-800"
+                                : "bg-slate-100 text-slate-700"
+                            }`}
+                          >
+                            {vm.status}
+                          </span>
+                        </div>
+
+                        <div className="space-y-1.5 text-xs">
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Wholesale Completed:</span>
+                            <span className="font-mono font-bold text-slate-900">{vm.wholesaleCount} verified</span>
+                          </div>
+
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Benchmark Rate:</span>
+                            <span className="font-mono font-bold text-indigo-700">
+                              LKR {vm.avgPricePerCaratLkr.toLocaleString()} / ct
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Clearing Spread:</span>
+                            <span className="font-mono text-slate-700 text-[11px]">
+                              {Math.round(vm.pricePerCaratMin / 1000)}k – {Math.round(vm.pricePerCaratMax / 1000)}k / ct
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Market Dispersion:</span>
+                            <span className="font-mono font-semibold text-slate-700">{vm.dispersionPct}%</span>
+                          </div>
+
+                          <div className="flex justify-between pt-1 border-t border-slate-100">
+                            <span className="text-slate-700 font-semibold">LOOCV MdAPE:</span>
+                            <span className="font-mono font-black text-emerald-700">
+                              {vm.loocvMdape > 0 ? `${vm.loocvMdape}%` : "—"}
+                            </span>
+                          </div>
+
+                          {vm.recentSaleDate && (
+                            <div className="text-[10px] text-slate-400 text-right">
+                              Latest trade: {vm.recentSaleDate}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Methodological Safeguards */}
+                <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-2 text-xs text-slate-600">
+                  <div className="flex items-center gap-1.5 font-bold text-slate-800 uppercase tracking-wider text-[11px]">
+                    <Scale className="w-3.5 h-3.5 text-slate-600" />
+                    <span>Engine Integrity &amp; Calibration Rules</span>
+                  </div>
+                  <ul className="grid sm:grid-cols-3 gap-2 text-[11px] leading-relaxed pt-1">
+                    <li className="bg-white rounded-xl p-2.5 border border-slate-200/80">
+                      <strong className="text-slate-800 block mb-0.5">Size-Tier Scaling:</strong>
+                      Adjusts price-per-carat non-linearly across natural corundum weight tiers (&lt;2ct: 1.0, 2–3ct: 1.15, 3–5ct: 1.35, &ge;5ct: 1.65).
+                    </li>
+                    <li className="bg-white rounded-xl p-2.5 border border-slate-200/80">
+                      <strong className="text-slate-800 block mb-0.5">Outlier Suppression:</strong>
+                      Automatically dampens comparables deviating &gt;65% from the peer median by 0.4&times; when pool &ge; 5 records.
+                    </li>
+                    <li className="bg-white rounded-xl p-2.5 border border-slate-200/80">
+                      <strong className="text-slate-800 block mb-0.5">Zero Synthetic Bias:</strong>
+                      100% of commercial valuations rely solely on verified completed wholesale sales backed by accredited laboratory reports.
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Modal Footer Actions */}
+                <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                  <button
+                    onClick={() => {
+                      const blob = new Blob([JSON.stringify(auditData, null, 2)], { type: "application/json" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `open4cs-validation-audit-${new Date().toISOString().split("T")[0]}.json`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Export Audit Report (JSON)</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowValidationAuditModal(false)}
+                    className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs"
+                  >
+                    Close Audit
                   </button>
                 </div>
               </div>

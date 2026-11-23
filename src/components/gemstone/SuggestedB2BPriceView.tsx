@@ -28,6 +28,7 @@ export type ContributingComparableProp = {
   treatmentMultiplier: number;
   originValue: string;
   originMultiplier: number;
+  sizeMultiplier?: number;
   adjustedPricePerCarat: number;
   similarityScore: number;
   effectiveWeight: number;

@@ -261,6 +261,8 @@ export async function POST(request: NextRequest) {
       originEvidence: body.originEvidence || "",
       reviewer: body.reviewer || access.user?.name || "CAGS Admin",
       reviewDate: body.reviewDate || new Date().toISOString().split("T")[0],
+      overallScore: body.overallScore !== undefined ? Number(body.overallScore) : null,
+      qualityGrade: body.qualityGrade || "",
     });
 
     const populatedReference = await ReferenceGemstone.findById(reference._id).lean();
