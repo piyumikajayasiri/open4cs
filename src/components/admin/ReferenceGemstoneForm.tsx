@@ -60,6 +60,7 @@ export type ReferenceFormData = {
   sourceEvidence: string;
   labCertificate: string;
   observationDate: string;
+  verificationStatus: "Verified" | "Pending";
 };
 
 interface VarietyBenchmark {
@@ -138,6 +139,7 @@ const initialFormData: ReferenceFormData = {
   sourceEvidence: "",
   labCertificate: "",
   observationDate: new Date().toISOString().split("T")[0],
+  verificationStatus: "Verified",
 };
 
 interface ReferenceGemstoneFormProps {
@@ -419,7 +421,7 @@ export default function ReferenceGemstoneForm({
         sourceEvidence: form.sourceEvidence.trim(),
         labCertificate: form.labCertificate.trim(),
         observationDate: form.observationDate,
-        verificationStatus: isEdit ? undefined : "Pending",
+        verificationStatus: isEdit ? undefined : form.verificationStatus,
         overallScore: autoScored4C?.overall4C?.score ?? null,
         qualityGrade: qualityGradeText,
       };
@@ -1085,20 +1087,66 @@ export default function ReferenceGemstoneForm({
           </div>
         )}
 
-        {/* Verification Status Notice */}
-        <div className="rounded-xl bg-slate-50 border border-slate-200 p-3.5 flex items-center justify-between text-xs">
-          <div>
-            <span className="font-bold text-slate-800">Verification State:</span>{" "}
-            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold ${
-              isEdit ? "bg-blue-50 text-blue-800 border border-blue-200" : "bg-amber-50 text-amber-800 border border-amber-200"
+        {/* Verification Status Selector & Engine Influence Notice */}
+        {!isEdit ? (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-800 mb-1">
+                  Pricing Engine Activation &amp; Verification State *
+                </label>
+                <p className="text-[11px] text-slate-500">
+                  Verified market records immediately calibrate B2B pricing comparables across the entire platform.
+                </p>
+              </div>
+
+              <div className="min-w-[240px]">
+                <ShadcnSelect
+                  id="ref-select-verificationStatus"
+                  value={form.verificationStatus}
+                  onValueChange={(val) => updateField("verificationStatus", val as "Verified" | "Pending")}
+                  options={[
+                    { value: "Verified", label: "Verified (Immediate Pricing Engine Activation)" },
+                    { value: "Pending", label: "Pending (Quarantine Awaiting Review)" },
+                  ]}
+                />
+              </div>
+            </div>
+
+            <div className={`rounded-xl p-3 text-xs flex items-center justify-between border ${
+              form.verificationStatus === "Verified"
+                ? "bg-emerald-50 text-emerald-900 border-emerald-200"
+                : "bg-amber-50 text-amber-900 border-amber-200"
             }`}>
-              {isEdit ? "Maintains Review Status" : "Pending"}
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold ${
+                  form.verificationStatus === "Verified"
+                    ? "bg-emerald-100 text-emerald-800"
+                    : "bg-amber-100 text-amber-800"
+                }`}>
+                  {form.verificationStatus === "Verified" ? "Active in Pricing Pool" : "Quarantined (Pending)"}
+                </span>
+                <span>
+                  {form.verificationStatus === "Verified"
+                    ? "Stored directly in MongoDB and immediately influences price suggestions for new evaluations without needing code updates."
+                    : "Requires authorized CAGS sign-off before influencing live valuation models."}
+                </span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-xl bg-slate-50 border border-slate-200 p-3.5 flex items-center justify-between text-xs">
+            <div>
+              <span className="font-bold text-slate-800">Verification State:</span>{" "}
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                Maintains Review Status
+              </span>
+            </div>
+            <span className="text-slate-500 text-[11px]">
+              Saves as new version in audit trail and preserves current engine calibration.
             </span>
           </div>
-          <span className="text-slate-500 text-[11px]">
-            {isEdit ? "Saves as new version in audit trail" : "Requires authorized CAGS sign-off before influencing pricing engine"}
-          </span>
-        </div>
+        )}
       </section>
 
       {/* Actions */}
