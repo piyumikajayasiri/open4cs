@@ -1,6 +1,6 @@
 # Open 4Cs — Gemstone Evaluation and Price Suggestion System
 
-[![Quality Assurance Tests](https://img.shields.io/badge/Tests-42%20Passed-brightgreen)](TEST_RESULTS.md)
+[![Quality Assurance Tests](https://img.shields.io/badge/Tests-48%20Passed-brightgreen)](TEST_RESULTS.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](tsconfig.json)
 [![Next.js](https://img.shields.io/badge/Next.js-16.3-black)](package.json)
 [![React](https://img.shields.io/badge/React-19.0-61dafb)](package.json)
