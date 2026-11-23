@@ -139,8 +139,7 @@ export default function MyEvaluationsPage() {
     <div className="min-h-screen bg-[#F8FAFC] flex font-sans text-slate-900">
       <PortalSidebar activeItem="my_evaluations" />
 
-      <main className="flex-1 lg:pl-64 flex flex-col min-h-screen">
-        <div className="p-6 lg:p-10 max-w-7xl w-full mx-auto space-y-6">
+      <main className="flex-1 p-6 lg:p-10 max-w-7xl mx-auto space-y-6 overflow-y-auto min-w-0">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-6">
             <div>
@@ -361,7 +360,6 @@ export default function MyEvaluationsPage() {
               })}
             </div>
           )}
-        </div>
       </main>
     </div>
   );
