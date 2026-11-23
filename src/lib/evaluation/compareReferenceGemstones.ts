@@ -15,10 +15,12 @@ export async function compareReferenceGemstones(
   const references: ReferenceForComparison[] =
     referenceGemstones.map((reference) => ({
       _id: reference._id.toString(),
+      referenceId: reference.referenceId,
       variety: reference.variety,
       caratWeight: reference.caratWeight,
       referencePrice: reference.referencePrice,
-      currency: reference.currency ?? "USD",
+      pricePerCarat: reference.pricePerCarat ?? (reference.caratWeight > 0 ? Math.round(reference.referencePrice / reference.caratWeight) : reference.referencePrice),
+      currency: reference.currency ?? "LKR",
 
       color: {
         hue: reference.color.hue,
@@ -50,8 +52,12 @@ export async function compareReferenceGemstones(
       treatment: reference.treatment ? { status: reference.treatment.status } : undefined,
       origin: reference.origin ? { value: reference.origin.value, reliability: reference.origin.reliability } : undefined,
       dataClassification: (reference.dataClassification as "Real" | "Demo") ?? "Demo",
-      transactionContext: (reference.transactionContext as "Completed Sale" | "Asking Price" | "Dealer Estimate") ?? "Dealer Estimate",
-      marketContext: (reference.marketContext as "Wholesale" | "Retail" | "Auction") ?? "Wholesale",
+      transactionContext: reference.transactionContext,
+      marketContext: reference.marketContext,
+      source: reference.source,
+      labCertificate: reference.labCertificate,
+      labName: reference.labName,
+      saleDate: reference.saleDate,
       sourceEvidence: reference.sourceEvidence,
       observationDate: reference.observationDate,
     }));

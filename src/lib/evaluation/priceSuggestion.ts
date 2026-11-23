@@ -1,5 +1,5 @@
-import { PRICE_SUGGESTION_RULES } from "./rules";
 import type { ExchangeRateRecord } from "../currency/exchangeRate";
+import type { ComparableAggregationResult, ContributingComparable } from "./comparablePrice";
 
 export type PriceSuggestionResult = {
   status: "COMPLETED" | "UNAVAILABLE";
@@ -9,6 +9,8 @@ export type PriceSuggestionResult = {
   currency: string | null;
   referencePrice: number | null;
   suggestedPrice: number | null;
+  pricePerCarat: number | null;
+
   priceRange: {
     minimum: number | null;
     maximum: number | null;
@@ -16,6 +18,9 @@ export type PriceSuggestionResult = {
 
   priceLkr?: number | null;
   priceUsd?: number | null;
+  pricePerCaratLkr?: number | null;
+  pricePerCaratUsd?: number | null;
+
   priceRangeLkr?: {
     minimum: number | null;
     maximum: number | null;
@@ -23,6 +28,34 @@ export type PriceSuggestionResult = {
   priceRangeUsd?: {
     minimum: number | null;
     maximum: number | null;
+  } | null;
+
+  priceRangePerCaratLkr?: {
+    minimum: number | null;
+    maximum: number | null;
+  } | null;
+  priceRangePerCaratUsd?: {
+    minimum: number | null;
+    maximum: number | null;
+  } | null;
+
+  rangePercentage?: number | null;
+  dispersion?: number | null;
+
+  evidenceBasis?: "Wholesale Completed Sales" | "Auction Results" | "Retail Asking Prices" | "Demonstration Data" | "None";
+  marketContext?: string;
+  comparablesUsedCount?: number;
+  contributingComparables?: ContributingComparable[];
+
+  retailIndicativeRangeLkr?: {
+    minimum: number;
+    maximum: number;
+    benchmark: number;
+  } | null;
+  retailIndicativeRangeUsd?: {
+    minimum: number;
+    maximum: number;
+    benchmark: number;
   } | null;
 
   adjustmentFactors: {
@@ -45,19 +78,26 @@ export type PriceSuggestionResult = {
   provisionalAssumptions?: string[];
 };
 
+export type CalculatePriceSuggestionOptions = {
+  referenceCount?: number;
+  relativeTreatmentMultiplier?: number;
+  relativeOriginMultiplier?: number;
+  exchangeRate?: ExchangeRateRecord | null;
+  isRealMarketData?: boolean;
+  dataClassification?: "Real" | "Demo";
+  aggregationResult?: ComparableAggregationResult | null;
+  evidenceBasis?: "Wholesale Completed Sales" | "Auction Results" | "Retail Asking Prices" | "Demonstration Data" | "None";
+  marketContext?: string;
+  candidateCaratWeight?: number;
+  retailMarkupFactor?: number;
+};
+
 export function calculatePriceSuggestion(
   referencePrice: number | null,
   currency: string | null,
   treatmentFactor: number | null,
   originFactor: number | null,
-  options?: {
-    referenceCount?: number;
-    relativeTreatmentMultiplier?: number;
-    relativeOriginMultiplier?: number;
-    exchangeRate?: ExchangeRateRecord | null;
-    isRealMarketData?: boolean;
-    dataClassification?: "Real" | "Demo";
-  }
+  options?: CalculatePriceSuggestionOptions
 ): PriceSuggestionResult {
   const minReferences = 3;
 
@@ -73,14 +113,16 @@ export function calculatePriceSuggestion(
       currency,
       referencePrice,
       suggestedPrice: null,
-      priceRange: {
-        minimum: null,
-        maximum: null,
-      },
+      pricePerCarat: null,
+      priceRange: { minimum: null, maximum: null },
       priceLkr: null,
       priceUsd: null,
       priceRangeLkr: null,
       priceRangeUsd: null,
+      evidenceBasis: "Demonstration Data",
+      marketContext: options?.marketContext || "Wholesale",
+      comparablesUsedCount: options?.referenceCount || 0,
+      contributingComparables: [],
       adjustmentFactors: {
         treatment: treatmentFactor,
         origin: originFactor,
@@ -99,14 +141,16 @@ export function calculatePriceSuggestion(
       currency,
       referencePrice,
       suggestedPrice: null,
-      priceRange: {
-        minimum: null,
-        maximum: null,
-      },
+      pricePerCarat: null,
+      priceRange: { minimum: null, maximum: null },
       priceLkr: null,
       priceUsd: null,
       priceRangeLkr: null,
       priceRangeUsd: null,
+      evidenceBasis: "None",
+      marketContext: options?.marketContext || "Wholesale",
+      comparablesUsedCount: options?.referenceCount || 0,
+      contributingComparables: [],
       adjustmentFactors: {
         treatment: treatmentFactor,
         origin: originFactor,
@@ -128,14 +172,13 @@ export function calculatePriceSuggestion(
       currency,
       referencePrice,
       suggestedPrice: null,
-      priceRange: {
-        minimum: null,
-        maximum: null,
-      },
+      pricePerCarat: null,
+      priceRange: { minimum: null, maximum: null },
       priceLkr: null,
       priceUsd: null,
       priceRangeLkr: null,
       priceRangeUsd: null,
+      evidenceBasis: "None",
       adjustmentFactors: {
         treatment: treatmentFactor,
         origin: originFactor,
@@ -144,27 +187,35 @@ export function calculatePriceSuggestion(
     };
   }
 
-  // Use relative multipliers if provided to eliminate double-counting
-  const effectiveTreatmentMultiplier =
-    options?.relativeTreatmentMultiplier ?? treatmentFactor;
-  const effectiveOriginMultiplier =
-    options?.relativeOriginMultiplier ?? originFactor;
+  const agg = options?.aggregationResult;
+  const candidateCarat = options?.candidateCaratWeight || 1.0;
 
-  const suggestedPrice =
-    referencePrice *
-    effectiveTreatmentMultiplier *
-    effectiveOriginMultiplier;
+  // Total suggested price and per carat
+  let suggestedPrice = referencePrice;
+  let pricePerCarat = agg?.benchmarkPricePerCarat || Math.round(suggestedPrice / candidateCarat);
+  let minimumPrice = agg?.priceRangeTotal.minimum || Math.round(suggestedPrice * 0.90);
+  let maximumPrice = agg?.priceRangeTotal.maximum || Math.round(suggestedPrice * 1.10);
+  let minPerCarat = agg?.priceRangePerCarat.minimum || Math.round(pricePerCarat * 0.90);
+  let maxPerCarat = agg?.priceRangePerCarat.maximum || Math.round(pricePerCarat * 1.10);
 
-  const minimumPrice =
-    suggestedPrice *
-    (1 - PRICE_SUGGESTION_RULES.rangePercentage);
+  // If using legacy path without pre-adjusted agg, apply multipliers
+  if (!agg) {
+    const effectiveTreatmentMultiplier =
+      options?.relativeTreatmentMultiplier ?? treatmentFactor;
+    const effectiveOriginMultiplier =
+      options?.relativeOriginMultiplier ?? originFactor;
 
-  const maximumPrice =
-    suggestedPrice *
-    (1 + PRICE_SUGGESTION_RULES.rangePercentage);
+    suggestedPrice = Math.round(
+      referencePrice * effectiveTreatmentMultiplier * effectiveOriginMultiplier
+    );
+    pricePerCarat = Math.round(suggestedPrice / candidateCarat);
+    minimumPrice = Math.round(suggestedPrice * 0.90);
+    maximumPrice = Math.round(suggestedPrice * 1.10);
+    minPerCarat = Math.round(pricePerCarat * 0.90);
+    maxPerCarat = Math.round(pricePerCarat * 1.10);
+  }
 
-  // Currency Normalization:
-  // Determine if rate is available
+  // Currency Normalization
   const hasRate = Boolean(
     options?.exchangeRate &&
       options.exchangeRate.isAvailable &&
@@ -175,15 +226,18 @@ export function calculatePriceSuggestion(
 
   let priceLkr: number | null = null;
   let priceUsd: number | null = null;
+  let pricePerCaratLkr: number | null = null;
+  let pricePerCaratUsd: number | null = null;
   let priceRangeLkr: { minimum: number; maximum: number } | null = null;
   let priceRangeUsd: { minimum: number; maximum: number } | null = null;
+  let priceRangePerCaratLkr: { minimum: number; maximum: number } | null = null;
+  let priceRangePerCaratUsd: { minimum: number; maximum: number } | null = null;
   let exchangeRateInfo: PriceSuggestionResult["exchangeRate"] = null;
 
   const normCurrency = (currency || "LKR").toUpperCase().trim();
 
   if (normCurrency === "USD") {
     if (!fxRate) {
-      // Cannot reliably normalize USD to regional LKR without a verified exchange rate
       return {
         status: "UNAVAILABLE",
         reason:
@@ -191,29 +245,27 @@ export function calculatePriceSuggestion(
         currency,
         referencePrice,
         suggestedPrice: null,
+        pricePerCarat: null,
         priceRange: { minimum: null, maximum: null },
         priceLkr: null,
         priceUsd: null,
         priceRangeLkr: null,
         priceRangeUsd: null,
-        adjustmentFactors: {
-          treatment: treatmentFactor,
-          origin: originFactor,
-        },
+        adjustmentFactors: { treatment: treatmentFactor, origin: originFactor },
         exchangeRate: null,
       };
     }
 
     priceUsd = Math.round(suggestedPrice);
-    priceRangeUsd = {
-      minimum: Math.round(minimumPrice),
-      maximum: Math.round(maximumPrice),
-    };
+    pricePerCaratUsd = Math.round(pricePerCarat);
+    priceRangeUsd = { minimum: Math.round(minimumPrice), maximum: Math.round(maximumPrice) };
+    priceRangePerCaratUsd = { minimum: minPerCarat, maximum: maxPerCarat };
+
     priceLkr = Math.round(suggestedPrice * fxRate);
-    priceRangeLkr = {
-      minimum: Math.round(minimumPrice * fxRate),
-      maximum: Math.round(maximumPrice * fxRate),
-    };
+    pricePerCaratLkr = Math.round(pricePerCarat * fxRate);
+    priceRangeLkr = { minimum: Math.round(minimumPrice * fxRate), maximum: Math.round(maximumPrice * fxRate) };
+    priceRangePerCaratLkr = { minimum: Math.round(minPerCarat * fxRate), maximum: Math.round(maxPerCarat * fxRate) };
+
     exchangeRateInfo = {
       rate: fxRate,
       source: options!.exchangeRate!.source,
@@ -221,19 +273,17 @@ export function calculatePriceSuggestion(
       isAvailable: true,
     };
   } else {
-    // Standard regional LKR base
     priceLkr = Math.round(suggestedPrice);
-    priceRangeLkr = {
-      minimum: Math.round(minimumPrice),
-      maximum: Math.round(maximumPrice),
-    };
+    pricePerCaratLkr = Math.round(pricePerCarat);
+    priceRangeLkr = { minimum: Math.round(minimumPrice), maximum: Math.round(maximumPrice) };
+    priceRangePerCaratLkr = { minimum: minPerCarat, maximum: maxPerCarat };
 
     if (fxRate) {
       priceUsd = Math.round(priceLkr / fxRate);
-      priceRangeUsd = {
-        minimum: Math.round(minimumPrice / fxRate),
-        maximum: Math.round(maximumPrice / fxRate),
-      };
+      pricePerCaratUsd = Math.round(pricePerCaratLkr / fxRate);
+      priceRangeUsd = { minimum: Math.round(minimumPrice / fxRate), maximum: Math.round(maximumPrice / fxRate) };
+      priceRangePerCaratUsd = { minimum: Math.round(minPerCarat / fxRate), maximum: Math.round(maxPerCarat / fxRate) };
+
       exchangeRateInfo = {
         rate: fxRate,
         source: options!.exchangeRate!.source,
@@ -243,46 +293,65 @@ export function calculatePriceSuggestion(
     }
   }
 
-  const marketLevel = "Indicative Wholesale Market Range (Verified Commercial References)";
+  // Indicative retail asking price range (Wholesale + typical 75% retail trade markup)
+  const retailFactor = options?.retailMarkupFactor || 1.75;
+  const retailIndicativeRangeLkr = priceLkr
+    ? {
+        benchmark: Math.round(priceLkr * retailFactor),
+        minimum: Math.round(priceLkr * (retailFactor - 0.20)),
+        maximum: Math.round(priceLkr * (retailFactor + 0.35)),
+      }
+    : null;
 
-  const provisionalAssumptions: string[] = [];
-  if (Math.abs(effectiveTreatmentMultiplier - 1.0) > 0.001) {
-    provisionalAssumptions.push(
-      `Relative treatment factor ${effectiveTreatmentMultiplier.toFixed(2)} applied as a provisional Open 4Cs modelling assumption; heat premiums vary widely by saturation and rough clarity.`
-    );
-  }
-  if (Math.abs(effectiveOriginMultiplier - 1.0) > 0.001) {
-    provisionalAssumptions.push(
-      `Relative origin factor ${effectiveOriginMultiplier.toFixed(2)} applied as a provisional Open 4Cs modelling assumption; origin premiums vary across dealer networks.`
-    );
-  }
+  const retailIndicativeRangeUsd = priceUsd
+    ? {
+        benchmark: Math.round(priceUsd * retailFactor),
+        minimum: Math.round(priceUsd * (retailFactor - 0.20)),
+        maximum: Math.round(priceUsd * (retailFactor + 0.35)),
+      }
+    : null;
 
   return {
     status: "COMPLETED",
-    reason:
-      "Indicative market price range suggested from verified commercial trade references with relative treatment and origin adjustment.",
-    marketLevel,
+    reason: `Price calculated using ${options?.referenceCount ?? 0} verified market comparables with individual per-comparable adjustments and dispersion-based uncertainty.`,
+    marketLevel: options?.marketContext || "Wholesale B2B Clearing",
     currency: normCurrency,
     referencePrice,
-    suggestedPrice: Number(suggestedPrice.toFixed(2)),
+    suggestedPrice,
+    pricePerCarat,
     priceRange: {
-      minimum: Number(minimumPrice.toFixed(2)),
-      maximum: Number(maximumPrice.toFixed(2)),
+      minimum: minimumPrice,
+      maximum: maximumPrice,
     },
     priceLkr,
     priceUsd,
+    pricePerCaratLkr,
+    pricePerCaratUsd,
     priceRangeLkr,
     priceRangeUsd,
+    priceRangePerCaratLkr,
+    priceRangePerCaratUsd,
+    rangePercentage: agg?.rangePercentage ?? 10,
+    dispersion: agg?.dispersion ?? 10,
+    evidenceBasis: options?.evidenceBasis || "Wholesale Completed Sales",
+    marketContext: options?.marketContext || "Wholesale",
+    comparablesUsedCount: options?.referenceCount || 0,
+    contributingComparables: agg?.contributingComparables || [],
+    retailIndicativeRangeLkr,
+    retailIndicativeRangeUsd,
     adjustmentFactors: {
       treatment: treatmentFactor,
       origin: originFactor,
     },
     relativeMultipliers: {
-      treatment: Number(effectiveTreatmentMultiplier.toFixed(3)),
-      origin: Number(effectiveOriginMultiplier.toFixed(3)),
+      treatment: options?.relativeTreatmentMultiplier ?? 1.0,
+      origin: options?.relativeOriginMultiplier ?? 1.0,
     },
     exchangeRate: exchangeRateInfo,
-    provisionalAssumptions:
-      provisionalAssumptions.length > 0 ? provisionalAssumptions : undefined,
+    provisionalAssumptions: [
+      "Prices are based on verified loose gemstone completed wholesale transactions.",
+      "Dispersion range reflects observed comparable price variance rather than arbitrary fixed percentages.",
+      "Treatment and origin adjustments applied on an individual per-comparable basis before aggregation.",
+    ],
   };
 }

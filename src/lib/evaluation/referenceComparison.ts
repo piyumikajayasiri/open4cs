@@ -2,15 +2,21 @@ import { FOUR_C_WEIGHTS } from "./rules";
 
 export type ReferenceGemstoneComparison = {
   referenceGemstoneId: string;
+  referenceId?: string;
   variety: string;
   caratWeight: number;
   referencePrice: number;
+  pricePerCarat?: number | null;
   currency: string;
   treatment?: { status: string };
   origin?: { value: string; reliability?: string };
   dataClassification?: "Real" | "Demo";
-  transactionContext?: "Completed Sale" | "Asking Price" | "Dealer Estimate";
+  transactionContext?: "Completed Sale" | "Auction Hammer" | "Auction Realised (With Premium)" | "Retail Asking Price" | "Dealer Quotation" | "Guide Estimate" | "Demonstration Data" | "Dealer Estimate";
   marketContext?: "Wholesale" | "Retail" | "Auction";
+  source?: string;
+  labCertificate?: string;
+  labName?: string;
+  saleDate?: string;
   sourceEvidence?: string;
   observationDate?: string;
 
@@ -318,15 +324,21 @@ export type GemstoneForComparison = {
 
 export type ReferenceForComparison = {
   _id: string;
+  referenceId?: string;
   variety: string;
   caratWeight: number;
   referencePrice: number;
+  pricePerCarat?: number | null;
   currency: string;
   treatment?: { status: string };
   origin?: { value: string; reliability?: string };
   dataClassification?: "Real" | "Demo";
-  transactionContext?: "Completed Sale" | "Asking Price" | "Dealer Estimate";
+  transactionContext?: "Completed Sale" | "Auction Hammer" | "Auction Realised (With Premium)" | "Retail Asking Price" | "Dealer Quotation" | "Guide Estimate" | "Demonstration Data" | "Dealer Estimate";
   marketContext?: "Wholesale" | "Retail" | "Auction";
+  source?: string;
+  labCertificate?: string;
+  labName?: string;
+  saleDate?: string;
   sourceEvidence?: string;
   observationDate?: string;
   color: ColorComparisonInput;
@@ -374,15 +386,21 @@ export function compareWithReference(
 
   return {
     referenceGemstoneId: reference._id,
+    referenceId: reference.referenceId,
     variety: reference.variety,
     caratWeight: reference.caratWeight,
     referencePrice: reference.referencePrice,
+    pricePerCarat: reference.pricePerCarat,
     currency: reference.currency,
     treatment: reference.treatment,
     origin: reference.origin,
     dataClassification: reference.dataClassification,
     transactionContext: reference.transactionContext,
     marketContext: reference.marketContext,
+    source: reference.source,
+    labCertificate: reference.labCertificate,
+    labName: reference.labName,
+    saleDate: reference.saleDate,
     sourceEvidence: reference.sourceEvidence,
     observationDate: reference.observationDate,
 

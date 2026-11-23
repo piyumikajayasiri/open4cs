@@ -42,8 +42,14 @@ export type ReportData = {
     currency: string | null;
     priceLkr?: number | null;
     priceUsd?: number | null;
+    pricePerCaratLkr?: number | null;
+    pricePerCaratUsd?: number | null;
     priceRangeLkr?: { minimum: number; maximum: number } | null;
     priceRangeUsd?: { minimum: number; maximum: number } | null;
+    priceRangePerCaratLkr?: { minimum: number; maximum: number } | null;
+    evidenceBasis?: string;
+    comparablesCount?: number;
+    pricingSnapshot?: Record<string, unknown> | null;
     exchangeRate?: {
       rate: number;
       source: string;
@@ -725,14 +731,15 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
       const maxUsd = report.priceSuggestion.priceRangeUsd?.maximum;
       const fx = report.priceSuggestion.exchangeRate;
 
+      const pricePerCaratLkr = report.priceSuggestion.pricePerCaratLkr || (report.gemstone.caratWeight > 0 ? Math.round(lkrPrice / report.gemstone.caratWeight) : null);
       const priceHeadline = (typeof usdPrice === "number" && usdPrice > 0)
-        ? `LKR ${formatMoneyNum(lkrPrice)}  (~ $${formatMoneyNum(usdPrice)} USD)`
-        : `LKR ${formatMoneyNum(lkrPrice)}`;
+        ? `LKR ${formatMoneyNum(lkrPrice)}  (~ $${formatMoneyNum(usdPrice)} USD)${pricePerCaratLkr ? ` · LKR ${formatMoneyNum(pricePerCaratLkr)}/ct` : ""}`
+        : `LKR ${formatMoneyNum(lkrPrice)}${pricePerCaratLkr ? ` · LKR ${formatMoneyNum(pricePerCaratLkr)}/ct` : ""}`;
 
       page2.drawText(priceHeadline, {
         x: margin + 16,
         y: y - 48,
-        size: 15,
+        size: 13,
         font: boldFont,
         color: emeraldDark,
       });
@@ -750,9 +757,10 @@ export async function generateEvaluationPdf(report: ReportData): Promise<Uint8Ar
         color: textDark,
       });
 
+      const basis = report.priceSuggestion.evidenceBasis || (isRealMarket ? "Verified Wholesale B2B Clearing Sales" : "Pedagogical Benchmark Records");
       const fxLine = (fx && fx.isAvailable && fx.rate > 0)
-        ? `Dated CBSL FX: 1 USD = ${fx.rate} LKR (${fx.asOfDate}) · Wholesale Dealer Clearing`
-        : `Primary currency: LKR (Secondary USD conversion omitted: dated official FX rate required)`;
+        ? `Basis: ${basis} · Dated CBSL FX: 1 USD = ${fx.rate} LKR (${fx.asOfDate})`
+        : `Basis: ${basis} · Regional LKR Benchmark Trading Currency`;
 
       page2.drawText(fxLine, {
         x: margin + 16,

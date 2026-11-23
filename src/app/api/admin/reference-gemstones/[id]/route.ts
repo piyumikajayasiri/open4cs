@@ -33,16 +33,13 @@ export async function GET(
 
     const { id } = await params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json(
-        { success: false, message: "Invalid reference gemstone ID" },
-        { status: 400 },
-      );
-    }
+    const query = mongoose.Types.ObjectId.isValid(id)
+      ? { _id: id }
+      : { referenceId: id.toUpperCase().trim() };
 
     await connectDB();
 
-    const reference = await ReferenceGemstone.findById(id)
+    const reference = await ReferenceGemstone.findOne(query)
       .populate(
         "gemstoneId",
         "code name species supportedOrigin supportedShapes",
@@ -88,19 +85,15 @@ export async function PUT(
     }
 
     const { id } = await params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json(
-        { success: false, message: "Invalid reference gemstone ID" },
-        { status: 400 },
-      );
-    }
-
     const body = await request.json();
 
     await connectDB();
 
-    const existing = await ReferenceGemstone.findById(id);
+    const query = mongoose.Types.ObjectId.isValid(id)
+      ? { _id: id }
+      : { referenceId: id.toUpperCase().trim() };
+
+    const existing = await ReferenceGemstone.findOne(query);
 
     if (!existing) {
       return NextResponse.json(
@@ -121,7 +114,7 @@ export async function PUT(
 
       const duplicate = await ReferenceGemstone.findOne({
         referenceId,
-        _id: { $ne: id },
+        _id: { $ne: existing._id },
       });
 
       if (duplicate) {
@@ -137,122 +130,196 @@ export async function PUT(
       existing.referenceId = referenceId;
     }
 
-    if (body.gemstoneId !== undefined) {
-      if (!mongoose.Types.ObjectId.isValid(body.gemstoneId)) {
-        return NextResponse.json(
-          { success: false, message: "Invalid gemstone" },
-          { status: 400 },
-        );
-      }
-
-      const gemstone = await Gemstone.findById(body.gemstoneId);
-
-      if (!gemstone) {
-        return NextResponse.json(
-          { success: false, message: "Selected gemstone does not exist" },
-          { status: 400 },
-        );
-      }
-
-      existing.gemstoneId = gemstone._id;
+    if (body.variety !== undefined) {
+      existing.variety = String(body.variety).trim();
     }
 
-    const stringFields = [
-      "origin",
-      "originVerification",
-      "color",
-      "clarity",
-      "cut",
-      "treatment",
-      "treatmentVerification",
-      "priceCurrency",
-      "verificationStatus",
+    if (body.species !== undefined) {
+      existing.species = String(body.species).trim();
+    }
+
+    if (body.naturalStatus !== undefined) {
+      existing.naturalStatus = body.naturalStatus;
+    }
+
+    if (body.shape !== undefined) {
+      existing.shape = String(body.shape).trim();
+    }
+
+    if (body.caratWeight !== undefined) {
+      const cw = Number(body.caratWeight);
+      if (isNaN(cw) || cw <= 0) {
+        return NextResponse.json(
+          { success: false, message: "Carat weight must be positive" },
+          { status: 400 }
+        );
+      }
+      existing.caratWeight = cw;
+    }
+
+    if (body.referencePrice !== undefined) {
+      const rp = Number(body.referencePrice);
+      if (isNaN(rp) || rp <= 0) {
+        return NextResponse.json(
+          { success: false, message: "Reference price must be positive" },
+          { status: 400 }
+        );
+      }
+      existing.referencePrice = rp;
+      existing.priceAmount = rp;
+    }
+
+    // Auto-compute price per carat
+    if (existing.caratWeight > 0 && existing.referencePrice > 0) {
+      existing.pricePerCarat = body.pricePerCarat
+        ? Number(body.pricePerCarat)
+        : Math.round(existing.referencePrice / existing.caratWeight);
+    }
+
+    if (body.currency !== undefined) {
+      existing.currency = String(body.currency).toUpperCase().trim();
+    }
+
+    // Sub-objects: color, clarity, cut, treatment, origin
+    if (body.color && typeof body.color === "object") {
+      existing.color = {
+        hue: body.color.hue || existing.color.hue,
+        tone: body.color.tone || existing.color.tone,
+        saturation: body.color.saturation || existing.color.saturation,
+        distribution: body.color.distribution || existing.color.distribution,
+        zoning: body.color.zoning || existing.color.zoning,
+      };
+    }
+
+    if (body.clarity && typeof body.clarity === "object") {
+      existing.clarity = {
+        nakedEye: body.clarity.nakedEye || existing.clarity.nakedEye,
+        loupe10x: body.clarity.loupe10x || existing.clarity.loupe10x,
+        inclusionType: body.clarity.inclusionType !== undefined ? body.clarity.inclusionType : existing.clarity.inclusionType,
+        inclusionLocation: body.clarity.inclusionLocation !== undefined ? body.clarity.inclusionLocation : existing.clarity.inclusionLocation,
+        severity: body.clarity.severity || existing.clarity.severity,
+      };
+    }
+
+    if (body.cut && typeof body.cut === "object") {
+      existing.cut = {
+        length: body.cut.length !== undefined ? Number(body.cut.length) || null : existing.cut.length,
+        width: body.cut.width !== undefined ? Number(body.cut.width) || null : existing.cut.width,
+        depth: body.cut.depth !== undefined ? Number(body.cut.depth) || null : existing.cut.depth,
+        symmetry: body.cut.symmetry || existing.cut.symmetry,
+        polish: body.cut.polish || existing.cut.polish,
+        windowing: body.cut.windowing || existing.cut.windowing,
+        extinction: body.cut.extinction || existing.cut.extinction,
+        bulging: body.cut.bulging || existing.cut.bulging,
+      };
+      existing.dimensions = {
+        length: existing.cut.length,
+        width: existing.cut.width,
+        depth: existing.cut.depth,
+      };
+    }
+
+    if (body.treatment && typeof body.treatment === "object") {
+      existing.treatment = {
+        status: body.treatment.status || existing.treatment.status,
+      };
+    }
+
+    if (body.origin && typeof body.origin === "object") {
+      existing.origin = {
+        value: body.origin.value || existing.origin.value,
+        reliability: body.origin.reliability || existing.origin.reliability,
+      };
+    }
+
+    const otherFields = [
+      "lotId",
+      "sourceColor",
+      "claritySystem",
+      "treatmentEvidence",
+      "claimedOrigin",
+      "labOrigin",
+      "originEvidence",
+      "labName",
+      "labReportNumber",
+      "labReportUrl",
+      "labCertificate",
+      "feesDisclosed",
+      "taxesDisclosed",
       "source",
-      "notes",
+      "sourceType",
+      "sourceUrl",
+      "publisher",
+      "evidenceNotes",
       "dataClassification",
-      "sourceEvidence",
-      "observationDate",
       "transactionContext",
       "marketContext",
-      "treatmentEvidence",
-      "originEvidence",
-      "reviewer",
-      "reviewDate",
+      "marketLocation",
+      "observationDate",
+      "saleDate",
+      "listingDate",
+      "photoUrl",
+      "photoAttribution",
+      "limitations",
+      "rejectionReason",
     ] as const;
 
-    for (const field of stringFields) {
-      if (body[field] !== undefined) {
-        existing[field] =
-          body[field] === null ? "" : String(body[field]).trim();
+    for (const f of otherFields) {
+      if (body[f] !== undefined) {
+        (existing as unknown as Record<string, unknown>)[f] = body[f];
       }
     }
 
-    const numberFields = [
-      "caratWeight",
-      "referencePrice",
-      "pricePerCarat",
-    ] as const;
-
-    for (const field of numberFields) {
-      if (body[field] !== undefined) {
-        if (
-          body[field] === "" ||
-          body[field] === null ||
-          body[field] === undefined
-        ) {
-          existing[field] = undefined;
-          continue;
-        }
-
-        const value = Number(body[field]);
-
-        if (!Number.isFinite(value) || value < 0) {
-          return NextResponse.json(
-            {
-              success: false,
-              message: `${field} must be a valid non-negative number`,
-            },
-            { status: 400 },
-          );
-        }
-
-        existing[field] = value;
+    if (body.verificationStatus !== undefined) {
+      existing.verificationStatus = body.verificationStatus;
+      if (body.verificationStatus === "Verified") {
+        existing.verifiedBy = session.name || "CAGS Admin";
+        existing.verifiedAt = new Date().toISOString();
+        existing.reviewer = session.name || "CAGS Admin";
+        existing.reviewDate = new Date().toISOString().split("T")[0];
       }
     }
 
     if (body.status !== undefined) {
-      if (!["ACTIVE", "INACTIVE"].includes(body.status)) {
-        return NextResponse.json(
-          { success: false, message: "Invalid status" },
-          { status: 400 },
-        );
-      }
-
       existing.status = body.status;
+      existing.isActive = body.status === "ACTIVE";
     }
+
+    // Increment version
+    existing.version = (existing.version || 1) + 1;
 
     await existing.save();
 
-    const updatedReference = await ReferenceGemstone.findById(existing._id)
-      .populate(
-        "gemstoneId",
-        "code name species supportedOrigin supportedShapes",
-      )
-      .lean();
+    try {
+      await AuditLog.create({
+        action: "UPDATE_REFERENCE_GEMSTONE",
+        entityType: "ReferenceGemstone",
+        entityId: existing._id,
+        performedBy: session.id,
+        userEmail: session.email,
+        details: {
+          referenceId: existing.referenceId,
+          version: existing.version,
+          updatedFields: Object.keys(body),
+        },
+        timestamp: new Date(),
+      });
+    } catch (logErr) {
+      console.error("Audit log error:", logErr);
+    }
+
+    const updated = await ReferenceGemstone.findById(existing._id).lean();
 
     return NextResponse.json({
       success: true,
-      reference: updatedReference,
+      message: `Reference ${existing.referenceId} updated (version ${existing.version}).`,
+      reference: updated,
     });
   } catch (error) {
     console.error("PUT reference gemstone error:", error);
-
     return NextResponse.json(
-      {
-        success: false,
-        message: "Failed to update reference gemstone",
-      },
-      { status: 500 },
+      { success: false, message: "Failed to update reference gemstone." },
+      { status: 500 }
     );
   }
 }
@@ -271,17 +338,13 @@ export async function DELETE(
     }
 
     const { id } = await params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json(
-        { success: false, message: "Invalid reference gemstone ID" },
-        { status: 400 },
-      );
-    }
-
     await connectDB();
 
-    const reference = await ReferenceGemstone.findById(id);
+    const query = mongoose.Types.ObjectId.isValid(id)
+      ? { _id: id }
+      : { referenceId: id.toUpperCase().trim() };
+
+    const reference = await ReferenceGemstone.findOne(query);
 
     if (!reference) {
       return NextResponse.json(
@@ -290,24 +353,35 @@ export async function DELETE(
       );
     }
 
-    // Soft delete / deactivate
+    // Soft delete / archive
     reference.status = "INACTIVE";
     reference.isActive = false;
+    reference.verificationStatus = "Archived";
     await reference.save();
+
+    try {
+      await AuditLog.create({
+        action: "ARCHIVE_REFERENCE_GEMSTONE",
+        entityType: "ReferenceGemstone",
+        entityId: reference._id,
+        performedBy: session.id,
+        userEmail: session.email,
+        details: { referenceId: reference.referenceId },
+        timestamp: new Date(),
+      });
+    } catch (logErr) {
+      console.error("Audit log error:", logErr);
+    }
 
     return NextResponse.json({
       success: true,
-      message: "Reference gemstone deactivated successfully",
+      message: `Reference gemstone '${reference.referenceId}' archived successfully.`,
     });
   } catch (error) {
     console.error("DELETE reference gemstone error:", error);
-
     return NextResponse.json(
-      {
-        success: false,
-        message: "Failed to deactivate reference gemstone",
-      },
-      { status: 500 },
+      { success: false, message: "Failed to archive reference gemstone" },
+      { status: 500 }
     );
   }
 }
@@ -331,19 +405,31 @@ export async function PATCH(
     const body = await request.json();
     const updateDoc: Record<string, unknown> = { ...body };
 
+    const reviewerName = admin.name || "CAGS Admin";
+    const timestamp = new Date().toISOString();
+
     if (body.verificationStatus === "Verified") {
-      const reviewerName = admin.name || "CAGS Admin";
-      const verifiedTimestamp = new Date().toISOString();
       updateDoc.verificationStatus = "Verified";
       updateDoc.verifiedBy = reviewerName;
-      updateDoc.verifiedAt = verifiedTimestamp;
+      updateDoc.verifiedAt = timestamp;
       updateDoc.reviewer = reviewerName;
-      updateDoc.reviewDate = verifiedTimestamp.split("T")[0];
+      updateDoc.reviewDate = timestamp.split("T")[0];
+      updateDoc.status = "ACTIVE";
+      updateDoc.isActive = true;
+    } else if (body.verificationStatus === "Rejected") {
+      updateDoc.verificationStatus = "Rejected";
+      updateDoc.rejectionReason = body.rejectionReason || "Criteria not met during peer review";
+      updateDoc.reviewer = reviewerName;
+      updateDoc.reviewDate = timestamp.split("T")[0];
+    } else if (body.verificationStatus === "Archived") {
+      updateDoc.verificationStatus = "Archived";
+      updateDoc.status = "INACTIVE";
+      updateDoc.isActive = false;
     }
 
     const query = mongoose.Types.ObjectId.isValid(id)
       ? { _id: id }
-      : { referenceId: id.toUpperCase() };
+      : { referenceId: id.toUpperCase().trim() };
 
     const updated = await ReferenceGemstone.findOneAndUpdate(
       query,
@@ -358,29 +444,27 @@ export async function PATCH(
       );
     }
 
-    if (body.verificationStatus === "Verified") {
-      try {
-        await AuditLog.create({
-          action: "VERIFY_REFERENCE_GEMSTONE",
-          entityType: "ReferenceGemstone",
-          entityId: updated._id,
-          performedBy: admin.id,
-          userEmail: admin.email,
-          details: {
-            referenceId: updated.referenceId,
-            verifiedBy: updateDoc.verifiedBy,
-            verifiedAt: updateDoc.verifiedAt,
-          },
-          timestamp: new Date(),
-        });
-      } catch (logErr) {
-        console.error("Audit log creation error:", logErr);
-      }
+    try {
+      await AuditLog.create({
+        action: `SET_STATUS_${String(body.verificationStatus || "UPDATED").toUpperCase()}`,
+        entityType: "ReferenceGemstone",
+        entityId: updated._id,
+        performedBy: admin.id,
+        userEmail: admin.email,
+        details: {
+          referenceId: updated.referenceId,
+          status: updated.verificationStatus,
+          rejectionReason: updateDoc.rejectionReason,
+        },
+        timestamp: new Date(),
+      });
+    } catch (logErr) {
+      console.error("Audit log creation error:", logErr);
     }
 
     return NextResponse.json({
       success: true,
-      message: "Reference record updated.",
+      message: `Reference record '${updated.referenceId}' updated to '${updated.verificationStatus}'.`,
       reference: updated,
     });
   } catch (err) {

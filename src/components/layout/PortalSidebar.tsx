@@ -161,6 +161,25 @@ export default function PortalSidebar({ activeItem = "my_evaluations" }: PortalS
               </Link>
             );
           })}
+
+          {user?.role === "CAGS_ADMIN" && (
+            <div className="pt-3 border-t border-slate-800/80">
+              <div className="px-3.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Governance
+              </div>
+              <Link
+                href="/admin/reference-gemstones"
+                className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800/60 hover:text-white transition"
+              >
+                <span className="text-amber-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </span>
+                <span>Reference Register</span>
+              </Link>
+            </div>
+          )}
         </nav>
       </div>
 

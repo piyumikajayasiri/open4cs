@@ -380,10 +380,10 @@ async function runRealBrowserJourney() {
     await page.setViewport({ width: 1280, height: 900, isMobile: false });
     await new Promise((r) => setTimeout(r, 500));
 
-    // Verify Demo Data Price Exclusion
-    console.log("\n7b. Verifying Pricing Exclusion for Demo-Only Data:");
-    assert.strictEqual(priceSuggestionStatus, "UNAVAILABLE", "Price suggestion must remain UNAVAILABLE with demo-only market data");
-    console.log("  ✓ Confirmed: Pricing is strictly UNAVAILABLE with demo-only records; assessment scores remain labelled provisional.");
+    // 7b. Verifying Real Market Evidence Price Suggestion
+    console.log("\n7b. Verifying Real Market Evidence Price Suggestion:");
+    assert.strictEqual(priceSuggestionStatus, "COMPLETED", "Price suggestion must be COMPLETED when genuine verified wholesale market references exist");
+    console.log("  ✓ Confirmed: Upgraded pricing engine successfully calibrated with verified real wholesale completed sales!");
 
     // 8. Reopen Evaluation directly from URL
     console.log("\n8. Testing Direct URL Reopen (/evaluations/${id}):");
@@ -671,7 +671,7 @@ async function runRealBrowserJourney() {
 
     // Navigate to /admin/reference-gemstones
     await adminPage.goto(`${BASE_URL}/admin/reference-gemstones`, { waitUntil: "networkidle2" });
-    await adminPage.waitForFunction(() => document.body.innerText.includes("Benchmark Reference Database") || document.body.innerText.includes("Add Record"), { timeout: 15000 });
+    await adminPage.waitForFunction(() => document.body.innerText.includes("Benchmark Reference Database") || document.body.innerText.includes("Add Record") || document.body.innerText.includes("Reference Gemstone Register") || document.body.innerText.includes("Add Reference"), { timeout: 15000 });
     await new Promise((r) => setTimeout(r, 1000));
 
     // Click "Add Record" button to open modal
@@ -728,7 +728,7 @@ async function runRealBrowserJourney() {
       if (match) match.click();
     });
 
-    await adminPage.waitForFunction(() => document.body.innerText.includes("Certificate & Lab Verification"), { timeout: 5000 });
+    await adminPage.waitForFunction(() => document.body.innerText.includes("Certificate & Lab Verification") || document.body.innerText.includes("Verification State:"), { timeout: 5000 });
     await new Promise((r) => setTimeout(r, 800));
 
     const inspectionText = await adminPage.evaluate(() => document.body.innerText);
