@@ -262,6 +262,8 @@ export async function PUT(
       "photoAttribution",
       "limitations",
       "rejectionReason",
+      "overallScore",
+      "qualityGrade",
     ] as const;
 
     for (const f of otherFields) {

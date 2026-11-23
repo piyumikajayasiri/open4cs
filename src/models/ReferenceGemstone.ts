@@ -421,6 +421,16 @@ const ReferenceGemstoneSchema = new Schema(
       ref: "ReferenceGemstone",
       default: null,
     },
+
+    overallScore: {
+      type: Number,
+      default: null,
+    },
+
+    qualityGrade: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

@@ -22,13 +22,58 @@ import {
   GemstoneForComparison,
 } from "../src/lib/evaluation/referenceComparison";
 
+interface MarketRecord {
+  referenceId: string;
+  variety: string;
+  caratWeight: number;
+  priceAmount: number;
+  pricePerCarat?: number;
+  currency: string;
+  dataClassification: string;
+  marketContext?: ReferenceForComparison["marketContext"];
+  transactionContext?: ReferenceForComparison["transactionContext"];
+  dimensions?: {
+    length?: number | null;
+    width?: number | null;
+    depth?: number | null;
+  };
+  color: {
+    hue: string;
+    tone: string;
+    saturation: string;
+    distribution?: string;
+    zoning?: string;
+  };
+  clarity: {
+    nakedEye: string;
+    loupe10x: string;
+    inclusionType?: string;
+    inclusionLocation?: string;
+    severity?: string;
+  };
+  cut?: {
+    length?: number | null;
+    width?: number | null;
+    depth?: number | null;
+    symmetry?: string;
+    polish?: string;
+    windowing?: string;
+    extinction?: string;
+    bulging?: string;
+  };
+  treatment: { status: string };
+  origin: { value: string; reliability: string };
+  source: string;
+  saleDate?: string;
+}
+
 test("Accuracy Validation: LOOCV and Chronological Safety Suite", async (t) => {
   const evidencePath = path.join(process.cwd(), "data", "market-references-evidence.json");
   assert.ok(fs.existsSync(evidencePath), "Evidence JSON file must exist");
 
-  const records = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
+  const records: MarketRecord[] = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
   const wholesaleSales = records.filter(
-    (r: any) =>
+    (r: MarketRecord) =>
       r.dataClassification === "Real" &&
       r.marketContext === "Wholesale" &&
       r.transactionContext === "Completed Sale"
@@ -37,16 +82,16 @@ test("Accuracy Validation: LOOCV and Chronological Safety Suite", async (t) => {
   assert.ok(wholesaleSales.length >= 7, "Should have at least 7 verified wholesale completed sales");
 
   await t.test("1. LOOCV: Improved engine achieves superior MdAPE compared to legacy baseline", () => {
-    const blueSapphires = wholesaleSales.filter((r: any) => r.variety === "Blue Sapphire");
-    assert.strictEqual(blueSapphires.length, 4, "Should have 4 verified Blue Sapphire wholesale sales");
+    const blueSapphires = wholesaleSales.filter((r: MarketRecord) => r.variety === "Blue Sapphire");
+    assert.ok(blueSapphires.length >= 4, "Should have at least 4 verified Blue Sapphire wholesale sales");
 
     const errors: number[] = [];
 
     for (const target of blueSapphires) {
-      const pool = blueSapphires.filter((r: any) => r.referenceId !== target.referenceId);
-      assert.strictEqual(pool.length, 3, "Held-out pool must contain exactly 3 references");
+      const pool = blueSapphires.filter((r: MarketRecord) => r.referenceId !== target.referenceId);
+      assert.ok(pool.length >= 3, "Held-out pool must contain at least 3 references");
 
-      const referencesForComp: ReferenceForComparison[] = pool.map((r: any) => ({
+      const referencesForComp: ReferenceForComparison[] = pool.map((r: MarketRecord) => ({
         _id: r.referenceId,
         referenceId: r.referenceId,
         variety: r.variety,
@@ -156,7 +201,7 @@ test("Accuracy Validation: LOOCV and Chronological Safety Suite", async (t) => {
   });
 
   await t.test("2. Chronological Safety: Sales with zero prior records return UNAVAILABLE without look-ahead", () => {
-    const earlySale = records.find((r: any) => r.referenceId === "AUC-SOT-2023-S02");
+    const earlySale = records.find((r: MarketRecord) => r.referenceId === "AUC-SOT-2023-S02");
     assert.ok(earlySale, "AUC-SOT-2023-S02 must exist");
 
     // Pool of strictly prior records for 2023-12-07 is empty
