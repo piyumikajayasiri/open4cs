@@ -64,15 +64,16 @@ export default function AdminSidebar({ pathname, user }: AdminSidebarProps) {
   }
 
   const initials =
-    user.name
-      ?.split(" ")
+    user?.name
+      ?.trim()
+      ?.split(/\s+/)
       .map((part) => part[0])
       .join("")
       .slice(0, 2)
       .toUpperCase() || "AD";
 
   return (
-    <aside className="w-64 bg-[#07131D] text-slate-200 flex flex-col shrink-0 border-r border-slate-800/80 min-h-screen">
+    <aside className="fixed inset-y-0 left-0 z-30 w-64 bg-[#07131D] text-slate-200 flex flex-col shrink-0 border-r border-slate-800/80 h-screen">
       {/* Brand Header */}
       <div className="p-4 border-b border-slate-800/80">
         <div className="flex items-center gap-3">
