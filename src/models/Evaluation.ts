@@ -2,27 +2,16 @@ import mongoose, { Schema } from "mongoose";
 
 const EvaluationSchema = new Schema(
   {
-    schemaVersion: { type: Number, default: 1 },
-    evaluationId: { type: String, required: true },
-    submissionKey: { type: String, required: true },
-    inputHash: { type: String, required: true },
-    dataKind: { type: String, enum: ["MOCK", "REFERENCE"], default: "MOCK", required: true },
-    inputSnapshot: { type: Schema.Types.Mixed, required: true },
-    ruleSnapshot: { type: Schema.Types.Mixed, required: true },
-    recordSnapshots: { type: [Schema.Types.Mixed], default: [] },
-    catalogueSnapshot: Schema.Types.Mixed,
-    guidanceSnapshot: Schema.Types.Mixed,
-    userCategory: String,
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      default: null,
     },
 
     gemstoneId: {
       type: Schema.Types.ObjectId,
       ref: "Gemstone",
-      default: null,
+      required: true,
     },
 
     ruleVersion: {
@@ -54,15 +43,29 @@ const EvaluationSchema = new Schema(
       type: Schema.Types.Mixed,
       default: null,
     },
+
+    exchangeRate: {
+      type: Schema.Types.Mixed,
+      default: null,
+    },
+
+    photoUrl: {
+      type: String,
+      default: "",
+    },
+
+    assessmentSnapshot: {
+      type: Schema.Types.Mixed,
+      default: null,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-EvaluationSchema.index({ evaluationId: 1 }, { name: "evaluation_public_id", unique: true, sparse: true });
-EvaluationSchema.index({ userId: 1, submissionKey: 1 }, { name: "evaluation_owner_submission", unique: true, partialFilterExpression: { submissionKey: { $type: "string" } } });
-EvaluationSchema.index({ userId: 1, createdAt: -1, _id: -1 });
+EvaluationSchema.index({ userId: 1, createdAt: -1 });
+EvaluationSchema.index({ gemstoneId: 1 });
 
 const Evaluation =
   mongoose.models.Evaluation ||

@@ -1,2 +1,5 @@
-import EnginePolicy from "@/components/admin/EnginePolicy";
-export default function OriginDataPage() { return <EnginePolicy kind="origin" />; }
+import { redirect } from "next/navigation";
+
+export default function OriginDataRedirect() {
+  redirect("/admin/reference-gemstones");
+}

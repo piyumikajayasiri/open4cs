@@ -1,0 +1,150 @@
+"use client";
+
+import React, { useMemo, useEffect, Suspense } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEvaluationDraft } from "@/context/EvaluationDraftContext";
+import BasicInformation, { GEMSTONE_VARIETIES } from "@/components/gemstone/BasicInformation";
+import { ArrowRight, RotateCcw, Play } from "lucide-react";
+
+function GemstoneStepContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { draft, updateDraft, resetDraft } = useEvaluationDraft();
+
+  // If URL has ?variety=..., preselect that variety (e.g. from Gemstone Guide)
+  useEffect(() => {
+    const varietyParam = searchParams.get("variety");
+    if (varietyParam) {
+      const lower = varietyParam.toLowerCase();
+      if (lower.includes("ruby")) {
+        updateDraft({ variety: "Ruby" });
+      } else if (lower.includes("pad")) {
+        updateDraft({ variety: "Padparadscha" });
+      } else if (lower.includes("blue")) {
+        updateDraft({ variety: "Blue Sapphire" });
+      }
+    }
+  }, [searchParams, updateDraft]);
+
+  const isSupportedVariety = useMemo(() => {
+    const found = GEMSTONE_VARIETIES.find(
+      (v) =>
+        v.id.toLowerCase() === draft.variety.toLowerCase() ||
+        v.name.toLowerCase() === draft.variety.toLowerCase() ||
+        (draft.variety.toLowerCase().includes("blue") && v.id === "Blue Sapphire") ||
+        (draft.variety.toLowerCase().includes("pad") && v.id === "Padparadscha") ||
+        (draft.variety.toLowerCase().includes("ruby") && v.id === "Ruby")
+    );
+    return found ? found.isSupported : false;
+  }, [draft.variety]);
+
+  const hasExistingDraft = Boolean(draft.variety && (draft.caratWeight || draft.hue || draft.length));
+
+  const handleStartNew = () => {
+    resetDraft();
+  };
+
+  const handleContinue = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isSupportedVariety) {
+      alert("Evaluation is currently supported only for Blue Sapphire, Padparadscha, and Ruby.");
+      return;
+    }
+    router.push("/evaluate/color");
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Step Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-5">
+        <div>
+          <span className="text-xs font-extrabold uppercase tracking-widest text-blue-600">
+            Step 1 of 7 · Gemstone Category & Origin Nature
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
+            Gemstone Variety & Photographic Evidence
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Select the corundum variety, natural geological status, and attach optional photographic references.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          {hasExistingDraft && (
+            <>
+              <button
+                type="button"
+                onClick={() => router.push("/evaluate/color")}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 text-xs font-semibold text-white hover:bg-blue-700 transition shadow-2xs cursor-pointer"
+              >
+                <Play className="w-3.5 h-3.5" />
+                <span>Resume Draft</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleStartNew}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition shadow-2xs cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
+                <span>Start New</span>
+              </button>
+            </>
+          )}
+
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            Draft active
+          </span>
+        </div>
+      </div>
+
+      <form onSubmit={handleContinue} className="space-y-8">
+        <BasicInformation
+          variety={draft.variety}
+          onVarietyChange={(val) => updateDraft({ variety: val })}
+          gemstoneCode={draft.stoneId}
+          onGemstoneCodeChange={(val) => updateDraft({ stoneId: val })}
+          naturalStatus={draft.naturalStatus || "Not specified"}
+          onNaturalStatusChange={(val) => updateDraft({ naturalStatus: val })}
+          shape={draft.shape || "Oval · Mixed Cut"}
+          onShapeChange={(val) => updateDraft({ shape: val })}
+          photoUrl={draft.photoUrl || ""}
+          onPhotoChange={(val) => updateDraft({ photoUrl: val })}
+        />
+
+        {/* Navigation Action Buttons */}
+        <div className="flex items-center justify-between pt-6 border-t border-slate-200">
+          <Link
+            href="/dashboard"
+            className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+          >
+            Cancel & Exit
+          </Link>
+
+          <button
+            type="submit"
+            disabled={!isSupportedVariety}
+            className={`inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md transition ${
+              isSupportedVariety
+                ? "bg-blue-600 hover:bg-blue-700 shadow-blue-500/20 cursor-pointer"
+                : "bg-slate-300 text-slate-500 cursor-not-allowed shadow-none"
+            }`}
+          >
+            <span>Continue to Color Evaluation</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+export default function GemstoneStepPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-slate-500">Loading gemstone selection...</div>}>
+      <GemstoneStepContent />
+    </Suspense>
+  );
+}

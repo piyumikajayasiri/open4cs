@@ -1,23 +1,11 @@
-import mongoose, { Schema, type InferSchemaType, type Model } from "mongoose";
-
-export const USER_CATEGORIES = ["STUDENT", "TRADER", "GEMOLOGIST", "PROFESSIONAL"] as const;
-export const USER_ROLES = ["USER", "ADMIN"] as const;
-export const USER_STATUSES = ["ACTIVE", "INACTIVE"] as const;
-export type UserCategory = (typeof USER_CATEGORIES)[number];
+import mongoose, { Schema } from "mongoose";
 
 const UserSchema = new Schema(
   {
-    organization: { type: String, trim: true, maxlength: 150, default: "" },
-    preferences: { dashboardActivity: { type: Boolean, default: true }, showLearningHints: { type: Boolean, default: true } },
-    learningProgress: { type: [String], default: [] },
-    sessionVersion: { type: Number, default: 0, select: false },
-    deletedAt: { type: Date, default: null }, deletedBy: String,
     name: {
       type: String,
       required: true,
       trim: true,
-      minlength: 2,
-      maxlength: 100,
     },
 
     email: {
@@ -26,7 +14,6 @@ const UserSchema = new Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      maxlength: 254,
     },
 
     passwordHash: {
@@ -37,29 +24,54 @@ const UserSchema = new Schema(
 
     category: {
       type: String,
-      enum: USER_CATEGORIES,
-      trim: true,
-      uppercase: true,
+      enum: [
+        "Student",
+        "Trader",
+        "Gemologist",
+        "Professional",
+      ],
       required: true,
+    },
+
+    organization: {
+      type: String,
+      default: "Perera Gems · Beruwala",
+      trim: true,
+    },
+
+    preferredLanguage: {
+      type: String,
+      default: "English",
+    },
+
+    reportCurrency: {
+      type: String,
+      default: "LKR — Sri Lankan Rupee",
+    },
+
+    notifications: {
+      evaluationComplete: { type: Boolean, default: true },
+      referenceDataUpdates: { type: Boolean, default: true },
+      ruleVersionChanges: { type: Boolean, default: true },
+      weeklyMarketDigest: { type: Boolean, default: false },
     },
 
     role: {
       type: String,
-      enum: USER_ROLES,
+      enum: ["USER", "CAGS_ADMIN"],
       default: "USER",
       required: true,
     },
 
-    // Retained while older account records are migrated.
-    isActive: { type: Boolean },
-
     status: {
       type: String,
-      enum: USER_STATUSES,
-      default: function () {
-        return this.isActive === false ? "INACTIVE" : "ACTIVE";
-      },
-      required: true,
+      enum: ["ACTIVE", "SUSPENDED"],
+      default: "ACTIVE",
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
     },
   },
   {
@@ -67,10 +79,54 @@ const UserSchema = new Schema(
   }
 );
 
-type UserRecord = InferSchemaType<typeof UserSchema>;
-
-const User: Model<UserRecord> =
+const User =
   mongoose.models.User ||
   mongoose.model("User", UserSchema);
+
+export interface SafeUserDTO {
+  id: string;
+  name: string;
+  email: string;
+  category: string;
+  organization?: string;
+  preferredLanguage?: string;
+  reportCurrency?: string;
+  role: "USER" | "CAGS_ADMIN";
+  status: "ACTIVE" | "SUSPENDED";
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export function toSafeUserDTO(user: {
+  _id?: unknown;
+  id?: unknown;
+  name?: string;
+  email?: string;
+  category?: string;
+  organization?: string;
+  preferredLanguage?: string;
+  reportCurrency?: string;
+  role?: string;
+  status?: string;
+  isActive?: boolean;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+}): SafeUserDTO {
+  return {
+    id: user._id ? String(user._id) : String(user.id || ""),
+    name: user.name || "",
+    email: user.email || "",
+    category: user.category || "Professional",
+    organization: user.organization || "",
+    preferredLanguage: user.preferredLanguage || "English",
+    reportCurrency: user.reportCurrency || "LKR — Sri Lankan Rupee",
+    role: (user.role as "USER" | "CAGS_ADMIN") || "USER",
+    status: (user.status as "ACTIVE" | "SUSPENDED") || "ACTIVE",
+    isActive: user.isActive !== false,
+    createdAt: user.createdAt ? new Date(user.createdAt).toISOString() : undefined,
+    updatedAt: user.updatedAt ? new Date(user.updatedAt).toISOString() : undefined,
+  };
+}
 
 export default User;

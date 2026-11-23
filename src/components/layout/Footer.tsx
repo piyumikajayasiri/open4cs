@@ -6,7 +6,17 @@ import { usePathname } from "next/navigation";
 export default function Footer() {
   const pathname = usePathname();
 
-  if (pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin") || pathname?.startsWith("/evaluate") || pathname?.startsWith("/catalogue")) {
+  if (
+    pathname?.startsWith("/dashboard") ||
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/evaluate") ||
+    pathname?.startsWith("/evaluations") ||
+    pathname?.startsWith("/history") ||
+    pathname?.startsWith("/compare") ||
+    pathname?.startsWith("/catalogue") ||
+    pathname?.startsWith("/settings") ||
+    pathname?.startsWith("/guide")
+  ) {
     return null;
   }
 
@@ -31,10 +41,10 @@ export default function Footer() {
 
         {/* Links */}
         <nav className="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-300">
-          <Link href="/learn" className="hover:text-white transition">
+          <Link href="/about" className="hover:text-white transition">
             About
           </Link>
-          <Link href="/learn" className="hover:text-white transition">
+          <Link href="/contact" className="hover:text-white transition">
             Contact
           </Link>
           <Link href="/learn" className="hover:text-white transition">

@@ -1,2 +1,5 @@
-import EnginePolicy from "@/components/admin/EnginePolicy";
-export default function TreatmentDataPage() { return <EnginePolicy kind="treatment" />; }
+import { redirect } from "next/navigation";
+
+export default function TreatmentDataRedirect() {
+  redirect("/admin/reference-gemstones");
+}

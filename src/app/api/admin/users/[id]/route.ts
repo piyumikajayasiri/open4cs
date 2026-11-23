@@ -1,177 +1,145 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Types } from "mongoose";
 import mongoose from "mongoose";
-import AdminAudit from "@/models/AdminAudit";
-import { requireUserDeletion, userAuditSnapshot } from "@/lib/admin/policy";
-import { adminRoute, AdminError } from "@/lib/admin/server";
-import { auth } from "@/auth";
-import { connectDB } from "@/lib/mongodb";
-import User, { USER_CATEGORIES, USER_ROLES, USER_STATUSES } from "@/models/User";
+import { getCurrentUser } from "@/lib/auth/currentUser";
+import { connectToDatabase } from "@/lib/mongodb";
+import User, { toSafeUserDTO } from "@/models/User";
+import AuditLog from "@/models/AuditLog";
 
-const CATEGORIES = USER_CATEGORIES;
-
-const ROLES = USER_ROLES;
-const STATUSES = USER_STATUSES;
-
-async function isAdmin() {
-  const session = await auth();
-  return Boolean(session?.user?.id && session.user.role === "ADMIN");
-}
-
-type RouteContext = {
-  params: Promise<{ id: string }>;
-};
-
-export async function GET(_request: NextRequest, context: RouteContext) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    if (!(await isAdmin())) {
-      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    const admin = await getCurrentUser(request);
+    if (!admin || admin.role !== "CAGS_ADMIN") {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await context.params;
-
-    if (!Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ message: "Invalid user ID" }, { status: 400 });
+    const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ success: false, message: "Invalid user ID" }, { status: 400 });
     }
 
-    await connectDB();
-
-    const user = await User.findOne({ _id: id, deletedAt: null }).select("-passwordHash").lean();
-
+    await connectToDatabase();
+    const user = await User.findById(id).select("-passwordHash -password").lean();
     if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
-    }
-
-    return NextResponse.json({ user });
-  } catch (error) {
-    console.error("GET admin user:", error);
-    return NextResponse.json(
-      { message: "Unable to load user" },
-      { status: 500 },
-    );
-  }
-}
-
-export async function PATCH(request: NextRequest, context: RouteContext) {
-  try {
-    const session = await auth();
-
-    if (!session?.user?.id || session.user.role !== "ADMIN") {
-      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-    }
-
-    const { id } = await context.params;
-
-    if (!Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ message: "Invalid user ID" }, { status: 400 });
-    }
-
-    const body = await request.json();
-    const updates: Record<string, string> = {};
-
-    if (body.name !== undefined) {
-      if (
-        typeof body.name !== "string" ||
-        body.name.trim().length < 2 ||
-        body.name.trim().length > 100
-      ) {
-        return NextResponse.json({ message: "Invalid name" }, { status: 400 });
-      }
-      updates.name = body.name.trim();
-    }
-
-    if (body.category !== undefined) {
-      if (!CATEGORIES.includes(body.category)) {
-        return NextResponse.json(
-          { message: "Invalid category" },
-          { status: 400 },
-        );
-      }
-      updates.category = body.category;
-    }
-
-    if (body.role !== undefined) {
-      if (!ROLES.includes(body.role)) {
-        return NextResponse.json({ message: "Invalid role" }, { status: 400 });
-      }
-      updates.role = body.role;
-    }
-
-    if (body.status !== undefined) {
-      if (!STATUSES.includes(body.status)) {
-        return NextResponse.json(
-          { message: "Invalid status" },
-          { status: 400 },
-        );
-      }
-      updates.status = body.status;
-    }
-
-    // Do not allow an administrator to deactivate or demote themselves.
-    if (id.toLowerCase() === session.user.id.toLowerCase()) {
-      if (
-        (updates.role && updates.role !== "ADMIN") ||
-        (updates.status && updates.status !== "ACTIVE")
-      ) {
-        return NextResponse.json(
-          { message: "You cannot remove your own administrator access." },
-          { status: 400 },
-        );
-      }
-    }
-
-    await connectDB();
-
-    await AdminAudit.init();
-    const auditSession = await mongoose.startSession();
-    let user;
-    try {
-      user = await auditSession.withTransaction(async () => {
-        const before = await User.findOne({ _id: id, deletedAt: null }).select("-passwordHash").session(auditSession);
-        if (!before) return null;
-        const updated = await User.findOneAndUpdate({ _id: id, deletedAt: null }, { $set: updates }, { new: true, runValidators: true, session: auditSession }).select("-passwordHash");
-        if (!updated) return null;
-        await AdminAudit.create([{ actorId: session.user.id, actorName: session.user.name || "Administrator", action: "USER_UPDATED", entity: "USER", entityId: id,
-          summary: `Updated account ${updated.name}.`, before: userAuditSnapshot(before.toObject()), after: userAuditSnapshot(updated.toObject()) }], { session: auditSession });
-        return updated;
-      });
-    } finally { await auditSession.endSession(); }
-
-    if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+      return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
     }
 
     return NextResponse.json({
-      message: "User updated successfully",
-      user,
+      success: true,
+      user: toSafeUserDTO(user),
     });
   } catch (error) {
-    console.error("PATCH admin user:", error);
-    return NextResponse.json(
-      { message: "Unable to update user" },
-      { status: 500 },
-    );
+    console.error("GET admin user by ID error:", error);
+    return NextResponse.json({ success: false, message: "Failed to load user" }, { status: 500 });
   }
 }
 
-export async function DELETE(request: Request, context: RouteContext) {
-  return adminRoute(request, async (actor) => {
-    const { id } = await context.params;
-    if (!Types.ObjectId.isValid(id)) throw new AdminError("Invalid user ID.");
-    try { requireUserDeletion(id, actor.id); } catch (error) { throw new AdminError(error instanceof Error ? error.message : "Cannot delete this account.", 409); }
-    await AdminAudit.init();
-    const session = await mongoose.startSession();
-    try {
-      await session.withTransaction(async () => {
-        const user = await User.findOne({ _id: id, deletedAt: null }).session(session);
-        if (!user) throw new AdminError("Account was not found or has already been deleted.", 404);
-        const before = userAuditSnapshot(user.toObject());
-        user.status = "INACTIVE"; user.deletedAt = new Date(); user.deletedBy = actor.id;
-        await user.save({ session });
-        await AdminAudit.create([{ actorId: actor.id, actorName: actor.name, action: "USER_DELETED", entity: "USER", entityId: id,
-          summary: `Deleted account ${user.name}; sign-in disabled.`, before, after: userAuditSnapshot(user.toObject()) }], { session });
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const admin = await getCurrentUser(request);
+    if (!admin || admin.role !== "CAGS_ADMIN") {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ success: false, message: "Invalid user ID" }, { status: 400 });
+    }
+
+    await connectToDatabase();
+    const body = await request.json();
+
+    const updateDoc: Record<string, unknown> = {};
+
+    if (typeof body.status === "string" && ["ACTIVE", "SUSPENDED"].includes(body.status.toUpperCase())) {
+      updateDoc.status = body.status.toUpperCase();
+      updateDoc.isActive = body.status.toUpperCase() === "ACTIVE";
+    }
+
+    if (typeof body.role === "string" && ["USER", "CAGS_ADMIN"].includes(body.role.toUpperCase())) {
+      updateDoc.role = body.role.toUpperCase();
+    }
+
+    if (typeof body.category === "string") {
+      updateDoc.category = body.category.trim();
+    }
+
+    if (Object.keys(updateDoc).length === 0) {
+      return NextResponse.json({ success: false, message: "No valid update fields" }, { status: 400 });
+    }
+
+    const targetUser = await User.findById(id);
+    if (!targetUser) {
+      return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
+    }
+
+    // Protection: Prevent admin from suspending their own active session
+    if (admin.id === id && updateDoc.status === "SUSPENDED") {
+      return NextResponse.json(
+        { success: false, message: "Administrators cannot suspend their own account." },
+        { status: 400 }
+      );
+    }
+
+    // Protection: Prevent demoting or suspending the last active CAGS_ADMIN
+    if (
+      targetUser.role === "CAGS_ADMIN" &&
+      (updateDoc.role === "USER" || updateDoc.status === "SUSPENDED")
+    ) {
+      const activeAdminCount = await User.countDocuments({
+        role: "CAGS_ADMIN",
+        status: "ACTIVE",
+        isActive: { $ne: false },
       });
-      return NextResponse.json({ success: true });
-    } finally { await session.endSession(); }
-  });
+
+      if (activeAdminCount <= 1) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Cannot suspend or demote the last remaining active CAGS Administrator.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    const updated = await User.findByIdAndUpdate(
+      id,
+      { $set: updateDoc },
+      { new: true }
+    )
+      .select("-passwordHash -password")
+      .lean();
+
+    if (!updated) {
+      return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
+    }
+
+    await AuditLog.create({
+      action: "USER_STATUS_CHANGED",
+      performedBy: {
+        userId: admin.id,
+        name: admin.name,
+        email: admin.email,
+      },
+      targetType: "User",
+      targetId: id,
+      summary: `${admin.name} updated user ${targetUser.name}: ${Object.keys(updateDoc).join(", ")}`,
+      details: updateDoc,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: `User ${targetUser.name} updated.`,
+      user: toSafeUserDTO(updated),
+    });
+  } catch (error) {
+    console.error("PATCH admin user error:", error);
+    return NextResponse.json({ success: false, message: "Failed to update user" }, { status: 500 });
+  }
 }

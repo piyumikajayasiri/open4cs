@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
@@ -18,9 +19,24 @@ const userSchema = new mongoose.Schema(
       unique: true,
     },
     passwordHash: String,
-    category: String,
-    role: String,
-    status: String,
+    category: {
+      type: String,
+      enum: ["Student", "Trader", "Gemologist", "Professional"],
+      default: "Professional",
+    },
+    role: {
+      type: String,
+      enum: ["USER", "CAGS_ADMIN"],
+      default: "CAGS_ADMIN",
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    status: {
+      type: String,
+      default: "ACTIVE",
+    },
   },
   { timestamps: true },
 );
@@ -29,28 +45,40 @@ const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 await mongoose.connect(uri);
 
-const email = "admin@open4cs.local";
-const password = "ChangeMe123!";
+const email = (process.env.ADMIN_EMAIL || "admin@open4cs.local").trim().toLowerCase();
+const password = process.env.ADMIN_PASSWORD || crypto.randomBytes(12).toString("base64") + "!Aa1";
 
 const existing = await User.findOne({ email });
 
 if (existing) {
-  console.log("Admin already exists.");
+  existing.role = "CAGS_ADMIN";
+  existing.category = "Professional";
+  existing.isActive = true;
+  existing.status = "ACTIVE";
+  if (process.env.ADMIN_PASSWORD) {
+    existing.passwordHash = await bcrypt.hash(password, 12);
+  }
+  await existing.save();
+  console.log(`[SECURE PROVISIONING] Admin account ${email} synchronized (role: CAGS_ADMIN, status: ACTIVE).`);
 } else {
   const passwordHash = await bcrypt.hash(password, 12);
 
   await User.create({
-    name: "CAGS Administrator",
+    name: process.env.ADMIN_NAME || "CAGS Administrator",
     email,
     passwordHash,
-    category: "PROFESSIONAL",
-    role: "ADMIN",
+    category: "Professional",
+    role: "CAGS_ADMIN",
+    isActive: true,
     status: "ACTIVE",
   });
 
-  console.log("Admin created successfully.");
-  console.log("Email:", email);
-  console.log("Password:", password);
+  console.log(`[SECURE PROVISIONING] CAGS Administrator provisioned successfully for ${email}.`);
+  if (!process.env.ADMIN_PASSWORD) {
+    // Only displayed once on initial setup when no env variable was supplied
+    console.log(`[ONE-TIME INITIAL CREDENTIALS] Temporary password: ${password}`);
+    console.log(`[ACTION REQUIRED] Store this securely and set ADMIN_PASSWORD in your environment.`);
+  }
 }
 
 await mongoose.disconnect();

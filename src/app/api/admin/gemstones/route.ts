@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { getCurrentUser } from "@/lib/auth/currentUser";
 import { connectDB } from "@/lib/mongodb";
 import Gemstone from "@/models/Gemstone";
-import { catalogueWriteFields } from "@/lib/evaluation/catalogue-config";
 
 async function checkAdmin() {
-  const session = await auth();
+  const user = await getCurrentUser();
 
-  if (!session?.user) {
+  if (!user) {
     return {
       authorized: false,
       status: 401,
@@ -15,16 +14,17 @@ async function checkAdmin() {
     };
   }
 
-  if (session.user.role !== "ADMIN") {
+  if (user.role !== "CAGS_ADMIN") {
     return {
       authorized: false,
       status: 403,
-      message: "Admin access required.",
+      message: "CAGS Admin access required.",
     };
   }
 
   return {
     authorized: true,
+    user,
   };
 }
 
@@ -97,6 +97,7 @@ export async function POST(request: NextRequest) {
       code,
       name,
       species,
+      supportedShapes,
       supportedOrigin,
       description,
       status,
@@ -147,11 +148,17 @@ export async function POST(request: NextRequest) {
     const gemstone = await Gemstone.create({
       code: normalizedCode,
       name: String(name).trim(),
+      species: String(species).trim(),
+
+      supportedShapes: Array.isArray(supportedShapes)
+        ? supportedShapes.map((shape) => String(shape).trim()).filter(Boolean)
+        : [],
+
+      supportedOrigin: finalOrigin,
 
       description: description ? String(description).trim() : undefined,
 
       status: finalStatus,
-      ...catalogueWriteFields({ ...body, _id: "", name: String(name).trim(), species: String(species).trim(), supportedOrigin: finalOrigin, status: finalStatus }),
     });
 
     return NextResponse.json(

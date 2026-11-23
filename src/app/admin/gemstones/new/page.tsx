@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ShadcnSelect } from "@/components/ui/select";
 
 const SHAPES = [
   "Oval",
@@ -10,6 +11,10 @@ const SHAPES = [
   "Cushion",
   "Pear",
   "Emerald",
+  "Princess",
+  "Radiant",
+  "Marquise",
+  "Cabochon",
 ];
 
 export default function NewGemstonePage() {
@@ -60,18 +65,24 @@ export default function NewGemstonePage() {
     try {
       setLoading(true);
 
-      const response = await fetch("/api/admin/gemstones", {
+      const response = await fetch("/api/admin/gemstone-varieties", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          name: form.name,
+          species: form.species,
+          description: form.description,
+          supportedShapes: form.supportedShapes,
+          isActive: form.status === "ACTIVE",
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to create gemstone.");
+        throw new Error(data.error || data.message || "Failed to create gemstone variety.");
       }
 
       router.push("/admin/gemstones");
@@ -290,19 +301,21 @@ export default function NewGemstonePage() {
                   </p>
                 </div>
 
-                <select
-                  value={form.status}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      status: e.target.value,
-                    })
-                  }
-                  className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
-                >
-                  <option value="ACTIVE">Active</option>
-                  <option value="INACTIVE">Inactive</option>
-                </select>
+                <div className="w-40">
+                  <ShadcnSelect
+                    value={form.status}
+                    onValueChange={(val) =>
+                      setForm({
+                        ...form,
+                        status: val,
+                      })
+                    }
+                    options={[
+                      { value: "ACTIVE", label: "Active" },
+                      { value: "INACTIVE", label: "Inactive" },
+                    ]}
+                  />
+                </div>
               </div>
             </section>
 

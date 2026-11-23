@@ -3,9 +3,6 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,60 +10,41 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
+  const [rememberMe, setRememberMe] = useState(true);
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showContactAdmin, setShowContactAdmin] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     setError("");
-    const errors: { email?: string; password?: string } = {};
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) || email.trim().length > 254) errors.email = "Enter a valid email address.";
-    if (!password) errors.password = "Enter your password.";
-    setFieldErrors(errors);
-    if (Object.keys(errors).length) {
-      document.getElementById(errors.email ? "email" : "password")?.focus();
-      return;
-    }
     setLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        email: email.trim().toLowerCase(),
-        password,
-        redirect: false,
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       });
 
-      if (!result || !result.ok || result.error) {
-        setError("Invalid email or password.");
-        return;
-      }
-
-      const response = await fetch("/api/auth/session", {
-        cache: "no-store",
-      });
+      const data = await response.json();
 
       if (!response.ok) {
-        setError("Unable to retrieve your session.");
+        setError(data.error ?? "Invalid email or password.");
         return;
       }
 
-      const session = await response.json();
-      const loggedInEmail = session?.user?.email?.trim().toLowerCase();
-      const enteredEmail = email.trim().toLowerCase();
-
-      if (!loggedInEmail || loggedInEmail !== enteredEmail) {
-        setError("The session does not match the account you entered.");
-        return;
-      }
-
-      router.replace(
-        session.user.role === "ADMIN" ? "/admin/dashboard" : "/dashboard",
-      );
+      // Successful login -> Redirect to dashboard
+      router.push("/dashboard");
       router.refresh();
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch {
       setError("An error occurred during login. Please try again.");
     } finally {
       setLoading(false);
@@ -76,13 +54,17 @@ export default function LoginPage() {
   return (
     <main className="min-h-[calc(100vh-80px)] bg-[#F8FAFC] py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="w-full max-w-4xl bg-white rounded-3xl shadow-xl overflow-hidden grid lg:grid-cols-2 border border-slate-100 min-h-[580px]">
+        
         {/* Left Column: Form Panel */}
         <div className="p-8 sm:p-10 flex flex-col justify-between">
           <div>
             {/* Logo & Brand Header */}
             <div className="flex items-center gap-3 mb-8">
               <div className="w-9 h-9 rounded-xl bg-[#0B132B] flex items-center justify-center text-sky-400 shadow-md">
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <svg
+                  className="w-5 h-5 fill-current"
+                  viewBox="0 0 24 24"
+                >
                   <path d="M12 2L2 9l10 13L22 9L12 2zm0 3.2L18.6 9 12 18.2 5.4 9 12 5.2z" />
                 </svg>
               </div>
@@ -107,7 +89,7 @@ export default function LoginPage() {
             </div>
 
             {/* Login Form */}
-            <form noValidate onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label
                   htmlFor="email"
@@ -115,21 +97,17 @@ export default function LoginPage() {
                 >
                   Email
                 </label>
-                <Input
+                <input
                   id="email"
-                  autoComplete="email"
-                  aria-invalid={Boolean(fieldErrors.email)}
-                  aria-describedby={fieldErrors.email ? "login-email-error" : undefined}
                   type="email"
                   value={email}
-                  onChange={(e) => { setEmail(e.target.value); setFieldErrors((previous) => ({ ...previous, email: undefined })); }}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="nimal@traders.lk"
                   required
                   className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 placeholder:text-slate-400"
                 />
               </div>
 
-              {fieldErrors.email && <p id="login-email-error" role="alert" className="text-sm text-destructive">{fieldErrors.email}</p>}
               <div>
                 <label
                   htmlFor="password"
@@ -138,14 +116,11 @@ export default function LoginPage() {
                   Password
                 </label>
                 <div className="relative">
-                  <Input
+                  <input
                     id="password"
-                    autoComplete="current-password"
-                    aria-invalid={Boolean(fieldErrors.password)}
-                    aria-describedby={fieldErrors.password ? "login-password-error" : undefined}
                     type={showPassword ? "text" : "password"}
                     value={password}
-                    onChange={(e) => { setPassword(e.target.value); setFieldErrors((previous) => ({ ...previous, password: undefined })); }}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
                     required
                     className="w-full rounded-xl border border-slate-300 px-4 py-2.5 pr-10 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 placeholder:text-slate-400"
@@ -157,78 +132,73 @@ export default function LoginPage() {
                     title={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? (
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858-5.908a10.046 10.046 0 012.122-.363c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m-3.269 1.126a3.001 3.001 0 01-4.243-4.243m4.243 4.243L3 3l18 18"
-                        />
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858-5.908a10.046 10.046 0 012.122-.363c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m-3.269 1.126a3.001 3.001 0 01-4.243-4.243m4.243 4.243L3 3l18 18" />
                       </svg>
                     ) : (
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                        />
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
                     )}
                   </button>
                 </div>
               </div>
 
-              {fieldErrors.password && <p id="login-password-error" role="alert" className="text-sm text-destructive">{fieldErrors.password}</p>}
               {/* Options Row */}
               <div className="flex items-center justify-between text-xs sm:text-sm pt-1">
-<span className="text-slate-500">Use your registered email.</span>
+                <label className="flex items-center gap-2 cursor-pointer text-slate-700 font-medium select-none">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span>Remember me</span>
+                </label>
 
-                <a
-                  href="#forgot-password"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    alert(
-                      "Please contact your system administrator or CAGS panel to reset your password.",
-                    );
-                  }}
-                  className="font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+                <button
+                  type="button"
+                  onClick={() => setShowContactAdmin(true)}
+                  className="font-semibold text-blue-600 hover:text-blue-700 transition cursor-pointer"
                 >
-                  Forgot Password?
-                </a>
+                  Contact administrator
+                </button>
               </div>
+
+              {showContactAdmin && (
+                <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 space-y-2 text-xs text-blue-900">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold">Password Reset & Account Assistance</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowContactAdmin(false)}
+                      className="text-slate-400 hover:text-slate-700 font-bold"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <p className="leading-relaxed">
+                    To maintain strict laboratory security and student privacy, passwords can be reset by a certified CAGS administrator. Please email <strong>admin@open4cs.app</strong> with your registered email and institution ID.
+                  </p>
+                </div>
+              )}
 
               {/* Error Message */}
               {error && (
-                <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+                <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
                   {error}
                 </div>
               )}
 
               {/* Submit Button */}
-              <Button
+              <button
                 type="submit"
                 disabled={loading}
                 className="w-full bg-[#0B132B] hover:bg-[#1C2A4D] text-white font-semibold py-3 rounded-xl shadow-md text-sm transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
               >
                 {loading ? "Signing in..." : "Login"}
-              </Button>
+              </button>
             </form>
 
             {/* Create Account Link */}
@@ -255,8 +225,7 @@ export default function LoginPage() {
               <path strokeWidth="2" d="M12 8v4m0 4h.01" />
             </svg>
             <span>
-              Outputs are suggested B2B market price ranges for valuation and
-              reference — not certifications or guaranteed prices.
+              Outputs are suggested B2B market price ranges for valuation and reference — not certifications or guaranteed prices.
             </span>
           </div>
         </div>
@@ -265,16 +234,8 @@ export default function LoginPage() {
         <div className="bg-[#070D1E] p-8 sm:p-10 flex-col justify-end text-white relative overflow-hidden hidden lg:flex">
           {/* Subtle Background Graphics Watermark */}
           <div className="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center">
-            <svg
-              className="w-80 h-80 text-blue-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeWidth="0.5"
-                d="M12 2L2 9l10 13L22 9L12 2zm0 3.2L18.6 9 12 18.2 5.4 9 12 5.2z"
-              />
+            <svg className="w-80 h-80 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeWidth="0.5" d="M12 2L2 9l10 13L22 9L12 2zm0 3.2L18.6 9 12 18.2 5.4 9 12 5.2z" />
             </svg>
           </div>
 
@@ -285,8 +246,7 @@ export default function LoginPage() {
             </div>
 
             <h2 className="text-xl sm:text-2xl font-bold text-white leading-snug">
-              “Every score traces back to a published rule and a real reference
-              stone.”
+              “Every score traces back to a published rule and a real reference stone.”
             </h2>
 
             <p className="text-xs text-slate-400 font-medium">
@@ -294,6 +254,7 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
+
       </div>
     </main>
   );

@@ -1,67 +1,78 @@
-import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { validateAccount } from "@/lib/account-validation";
-import { connectDB } from "@/lib/mongodb";
-import User, { type UserCategory } from "@/models/User";
 
+import { connectToDatabase } from "@/lib/mongodb";
+import User from "@/models/User";
 
-export async function POST(request: NextRequest) {
+const ALLOWED_CATEGORIES = [
+  "Student",
+  "Trader",
+  "Gemologist",
+  "Professional",
+];
+
+export async function POST(request: Request) {
   try {
-    let body;
-    try { body = await request.json(); } catch {
-      return NextResponse.json({ message: "Invalid request body." }, { status: 400 });
-    }
-    if (!body || typeof body !== "object" || Array.isArray(body)) {
-      return NextResponse.json({ message: "Invalid request body." }, { status: 400 });
-    }
-    const errors = validateAccount({ ...body, category: body.category ?? body.userCategory ?? body.selectedCategory });
-    if (Object.keys(errors).length) {
-      return NextResponse.json({ success: false, message: "Please correct the highlighted fields.", errors }, { status: 400 });
-    }
+    const data = await request.json();
 
-    const name = typeof body.name === "string" ? body.name.trim() : "";
-    const email =
-      typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-    const password = typeof body.password === "string" ? body.password : "";
-    const rawCategory =
-      body.category ?? body.userCategory ?? body.selectedCategory;
+    const name = data.name?.trim();
+    const email = data.email?.trim().toLowerCase();
+    const password = data.password;
+    const category = data.category;
 
-    const category =
-      typeof rawCategory === "string" ? rawCategory.trim().toUpperCase() : "";
-
-    // Connect to the database
-    await connectDB();
-
-    // Check for an existing account
-    const existingUser = await User.findOne({ email }).select("_id");
-
-    if (existingUser) {
-      return NextResponse.json(
+    if (!name || !email || !password || !category) {
+      return Response.json(
         {
-          success: false,
-          message: "An account with this email already exists.",
+          error:
+            "Name, email, password, and category are required.",
         },
-        { status: 409 },
+        { status: 400 }
       );
     }
 
-    // Hash the password before saving it
+    if (!ALLOWED_CATEGORIES.includes(category)) {
+      return Response.json(
+        { error: "Invalid user category." },
+        { status: 400 }
+      );
+    }
+
+    if (password.length < 8) {
+      return Response.json(
+        {
+          error:
+            "Password must contain at least 8 characters.",
+        },
+        { status: 400 }
+      );
+    }
+
+    await connectToDatabase();
+
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return Response.json(
+        {
+          error:
+            "An account with this email already exists.",
+        },
+        { status: 409 }
+      );
+    }
+
     const passwordHash = await bcrypt.hash(password, 12);
 
-    // Public registration always creates a normal user
     const user = await User.create({
       name,
       email,
       passwordHash,
-      category: category as UserCategory,
+      category,
       role: "USER",
-      status: "ACTIVE",
     });
 
-    return NextResponse.json(
+    return Response.json(
       {
-        success: true,
-        message: "Account created successfully. You can now sign in.",
+        message: "Registration successful.",
         user: {
           id: user._id.toString(),
           name: user.name,
@@ -70,30 +81,14 @@ export async function POST(request: NextRequest) {
           role: user.role,
         },
       },
-      { status: 201 },
+      { status: 201 }
     );
-  } catch (error: unknown) {
-    // Handle duplicate email race conditions
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "code" in error &&
-      error.code === 11000
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "An account with this email already exists.",
-        },
-        { status: 409 },
-      );
-    }
+  } catch (error) {
+    console.error("Registration failed:", error);
 
-    console.error("Registration error:", error);
-
-    return NextResponse.json(
-      { success: false, message: "Registration failed. Please try again." },
-      { status: 500 },
+    return Response.json(
+      { error: "Registration failed." },
+      { status: 500 }
     );
   }
 }

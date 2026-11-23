@@ -1,23 +1,40 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import SessionProvider from "@/components/providers/SessionProvider";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import "./globals.css";
 
-const geistSans = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: "Open 4Cs | Gemstone Evaluation",
-  description: "Gemstone evaluation, reference comparisons and estimated B2B price suggestions.",
+const geistSans = {
+  variable: "--font-geist-sans",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+const geistMono = {
+  variable: "--font-geist-mono",
+};
+
+export const metadata: Metadata = {
+  title: "Open 4Cs | Gemstone Evaluation & B2B Price Suggestion",
+  description:
+    "An educational gemstone evaluation and price suggestion system based on the 4Cs: Color, Clarity, Cut, and Carat Weight.",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
-        <SessionProvider>{children}</SessionProvider>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body
+        suppressHydrationWarning
+        className="min-h-screen flex flex-col bg-[var(--background)] text-[var(--foreground)]"
+      >
+        <Header />
+        <div className="flex-1">{children}</div>
+        <Footer />
       </body>
     </html>
   );

@@ -1,15 +1,94 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import mongoose from "mongoose";
+import { verifySessionToken } from "@/lib/auth/session";
+import { connectToDatabase } from "@/lib/mongodb";
 import Evaluation from "@/models/Evaluation";
-import { evaluationRoute } from "@/lib/evaluation/user-route";
-import { evaluationDetail, ownedEvaluationFilter } from "@/lib/evaluation/submission";
+import Gemstone from "@/models/Gemstone";
+import User from "@/models/User";
 
-export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
-  return evaluationRoute(request, async (user) => {
+if (!mongoose.models.Gemstone) {
+  void Gemstone;
+}
+
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    let sessionToken: string | undefined;
+    try {
+      const cookieStore = await cookies();
+      sessionToken = cookieStore.get("session")?.value;
+    } catch {
+      sessionToken = request.cookies.get("session")?.value;
+    }
+    if (!sessionToken) {
+      sessionToken = request.cookies.get("session")?.value;
+    }
+
+    if (!sessionToken) {
+      return NextResponse.json(
+        { error: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
+    const session = await verifySessionToken(sessionToken);
+    if (!session) {
+      return NextResponse.json(
+        { error: "Invalid or expired session." },
+        { status: 401 }
+      );
+    }
+
     const { id } = await context.params;
-    if (!/^[0-9a-f]{24}$/i.test(id)) return NextResponse.json({ message: "Invalid evaluation identifier." }, { status: 400 });
-    const document = await Evaluation.findOne(ownedEvaluationFilter(user.id, id)).lean();
-    // Do not distinguish another user's record from a record that does not exist.
-    if (!document) return NextResponse.json({ message: "Evaluation was not found." }, { status: 404 });
-    return NextResponse.json({ evaluation: evaluationDetail(document) });
-  });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { error: "Invalid evaluation ID." },
+        { status: 400 }
+      );
+    }
+
+    await connectToDatabase();
+
+    const activeUser = await User.findById(session.userId).select("status isActive role");
+    if (!activeUser || activeUser.isActive === false || activeUser.status === "SUSPENDED") {
+      return NextResponse.json(
+        { error: "Account is inactive or suspended." },
+        { status: 403 }
+      );
+    }
+
+    const evaluation = await Evaluation.findById(id)
+      .populate("gemstoneId")
+      .lean();
+
+    if (!evaluation) {
+      return NextResponse.json(
+        { error: "Evaluation not found." },
+        { status: 404 }
+      );
+    }
+
+    // Ownership & Privacy Enforcement: Users can only view their own evaluations unless CAGS_ADMIN
+    const evaluationUserId = (evaluation as { userId?: mongoose.Types.ObjectId | string }).userId?.toString();
+    const isOwner = evaluationUserId === session.userId;
+    const isCagsAdmin = session.role === "CAGS_ADMIN";
+
+    if (!isOwner && !isCagsAdmin) {
+      return NextResponse.json(
+        { error: "Access denied. You do not have permission to view this evaluation." },
+        { status: 403 }
+      );
+    }
+
+    return NextResponse.json({ success: true, evaluation });
+  } catch (error) {
+    console.error("Failed to load evaluation:", error);
+    return NextResponse.json(
+      { error: "Server error loading evaluation." },
+      { status: 500 }
+    );
+  }
 }

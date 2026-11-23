@@ -1,2 +1,5 @@
-import DataRecords from "@/components/admin/DataRecords";
-export default function HistoricalPricingPage() { return <DataRecords initialDataset="MOCK" />; }
+import { redirect } from "next/navigation";
+
+export default function HistoricalPricingRedirect() {
+  redirect("/admin/reference-gemstones");
+}

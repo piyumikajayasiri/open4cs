@@ -3,8 +3,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 export type GemstoneStatus = "ACTIVE" | "INACTIVE";
 
 export interface IGemstone extends Document {
-  evaluationVariety?: "RUBY" | "SAPPHIRE";
-  supportedHues?: string[];
+  userId?: mongoose.Types.ObjectId | string;
   code?: string;
   name?: string;
   species?: string;
@@ -58,14 +57,20 @@ export interface IGemstone extends Document {
     treatment?: string;
     origin?: string;
   };
+  photoUrl?: string;
+  naturalStatus?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const gemstoneSchema = new Schema<IGemstone>(
   {
-    evaluationVariety: { type: String, enum: ["RUBY", "SAPPHIRE"] },
-    supportedHues: { type: [String], default: [] },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      index: true,
+      default: null,
+    },
     code: {
       type: String,
       trim: true,
@@ -160,11 +165,15 @@ const gemstoneSchema = new Schema<IGemstone>(
         default: "Unverified",
       },
     },
+    photoUrl: { type: String, default: "" },
+    naturalStatus: { type: String, default: "Natural" },
   },
   {
     timestamps: true,
   }
 );
+
+gemstoneSchema.index({ userId: 1, createdAt: -1 });
 
 const Gemstone: Model<IGemstone> =
   mongoose.models.Gemstone ||

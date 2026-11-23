@@ -1,6 +1,5 @@
-import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-
+import { getCurrentUser } from "@/lib/auth/currentUser";
 import AdminShell from "./AdminShell";
 
 export default async function AdminLayout({
@@ -8,23 +7,19 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-
-  // User is not logged in
-  if (!session?.user) {
-    redirect("/login");
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login?callbackUrl=/admin");
   }
-
-  // User is logged in but is not an admin
-  if (session.user.role !== "ADMIN") {
-    redirect("/dashboard");
+  if (user.role !== "CAGS_ADMIN") {
+    redirect("/dashboard?error=admin_required");
   }
 
   return (
     <AdminShell
       user={{
-        name: session.user.name || "CAGS Admin",
-        email: session.user.email || "admin@cags.lk",
+        name: user.name,
+        email: user.email,
       }}
     >
       {children}

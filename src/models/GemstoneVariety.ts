@@ -15,6 +15,28 @@ const GemstoneVarietySchema = new Schema(
       trim: true,
     },
 
+    species: {
+      type: String,
+      default: "Corundum",
+      trim: true,
+    },
+
+    supportedShapes: {
+      type: [String],
+      default: ["Oval", "Round"],
+    },
+
+    ruleVersion: {
+      type: String,
+      default: "v4.2",
+      trim: true,
+    },
+
+    referenceCount: {
+      type: Number,
+      default: 0,
+    },
+
     isActive: {
       type: Boolean,
       default: true,

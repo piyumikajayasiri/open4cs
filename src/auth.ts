@@ -1,4 +1,3 @@
-import { sessionVersionMatches } from "@/lib/account-settings";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
@@ -38,15 +37,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         await connectDB();
 
-        const email = String(credentials.email).trim().toLowerCase();
+        const email = String(credentials.email).toLowerCase();
 
-        const user = await User.findOne({ email }).select("+passwordHash +sessionVersion");
+        const user = await User.findOne({ email }).select("+passwordHash");
 
         if (!user) {
           return null;
         }
 
-        if (user.deletedAt || user.status !== "ACTIVE") {
+        if (user.isActive === false || (user.status && user.status !== "ACTIVE")) {
           return null;
         }
 
@@ -65,7 +64,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           role: user.role,
           category: user.category,
-          sessionVersion: user.sessionVersion || 0,
         };
       },
     }),
@@ -77,16 +75,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.userId = user.id;
         token.role = user.role;
         token.category = user.category;
-        token.sessionVersion = user.sessionVersion || 0;
-      }
-
-      // Recheck access so deactivation and role changes affect existing sessions.
-      if (token.userId) {
-        await connectDB();
-        const current = await User.findById(token.userId).select("name email role category status isActive deletedAt +sessionVersion").lean();
-        if (!current || current.deletedAt || (current.status ?? (current.isActive === false ? "INACTIVE" : "ACTIVE")) !== "ACTIVE") return null;
-        if (!sessionVersionMatches(token.sessionVersion, current.sessionVersion)) return null;
-        token.role = current.role; token.category = current.category; token.name = current.name; token.email = current.email;
       }
 
       return token;

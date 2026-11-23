@@ -1,2 +1,5 @@
-import EnginePolicy from "@/components/admin/EnginePolicy";
-export default function RecommendationsPage() { return <EnginePolicy kind="recommendations" />; }
+import { redirect } from "next/navigation";
+
+export default function RecommendationsRedirect() {
+  redirect("/admin/reference-gemstones");
+}
