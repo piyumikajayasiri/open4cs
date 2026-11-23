@@ -57,6 +57,18 @@ const DEFAULT_VARIETIES: VarietyItem[] = [
       "Delicate pinkish-orange corundum with strict spectral saturation bounds.",
   },
   {
+    id: "var-ruby",
+    name: "Ruby",
+    species: "Corundum",
+    shapes: "Oval/Cushion",
+    referenceCoverage: "45 refs",
+    ruleVersion: "v4.2",
+    status: "Supported",
+    origin: "Sri Lanka / Mogok",
+    description:
+      "Chromium red corundum calibrated for standard market valuation with pigeon blood benchmarks.",
+  },
+  {
     id: "var-3",
     name: "Pink Sapphire",
     species: "Corundum",
@@ -107,7 +119,7 @@ const DEFAULT_VARIETIES: VarietyItem[] = [
 ];
 
 export default function GemstoneCataloguePage() {
-  const [varieties, setVarieties] = useState<VarietyItem[]>([]);
+  const [varieties, setVarieties] = useState<VarietyItem[]>(DEFAULT_VARIETIES);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -140,39 +152,39 @@ export default function GemstoneCataloguePage() {
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data.gemstoneVarieties) && data.gemstoneVarieties.length > 0) {
-            const dbMap = new Map<string, Record<string, unknown>>();
-            data.gemstoneVarieties.forEach((v: Record<string, unknown>) => {
-              const vName = typeof v.name === "string" ? v.name.toLowerCase().trim() : "";
-              if (vName) {
-                dbMap.set(vName, v);
-              }
+            const loadedVarieties: VarietyItem[] = data.gemstoneVarieties.map((v: Record<string, unknown>) => {
+              const shapes = Array.isArray(v.supportedShapes)
+                ? (v.supportedShapes as string[]).join("/")
+                : typeof v.shapes === "string" && v.shapes
+                ? v.shapes
+                : "Oval/Round";
+              const ruleVersion = typeof v.ruleVersion === "string" && v.ruleVersion ? v.ruleVersion : "v4.2";
+              const vName = typeof v.name === "string" ? v.name : "";
+              const isEngine = v.engineSupported === true || ["blue sapphire", "padparadscha", "ruby"].includes(vName.toLowerCase());
+              const status: "Supported" | "In Review" | "Suspended" = v.isActive === false
+                ? "Suspended"
+                : isEngine
+                ? "Supported"
+                : "In Review";
+
+              return {
+                id: String(v._id || v.id || `var-${vName.toLowerCase().replace(/\s+/g, "-")}`),
+                name: vName,
+                species: typeof v.species === "string" && v.species ? v.species : "Corundum",
+                shapes,
+                referenceCoverage: `${typeof v.referenceCount === "number" ? v.referenceCount : 0} refs`,
+                ruleVersion,
+                status,
+                origin: typeof v.supportedOrigin === "string" && v.supportedOrigin
+                  ? v.supportedOrigin
+                  : typeof v.origin === "string" && v.origin
+                  ? v.origin
+                  : "Sri Lanka (Ceylon)",
+                description: typeof v.description === "string" ? v.description : "",
+              };
             });
 
-            setVarieties((prev) =>
-              prev.map((item) => {
-                const match = dbMap.get(item.name.toLowerCase().trim());
-                if (match) {
-                  const shapes = Array.isArray(match.supportedShapes)
-                    ? match.supportedShapes.join("/")
-                    : item.shapes;
-                  const ruleVersion = typeof match.ruleVersion === "string" && match.ruleVersion
-                    ? match.ruleVersion
-                    : item.ruleVersion;
-                  const status = match.isActive === false
-                    ? "Suspended"
-                    : item.status;
-                  return {
-                    ...item,
-                    id: String(match._id || item.id),
-                    shapes,
-                    ruleVersion,
-                    status,
-                    description: typeof match.description === "string" ? match.description : item.description,
-                  };
-                }
-                return item;
-              })
-            );
+            setVarieties(loadedVarieties);
           }
         }
       } catch (err) {
